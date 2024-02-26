@@ -1,4 +1,4 @@
-import { Button, TextField, Stack, Box, Alert, Typography } from '@mui/material';
+import { Button, TextField, Stack, Box, Alert } from '@mui/material';
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../../context/authContext';
 import Logo from '../../assets/ss-logo.svg';
@@ -62,113 +62,61 @@ export default function LoginPage() {
 
   return (
     <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        bgcolor: 'black',
-        padding: '20px',
-      }}
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      height="100vh"
     >
-      <Stack alignItems="center" spacing={2} sx={{ width: '100%', maxWidth: '360px', px: 2 }}>
-        <Box
-          component="img"
-          src={Logo}
-          alt="Logo"
-          sx={{
-            width: '80%',
-            maxWidth: '300px',
-            height: 'auto',
-            my: 4,
-            '@media (min-width:600px)': {
-              maxWidth: '80%',
-            },
-          }}
-        />
-        <Formik initialValues={initialValues} validationSchema={validationSchema}>
-          {({ isSubmitting }) => (
+      <Stack alignItems="center" spacing={3} pb={7}>
+        <img src={Logo} style={{ height: '30vh', width: 'auto' }} alt="Logo" />
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+        >
+          {({ values, isSubmitting }) => (
             <Form>
-              <TextField
+              <FormikTextField
                 name="email"
                 label="Email"
-                type="email"
-                variant="outlined"
                 fullWidth
-                InputLabelProps={{ style: { color: 'white' } }}
-                InputProps={{
-                  style: { color: 'white', borderColor: 'white' },
-                }}
+                style={{ paddingBottom: '1rem' }}
               />
-              <TextField
+
+              <FormikTextField
                 name="password"
                 label="Password"
                 type="password"
-                variant="outlined"
                 fullWidth
-                InputLabelProps={{ style: { color: 'white' } }}
-                InputProps={{
-                  style: { color: 'white', borderColor: 'white' },
-                }}
-                sx={{ mt: 2 }}
               />
-              <Typography
-                variant="caption"
-                sx={{
-                  alignSelf: 'flex-start',
-                  color: 'white',
-                  cursor: 'pointer',
-                  '&:hover': { color: 'white' },
-                }}
-                onClick={() => console.log('Navigate to forgot password')}
-              >
-                Forgot password?
-              </Typography>
-              <Button
-                fullWidth
-                variant="contained"
-                type="submit"
-                disabled={isSubmitting}
-                sx={{
-                  mt: 2,
-                  color: 'white',
-                  py: 1,
-                }}
-              >
-                Sign In
-              </Button>
-              <Button
-                fullWidth
-                variant="contained"
-                startIcon={<GoogleIcon />}
-                sx={{
-                  mt: 1,
-                  color: 'white',
-                  py: 1,
-                }}
-                onClick={() => handleLogin('google')}
-              >
-                Sign in with Google
-              </Button>
-              {error && <Alert severity="error" sx={{ mt: 2, width: '100%' }}>{error}</Alert>}
-              <Typography
-                variant="body2"
-                sx={{
-                  mt: 4,
-                  color: 'white',
-                  textAlign: 'center',
-                  '& span': {
-                    color: 'yellow',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      textDecoration: 'underline',
-                    },
-                  },
-                }}
-                onClick={() => navigate('/register')}
-              >
-                Not in the society? <span>Create an Account</span>
-              </Typography>
+              <Stack pt={2} spacing={2}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  type="submit"
+                  disabled={isSubmitting}
+                  onClick={() => handleLogin('email', values)}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  type="button"
+                  onClick={() => handleLogin('google', values)}
+                  startIcon={<GoogleIcon />}
+                >
+                  Sign In with Google
+                </Button>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  type="button"
+                  onClick={handleLogOut}
+                >
+                  Logout
+                </Button>
+                {error && <Alert severity="error"> {error}</Alert>}
+              </Stack>
             </Form>
           )}
         </Formik>

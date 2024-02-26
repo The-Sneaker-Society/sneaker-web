@@ -1,3 +1,4 @@
+import React, { useState, useContext } from 'react';
 import { Box, IconButton, Typography, useTheme } from '@mui/material';
 import { tokens } from '../theme/theme';
 import { mockTransactions } from '../data/mockData';
@@ -8,18 +9,29 @@ import PaidIcon from '@mui/icons-material/Paid';
 import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
 import Header from '../components/Header';
 import StatBox from '../components/StatBox';
-import { useContext } from 'react';
+import NewSidebar from './NewSideBar';
 import { AuthContext } from '../context/authContext';
 
 const Dashboard = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isSmallScreen = useMediaQuery('(max-width:600px)');
   const { currentUser } = useContext(AuthContext);
   const user = currentUser();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+
   return (
     <Box m="20px">
-      {/* HEADER */}
+      {/* Header */}
+      {(!isSmallScreen || !sidebarOpen) && <Header toggleSidebar={toggleSidebar} />}
+      <NewSidebar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+
+      {/* The rest of the Dashboard content */}
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Header title="DASHBOARD" subtitle="Welcome to the Sneaker Society" />
       </Box>
@@ -276,3 +288,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
