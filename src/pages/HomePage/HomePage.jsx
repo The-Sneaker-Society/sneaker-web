@@ -136,7 +136,7 @@ function HomePage() {
             textAlign: 'center',
           }}
         >
-          <Box sx={{ width: '100%', height: '100%' }}>
+          <Box sx={{ width: '100%', height: '100%', paddingTop: '10%' }}>
             <Typography
               fontWeight="bold"
               gutterBottom
@@ -151,10 +151,10 @@ function HomePage() {
 
             <PricingTable
               features={[
-                'Unlimited Intakes',
+                'Unlimited Prospect Intakes',
                 'Direct Messaging',
                 'Direct Stripe Payments',
-                'Business Insights',
+                'Business analytics',
               ]}
               onButtonClick={handleSignupClick}
             />
@@ -165,11 +165,11 @@ function HomePage() {
         </Box>
         <Box
           sx={{
-            height: '100vh',
             width: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            paddingTop: '12%'
           }}
           ref={contactSectionRef}
         >
