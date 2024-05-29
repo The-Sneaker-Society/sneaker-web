@@ -89,6 +89,7 @@ export const AuthProvider = ({ children }) => {
 
   const currentUser = () => {
     const { data, loading } = useQuery(CURRENT_MEMBER);
+    console.log(data)
 
     if (!loading) {
       if (!data) {
