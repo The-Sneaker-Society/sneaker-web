@@ -38,7 +38,7 @@ function Footer() {
           sx={{ textAlign: 'center', mt: { xs: 2, sm: 0 } }}
         >
           <Typography variant="body2">
-            Copyright © 2023 The Sneaker Society
+            Copyright © 2023 LLC The Sneaker Society
           </Typography>
         </Grid>
         <Grid

@@ -10,6 +10,7 @@ const ContactSection = () => {
         height: '100%',
         width: '100%',
         px: 5,
+        paddingBottom: '10%',
       }}
     >
       <Grid container spacing={8} alignItems="center" justifyContent="center">
@@ -22,7 +23,7 @@ const ContactSection = () => {
               lineHeight: 1.4,
             }}
           >
-            Contact
+            Contact Us
           </Typography>
           <Box
             sx={{
@@ -45,7 +46,7 @@ const ContactSection = () => {
                 marginLeft: '0.5rem',
               }}
             >
-              Email us!
+              Email
               <br />
               <Link
                 href="mailto:help@thesneakersociety.com"
@@ -79,7 +80,7 @@ const ContactSection = () => {
                 marginLeft: '0.5rem',
               }}
             >
-              DM us on Instagram
+              Instagram
               <br />
               <Link
                 href="https://instagram.com/thesneakersociety1"
@@ -105,7 +106,7 @@ const ContactSection = () => {
             <img
               src={Sneakers}
               alt="Sneaker Society Logo"
-              style={{ width: '50%' }}
+              style={{ width: '50%', marginTop: '20%', }}
             />
           </Box>
         </Grid>

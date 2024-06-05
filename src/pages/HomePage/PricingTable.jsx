@@ -50,7 +50,7 @@ const PricingTable = ({ features, onButtonClick }) => {
                 pt: 5,
               }}
             >
-              <Check sx={{ mr: 1 }} />
+              <Check sx={{ pr: 1 }} />
               {feat}
             </Typography>
           ))}

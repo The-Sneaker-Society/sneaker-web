@@ -56,7 +56,7 @@ function HeroSection() {
             title="Monthly"
             price="$7.99/mo"
             benefits={[
-              'Unlimited Intakes',
+              'Unlimited Prospect Intakes',
               'Direct Messaging',
               'Direct Stripe Payments',
               'Restoration Analytics',

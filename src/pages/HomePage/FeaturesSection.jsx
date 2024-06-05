@@ -13,26 +13,26 @@ function FeaturesSection({ refFnc }) {
       description:
         'Connect effortlessly with sellers and buyers in real-time. Our platform ensures you never miss a beat in your sneaker needs. Say goodbye to endless email threads, Instagram DMs and missed opportunities!',
       icon: (
-        <ConnectWithoutContactIcon style={{ fontSize: 48, color: 'grey' }} />
+        <ConnectWithoutContactIcon style={{ fontSize: 48, color: 'clear' }} />
       ),
-    },
-    {
-      title: 'Detailed Intake Form',
-      description:
-        'Revamp your sneaker restoration process with our comprehensive intake form. Document every aspect of your beloved kicks, from wear and tear to your restoration goals, ensuring a personalized and meticulous restoration journey.',
-      icon: <ReceiptLongIcon style={{ fontSize: 48, color: 'grey' }} />,
     },
     {
       title: 'Business Analytics',
       description:
         'Get ahead of the game with in-depth business analytics. Monitor your performance, track trends, and make data-driven decisions to boost your sneaker game.',
-      icon: <AnalyticsIcon style={{ fontSize: 48, color: 'grey' }} />,
+      icon: <AnalyticsIcon style={{ fontSize: 48, color: 'clear' }} />,
     },
     {
       title: 'Brand Building and Trust',
       description:
-        'Establish your brand and gain trust within the sneaker community. Build a reputation that sets you apart as a trusted seller or buyer.',
-      icon: <VolunteerActivismIcon style={{ fontSize: 48, color: 'grey' }} />,
+      'Establish your brand and gain trust within the sneaker community. Build a reputation that sets you apart as a trusted seller or buyer.',
+      icon: <VolunteerActivismIcon style={{ fontSize: 48, color: 'clear' }} />,
+    },
+    {
+      title: 'Detailed Intake Form',
+      description:
+        'Revamp your sneaker restoration process with our comprehensive intake form. Document every aspect of your beloved kicks, from wear and tear to your restoration goals, ensuring a personalized and meticulous restoration journey.',
+      icon: <ReceiptLongIcon style={{ fontSize: 48, color: 'clear' }} />,
     },
   ];
 
@@ -54,6 +54,7 @@ function FeaturesSection({ refFnc }) {
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: '1rem',
+            background: 'gold'
           }}
         >
           {icon}
