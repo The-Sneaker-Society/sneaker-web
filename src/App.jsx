@@ -50,7 +50,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="stripeOnboarding" element={<StripeSignupPage />} />
+                <Route path="/stripeOnboarding" element={<StripeSignupPage />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 {/* Protected Routes */}
                 <Route
