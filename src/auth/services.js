@@ -5,8 +5,9 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   getAdditionalUserInfo,
-} from 'firebase/auth';
-import { FirebaseAuth } from './firebase';
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import { FirebaseAuth } from "./firebase";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -64,11 +65,49 @@ export const signUpWithEmailPassword = async (email, password) => {
   }
 };
 
+export const resetPassword = async (email) => {
+  try {
+    await sendPasswordResetEmail(FirebaseAuth, email);
+    return { success: true };
+  } catch (error) {
+    let errorMessage;
+    switch (error.code) {
+      case "auth/user-not-found":
+        errorMessage = "No user found with this email.";
+        break;
+      case "auth/invalid-email":
+        errorMessage = "Invalid email address";
+        break;
+      default:
+        errorMessage = "An error occurred. Please try again later.";
+    }
+    return { success: false, error: errorMessage };
+  }
+};
+
+export const verifyPasswordResetCode = async (code) => {
+  try {
+    await FirebaseAuth.verifyPasswordResetCode(code);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const resendPasswordResetEmail = async (email) => {
+  try {
+    await sendPasswordResetEmail(FirebaseAuth, email);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
 export const onAuthStateHasChanged = (setSession) => {
   onAuthStateChanged(FirebaseAuth, (user) => {
-    if (!user) return setSession({ status: 'no-authenticated', userId: null });
+    if (!user) return setSession({ status: "no-authenticated", userId: null });
 
-    setSession({ status: 'authenticated', userId: user.uid });
+    setSession({ status: "authenticated", userId: user.uid });
   });
 };
 

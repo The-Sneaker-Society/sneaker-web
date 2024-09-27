@@ -118,7 +118,7 @@ export default function LoginPage() {
                     cursor: "pointer",
                     "&:hover": { color: "white" },
                   }}
-                  onClick={() => console.log("Navigate to forgot password")}
+                  onClick={() => navigate("/forgotpassword")}
                 >
                   Forgot password?
                 </Typography>
