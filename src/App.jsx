@@ -15,6 +15,7 @@ import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Blockers } from "./components/Blockers";
+import PaymentStatus from './pages/PaymentStatus/PaymentStatus';
 
 function App() {
   // const { status } = useContext(AuthContext);
@@ -54,7 +55,9 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/logout" element={<LogoutPage />} />
                 <Route path="stripeOnboarding" element={<StripeSignupPage />} />
-                <Route
+                <Route path="/paymentSuccess/:contractId" element={<PaymentStatus success={true} />} />
+                <Route path="/paymentFail/:contractId" element={<PaymentStatus success={false} />} />
+               <Route
                   path="/dashboard"
                   element={
                     <>
