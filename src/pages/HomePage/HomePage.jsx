@@ -1,19 +1,19 @@
-import React, { useState, useRef } from 'react';
-import { Box, Stack, Typography, Divider, useMediaQuery } from '@mui/material';
-import Header from './Header';
-import Footer from './Footer';
-import { TypeAnimation } from 'react-type-animation';
-import StyledButton from './StackedButton';
-import FeaturesSection from './FeaturesSection';
-import ScrollToNextIcon from './ScrollToNextIcon';
-import PricingTable from './PricingTable';
-import { useNavigate } from 'react-router-dom';
-import ContactSection from './ContactSection';
-import ContractWidget from './ContractWidget';
+import React, { useState, useRef } from "react";
+import { Box, Stack, Typography, Divider, useMediaQuery } from "@mui/material";
+import Header from "./Header";
+import Footer from "./Footer";
+import { TypeAnimation } from "react-type-animation";
+import StyledButton from "./StackedButton";
+import FeaturesSection from "./FeaturesSection";
+import ScrollToNextIcon from "./ScrollToNextIcon";
+import PricingTable from "./PricingTable";
+import { useNavigate } from "react-router-dom";
+import ContactSection from "./ContactSection";
+import ContractWidget from "./ContractWidget";
 
 function HomePage() {
-  const isSmallScreen = useMediaQuery('(max-width:600px)');
-  const isLargeScreen = useMediaQuery('(min-width:1200px)'); // For large monitors
+  const isSmallScreen = useMediaQuery("(max-width:600px)");
+  const isLargeScreen = useMediaQuery("(min-width:1200px)"); // For large monitors
 
   const featuresSectionRef = useRef(null); // Create a ref for the FeaturesSection
   const pricingSectionRef = useRef(null);
@@ -50,11 +50,11 @@ function HomePage() {
       >
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            flexDirection: 'column',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            flexDirection: "column",
           }}
         >
           <Typography
@@ -114,13 +114,13 @@ function HomePage() {
 
         <Box
           sx={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingTop: isLargeScreen ? '10px' : '20px', // Less space above for large screens
-            paddingBottom: isLargeScreen ? '60px' : '40px', // More space below for large screens
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingTop: isLargeScreen ? "10px" : "20px", // Less space above for large screens
+            paddingBottom: isLargeScreen ? "60px" : "40px", // More space below for large screens
           }}
           ref={featuresSectionRef}
         >
@@ -129,16 +129,16 @@ function HomePage() {
 
         <Box
           sx={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingY: isSmallScreen ? '20px' : '40px',
-            textAlign: 'center',
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingY: isSmallScreen ? "20px" : "40px",
+            textAlign: "center",
           }}
         >
-          <Box sx={{ width: '100%' }}>
+          <Box sx={{ width: "100%" }}>
             <Typography
               fontWeight="bold"
               gutterBottom
@@ -168,11 +168,11 @@ function HomePage() {
 
         <Box
           sx={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingY: isSmallScreen ? '20px' : '40px',
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingY: isSmallScreen ? "20px" : "40px",
           }}
           ref={contactSectionRef}
         >
@@ -180,7 +180,7 @@ function HomePage() {
         </Box>
       </Box>
 
-      <Box mt={5} sx={{marginTop: '0'}}>
+      <Box mt={5} sx={{ marginTop: "0" }}>
         <ContractWidget />
       </Box>
 
