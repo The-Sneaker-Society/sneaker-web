@@ -185,7 +185,7 @@ export default function LoginPage() {
                       },
                     },
                   }}
-                  onClick={() => navigate("/register")}
+                  onClick={() => navigate("/member/signup")}
                 >
                   Not in the society? <span>Create an Account</span>
                 </Typography>
