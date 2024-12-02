@@ -185,9 +185,9 @@ function HomePage() {
         </Box>
       </Box>
 
-      <Box mt={5} sx={{ marginTop: "0" }}>
+      {/* <Box mt={5} sx={{ marginTop: "0" }}>
         <ContractWidget />
-      </Box>
+      </Box> */}
 
       <Footer />
     </Box>
