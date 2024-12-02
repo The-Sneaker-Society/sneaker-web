@@ -139,8 +139,9 @@ export default function LoginPage() {
                   disabled={isSubmitting}
                   sx={{
                     mt: 2,
-                    color: "white",
+                    color: "black",
                     py: 1,
+                    background: "#FFD100",
                   }}
                   onClick={() => {
                     handleLogin("email", values);
@@ -154,8 +155,9 @@ export default function LoginPage() {
                   startIcon={<GoogleIcon />}
                   sx={{
                     mt: 1,
-                    color: "white",
+                    color: "black",
                     py: 1,
+                    background: "#FFD100",
                   }}
                   onClick={() => {
                     handleLogin("google");
