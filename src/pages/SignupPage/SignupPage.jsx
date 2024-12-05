@@ -66,18 +66,29 @@ const SignupPage = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ height: "100vh" }}>
+    <Container
+      maxWidth="md"
+      sx={{ height: "100vh", display: "flex", alignItems: "start" }}
+    >
       <div
         style={{
           height: "100%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          alignItems: "center",
+          alignItems: "flex-start",
+          marginLeft: "20px",
+          width: "100%",
         }}
       >
-        <Typography pb={4} variant="h1">
-          More User Info
+        <Typography
+          pb={2}
+          variant="h1"
+          sx={{
+            fontWeight: "bold",
+          }}
+        >
+          Contact Info
         </Typography>
         <Formik
           initialValues={{
@@ -115,7 +126,6 @@ const SignupPage = () => {
                 <Grid item xs={12}>
                   <FormikTextField
                     name="email"
-                    label="Email"
                     variant="outlined"
                     disabled
                     fullWidth
@@ -144,7 +154,6 @@ const SignupPage = () => {
                     label="Address Line 1"
                     variant="outlined"
                     fullWidth
-                    helperText="Optional"
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -153,7 +162,6 @@ const SignupPage = () => {
                     label="Address Line 2"
                     variant="outlined"
                     fullWidth
-                    helperText="Optional"
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -182,8 +190,15 @@ const SignupPage = () => {
                 </Grid>
               </Grid>
               <Box sx={{ paddingTop: 2 }}>
-                <Button type="submit" variant="contained" color="primary">
-                  Sign Up
+                <Button
+                  type="submit"
+                  variant="contained"
+                  sx={{
+                    color: "black",
+                    backgroundColor: "gold",
+                  }}
+                >
+                  Submit
                 </Button>
               </Box>
             </Form>
