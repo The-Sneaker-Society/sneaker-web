@@ -5,9 +5,17 @@ import { QrWidget } from "../../components/qrWidget";
 import { StripeWidget } from "../../components/StripeWidget";
 import ContractWidget from "../HomePage/ContractWidget";
 import { useAuth } from "../../context/AuthContext";
+import StyledButton from "../HomePage/StackedButton";
+import { useNavigate } from "react-router-dom";
 
 export const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
   const WidgetPlaceholder = ({ color, height, children }) => (
     <div
       style={{
@@ -26,9 +34,19 @@ export const Dashboard = () => {
 
   return (
     <Container maxWidth="lg" style={{ height: "100vh" }}>
-      <Typography variant="h1" fontWeight="bold">
-        Welcome, {user.firstName || "User"}
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <Typography variant="h1" fontWeight="bold">
+          Welcome, {user.firstName || "User"}
+        </Typography>
+        <StyledButton onClick={handleLogout} style={{ marginTop: "10px" }}>Log Out</StyledButton>
+      </Box>
 
       <Grid container spacing={2} style={{ height: "100%" }}>
         <Grid item xs={12} md={6}>
