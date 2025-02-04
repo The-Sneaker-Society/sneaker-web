@@ -8,11 +8,8 @@ import ErrorPage from "./pages/ErrorPage";
 import StripeSignupPage from "./pages/StripeSignUpPage/StripeSignupPage";
 import LoginPage from "./pages/Login/LoginPage";
 import { LogoutPage } from "./pages/Logout/LogoutPage";
-import SignupMember  from "./pages/SignUpMemberPage/SignUpMemberPage";
+import SignupMember from "./pages/SignUpMemberPage/SignUpMemberPage";
 import { ProtectedRoute } from "./components/PrivateRoute";
-import { ApolloProvider } from "@apollo/client";
-import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
 import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Blockers } from "./components/Blockers";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
@@ -23,97 +20,84 @@ import PasswordReset from "./pages/ForgotPassword/PasswordReset";
 import SetANewPassword from "./pages/ForgotPassword/SetANewPassword";
 import SuccessfulPage from "./pages/ForgotPassword/SuccessfulPage";
 import StripePage from "./pages/StripePage";
+import { LoginV2 } from "./pages/Login/LoginV2";
+
+import React from "react";
 
 function App() {
   // const { status } = useContext(AuthContext);
   const [theme, colorMode] = useMode();
 
-  const httpLink = createHttpLink({
-    uri: `${import.meta.env.VITE_API_URL}/graphql`,
-  });
-
-  const authLink = setContext((_, { headers }) => {
-    // get the authentication token from local storage if it exists
-    const token = localStorage.getItem("authToken");
-    // return the headers to the context so httpLink can read them
-    return {
-      headers: {
-        ...headers,
-        authorization: token ? `Bearer ${token}` : "",
-      },
-    };
-  });
-
-  const client = new ApolloClient({
-    link: authLink.concat(httpLink),
-    cache: new InMemoryCache(),
-  });
-
   return (
-    <ApolloProvider client={client}>
-      <ColorModeContext.Provider value={colorMode}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <div className="App">
-            <div className="content-container">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/logout" element={<LogoutPage />} />
-                <Route path="stripeOnboarding" element={<StripeSignupPage />} />
-                <Route
-                  path="/paymentSuccess/:contractId"
-                  element={<PaymentStatus success={true} />}
-                />
-                <Route
-                  path="/paymentFail/:contractId"
-                  element={<PaymentStatus success={false} />}
-                />
-                <Route path="/ForgotPassword" element={<ForgotPassword />} />
-                <Route path="/CheckYourEmail" element={<CheckYourEmail />} />
-                <Route path="/PasswordReset" element={<PasswordReset />} />
-                <Route path="/SetANewPassword" element={<SetANewPassword />} />
-                <Route path="/SuccessfulPage" element={<SuccessfulPage />} />
-                <Route
-                  path="/member/stripe"
-                  element={
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <div className="App">
+          <div className="content-container">
+            <Routes>
+              <Route path="/test" element={<LoginV2 />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/logout" element={<LogoutPage />} />
+              <Route path="stripeOnboarding" element={<StripeSignupPage />} />
+              <Route
+                path="/paymentSuccess/:contractId"
+                element={<PaymentStatus success={true} />}
+              />
+              <Route
+                path="/paymentFail/:contractId"
+                element={<PaymentStatus success={false} />}
+              />
+              <Route path="/ForgotPassword" element={<ForgotPassword />} />
+              <Route path="/CheckYourEmail" element={<CheckYourEmail />} />
+              <Route path="/PasswordReset" element={<PasswordReset />} />
+              <Route path="/SetANewPassword" element={<SetANewPassword />} />
+              <Route path="/SuccessfulPage" element={<SuccessfulPage />} />
+              <Route
+                path="/member/stripe"
+                element={
+                  <ProtectedRoute>
+                    <StripePage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/paymentSuccess/:contractId"
+                element={<PaymentStatus success={true} />}
+              />
+              <Route
+                path="/paymentFail/:contractId"
+                element={<PaymentStatus success={false} />}
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <>
+                    <Blockers />
                     <ProtectedRoute>
-                      <StripePage />
+                      <Dashboard />
                     </ProtectedRoute>
-                  }
-                />
-            
-                <Route path="/paymentSuccess/:contractId" element={<PaymentStatus success={true} />} />
-                <Route path="/paymentFail/:contractId" element={<PaymentStatus success={false} />} />
-               <Route
-                  path="/dashboard"
-                  element={
-                    <>
-                      <Blockers />
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    </>
-                  }
-                />
-                <Route path="member/signup" element={<SignupMember />} />
-                <Route path="user/signup" element={<SignUpUser />} />
-                <Route
-                  path="/signup"
-                  element={
-                    <ProtectedRoute>
-                      <SignupPage />
-                    </ProtectedRoute>
-                  }
-                />
-                {/* Error Page Route */}
-                <Route path="*" element={<ErrorPage />} />
-              </Routes>
-            </div>
+                  </>
+                }
+              />
+              <Route path="member/signup" element={<SignupMember />} />
+              <Route path="user/signup" element={<SignUpUser />} />
+              <Route
+                path="/signup"
+                element={
+                  <ProtectedRoute>
+                    <SignupPage />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Error Page Route */}
+              <Route path="*" element={<ErrorPage />} />
+            </Routes>
           </div>
-        </ThemeProvider>
-      </ColorModeContext.Provider>
-    </ApolloProvider>
+        </div>
+      </ThemeProvider>
+    </ColorModeContext.Provider>
   );
 }
 
