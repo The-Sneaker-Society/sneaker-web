@@ -6,6 +6,7 @@ import "./index.css";
 import { AuthProvider } from "./context/AuthContext";
 import { ClerkProvider } from "@clerk/clerk-react";
 import ApolloProviderWithAuth from "./ApolloProviderWithAuth";
+import { UserProvider } from "./context/UserContext";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -19,7 +20,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <ApolloProviderWithAuth>
           <AuthProvider>
-            <App />
+            <UserProvider>
+              <App />
+            </UserProvider>
           </AuthProvider>
         </ApolloProviderWithAuth>
       </BrowserRouter>

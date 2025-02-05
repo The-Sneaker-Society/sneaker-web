@@ -1,14 +1,11 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useEffect } from "react";
+import { useClerk } from "@clerk/clerk-react";
 
 export const LogoutPage = () => {
-  const { handleLogout } = useAuth();
-  const navigate = useNavigate();
+  const { signOut } = useClerk();
 
-  const handleLogoutPage = async () => {
-    await handleLogout();
-    navigate('/login');
+  const handleLogoutPage = () => {
+    signOut();
   };
 
   useEffect(() => {

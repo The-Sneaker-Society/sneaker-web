@@ -14,7 +14,8 @@ import { UPDATE_MEMBER } from "./signup";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { TEST_QUERY } from "../../context/graphql/testQuery";
-import { CREATE_MEMBER } from "../SignUpMemberPage/graphql/addMember";
+import { CREATE_USER } from "../SignUpMemberPage/graphql/addUser";
+import { replace } from "lodash";
 
 const FormikTextField = ({ name, ...props }) => {
   const [field, meta] = useField(name);
@@ -31,16 +32,15 @@ const FormikTextField = ({ name, ...props }) => {
   );
 };
 
-const SignupPage = () => {
+const UserSignupPage = () => {
   const navigate = useNavigate();
   const { data: testData } = useQuery(TEST_QUERY);
 
   const { user } = useUser();
 
-
   const handleSubmit = async (values) => {
     try {
-      await createMember({
+      await createUser({
         variables: {
           data: {
             clerkId: user.id,
@@ -55,7 +55,7 @@ const SignupPage = () => {
           },
         },
       });
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       setErrorMessage(error.message);
     }
@@ -63,7 +63,7 @@ const SignupPage = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  const [createMember, { data, loading }] = useMutation(CREATE_MEMBER);
+  const [createUser, { loading }] = useMutation(CREATE_USER);
 
   if (loading) {
     return <>loading</>;
@@ -218,4 +218,4 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage;
+export default UserSignupPage;

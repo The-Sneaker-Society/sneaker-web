@@ -14,18 +14,14 @@ import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Blockers } from "./components/Blockers";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
-import CheckYourEmail from "./pages/ForgotPassword/CheckYourEmail";
-import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
-import PasswordReset from "./pages/ForgotPassword/PasswordReset";
-import SetANewPassword from "./pages/ForgotPassword/SetANewPassword";
-import SuccessfulPage from "./pages/ForgotPassword/SuccessfulPage";
 import StripePage from "./pages/StripePage";
 import { LoginV2 } from "./pages/Login/LoginV2";
 
 import React from "react";
+import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
+import { UserDashboard } from "./pages/Dashboard/UserDashBoard";
 
 function App() {
-  // const { status } = useContext(AuthContext);
   const [theme, colorMode] = useMode();
 
   return (
@@ -48,11 +44,7 @@ function App() {
                 path="/paymentFail/:contractId"
                 element={<PaymentStatus success={false} />}
               />
-              <Route path="/ForgotPassword" element={<ForgotPassword />} />
-              <Route path="/CheckYourEmail" element={<CheckYourEmail />} />
-              <Route path="/PasswordReset" element={<PasswordReset />} />
-              <Route path="/SetANewPassword" element={<SetANewPassword />} />
-              <Route path="/SuccessfulPage" element={<SuccessfulPage />} />
+
               <Route
                 path="/member/stripe"
                 element={
@@ -74,7 +66,7 @@ function App() {
                 path="/dashboard"
                 element={
                   <>
-                    <Blockers />
+                    {/* <Blockers /> */}
                     <ProtectedRoute>
                       <Dashboard />
                     </ProtectedRoute>
@@ -84,10 +76,18 @@ function App() {
               <Route path="member/signup" element={<SignupMember />} />
               <Route path="user/signup" element={<SignUpUser />} />
               <Route
-                path="/signup"
+                path="member/signup-info"
                 element={
                   <ProtectedRoute>
                     <SignupPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="user/signup-info"
+                element={
+                  <ProtectedRoute>
+                    <UserSignupPage />
                   </ProtectedRoute>
                 }
               />
