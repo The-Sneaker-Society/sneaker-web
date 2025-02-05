@@ -1,12 +1,12 @@
 import React from "react";
 import { Box, Typography, Button, Stack } from "@mui/material";
 import { gql, useQuery } from "@apollo/client";
-import { useAuth } from "../context/AuthContext";
 import { GoAlertFill } from "react-icons/go";
 
 const GET_STRIPE_WIDGET_DATA = gql`
   query GetStripeWidgetData {
     stripeWidgetData {
+      stripeConnectAccountId
       nextPayoutDays
       payoutAmount
       percentChange
@@ -16,13 +16,12 @@ const GET_STRIPE_WIDGET_DATA = gql`
 
 export const StripeWidget = () => {
   const { data, loading, error } = useQuery(GET_STRIPE_WIDGET_DATA);
-  const { user } = useAuth(); // Access currentUser from useAuth()
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   // Check if stripeConnectAccountId is not present on the user
-  if (!user.stripeConnectAccountId) {
+  if (!data.stripeWidgetData.stripeConnectAccountId) {
     return (
       <Box
         sx={{
@@ -53,9 +52,9 @@ export const StripeWidget = () => {
           <Box
             sx={{
               display: "flex",
-              alignItems: "center", // Align icon and text horizontally
-              gap: "8px", // Add spacing between icon and text
-              marginBottom: "16px", // Add spacing below the icon/text group
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "16px",
             }}
           >
             <GoAlertFill style={{ color: "red", fontSize: "24px" }} />
@@ -79,7 +78,6 @@ export const StripeWidget = () => {
           </Button>
         </Box>
       </Box>
-
     );
   }
 
@@ -161,7 +159,12 @@ export const StripeWidget = () => {
         </Button>
         <Button
           variant="outlined"
-          sx={{ width: "129px", color: "white", display: "flex", alignItems: "center" }}
+          sx={{
+            width: "129px",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+          }}
           onClick={() => console.log("Navigate to Stripe Dashboard")}
         >
           <GoAlertFill style={{ color: "red", marginRight: "8px" }} />

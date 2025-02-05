@@ -1,52 +1,31 @@
-import { BrowserRouter } from 'react-router-dom';
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './index.css';
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  createHttpLink,
-} from '@apollo/client';
-import { AuthProvider } from './context/AuthContext';
-import { ProSidebarProvider } from 'react-pro-sidebar';
-import { ApolloLink } from '@apollo/client/link/core';
-import { setContext } from '@apollo/client/link/context';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { BrowserRouter } from "react-router-dom";
+import "./index.css";
+import { AuthProvider } from "./context/AuthContext";
+import { ClerkProvider } from "@clerk/clerk-react";
+import ApolloProviderWithAuth from "./ApolloProviderWithAuth";
+import { UserProvider } from "./context/UserContext";
 
-const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem('authToken');
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : '',
-    },
-  };
-});
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing Publishable Key");
+}
 
-// Create an HTTP link for Apollo Client
-const httpLink = createHttpLink({
-  uri: `${import.meta.env.VITE_API_URL}/graphql`,
-});
-
-const link = ApolloLink.from([authLink, httpLink]);
-
-const client = new ApolloClient({
-  link,
-  cache: new InMemoryCache(),
-});
-
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ApolloProvider client={client}>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
       <BrowserRouter>
-        <AuthProvider>
-          {/* <ProSidebarProvider> */}
-          <App />
-          {/* </ProSidebarProvider> */}
-        </AuthProvider>
+        <ApolloProviderWithAuth>
+          <AuthProvider>
+            <UserProvider>
+              <App />
+            </UserProvider>
+          </AuthProvider>
+        </ApolloProviderWithAuth>
       </BrowserRouter>
-    </ApolloProvider>
+    </ClerkProvider>
   </React.StrictMode>
 );

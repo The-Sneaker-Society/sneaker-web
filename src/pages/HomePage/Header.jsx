@@ -14,6 +14,7 @@ const Header = ({
   contactRef,
   featureRef,
   onButtonClick,
+  onLoginButtonClick,
   onRedirectClick,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -75,7 +76,7 @@ const Header = ({
               </Tabs>
 
               <div style={{ padding: "20px" }}>
-                <StyledButton onClick={onButtonClick}>Login</StyledButton>{" "}
+                <StyledButton onClick={onLoginButtonClick}>Login</StyledButton>{" "}
               </div>
               <StyledButton onClick={onRedirectClick}>Sign Up</StyledButton>
             </div>

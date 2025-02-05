@@ -27,8 +27,16 @@ function HomePage() {
 
   const navigate = useNavigate();
 
-  const handleSignupClick = () => {
-    navigate("/signup");
+  const handleMemberSignupCLick = () => {
+    navigate("/member/signup");
+  };
+
+  const handleUserSignupCLick = () => {
+    navigate("/user/signup");
+  };
+
+  const handleLoginClick = () => {
+    navigate("/login");
   };
 
   const redirectSignupClick = () => {
@@ -41,7 +49,7 @@ function HomePage() {
         pricingRef={() => scrollToRef(pricingSectionRef)}
         featureRef={() => scrollToRef(featuresSectionRef)}
         contactRef={() => scrollToRef(contactSectionRef)}
-        onButtonClick={handleSignupClick}
+        onLoginButtonClick={handleLoginClick}
         onRedirectClick={redirectSignupClick}
       />
 
@@ -107,8 +115,12 @@ function HomePage() {
             divider={<Divider orientation="vertical" flexItem />}
             spacing={2}
           >
-            <StyledButton onClick={handleSignupClick}>Business</StyledButton>
-            <StyledButton onClick={handleSignupClick}>Customer</StyledButton>
+            <StyledButton onClick={handleMemberSignupCLick}>
+              Business
+            </StyledButton>
+            <StyledButton onClick={handleUserSignupCLick}>
+              Customer
+            </StyledButton>
           </Stack>
 
           <ScrollToNextIcon
@@ -162,7 +174,7 @@ function HomePage() {
                 "Direct Stripe Payments",
                 "Business analytics",
               ]}
-              onButtonClick={handleSignupClick}
+              onButtonClick={handleMemberSignupCLick}
             />
           </Box>
           <ScrollToNextIcon

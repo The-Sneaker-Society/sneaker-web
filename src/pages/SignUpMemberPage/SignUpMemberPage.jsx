@@ -1,61 +1,32 @@
 import React, { useState } from "react";
 import Logo from "../../assets/ss-logo.svg";
 import GoogleIcon from "@mui/icons-material/Google";
-import { Formik, Form, useField } from "formik";
-import { useNavigate } from "react-router-dom";
-import { Button, Alert, Grid, TextField, Stack, Box } from "@mui/material";
-import * as Yup from "yup";
-import { useAuth } from "../../context/AuthContext";
-
-const FormikTextField = ({ name, ...props }) => {
-  const [field, meta] = useField(name);
-  const isError = meta.touched && meta.error;
-  return (
-    <TextField
-      {...field}
-      {...props}
-      error={isError}
-      helperText={isError ? meta.error : props.helperText}
-    />
-  );
-};
+import { Button, Alert, Stack, Box } from "@mui/material";
+import { SignedOut, useClerk } from "@clerk/clerk-react";
 
 const SignUpMember = () => {
-  const navigate = useNavigate();
   const [error, setError] = useState("");
-  const { handleSignupWithEmailAndPassword, handleGoogleLogin } = useAuth();
+  const { openSignUp } = useClerk();
 
-  const handleLogin = async (type, values) => {
+  const handleGoogleSignUp = async () => {
     try {
-      switch (type) {
-        case "google":
-          await handleGoogleLogin("MEMBER");
-          break;
-        case "email":
-          await handleSignupWithEmailAndPassword(
-            values.email,
-            values.password,
-            "MEMBER"
-          );
-          break;
-        default:
-          break;
+      setError("");
+
+      await openSignUp({
+        strategy: "oauth_google",
+        unsafeMetadata: { role: "member" },
+        forceRedirectUrl: "member/signup-info",
+        signInForceRedirectUrl: "/dashboard",
+        signInUrl: "/login",
+      });
+
+      if (!createdUserId) {
+        throw new Error("Signup failed, no user ID returned.");
       }
-      navigate("/signup");
-    } catch (error) {
+    } catch (err) {
       setError(error.message);
-      console.log(errorCode, errorMessage);
     }
   };
-
-  const initialValues = { email: "", password: "" };
-
-  const validationSchema = Yup.object().shape({
-    email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
-    password: Yup.string().required("Password is required"),
-  });
 
   return (
     <Box
@@ -78,60 +49,22 @@ const SignUpMember = () => {
           alt="Logo"
           sx={{ width: "80%", maxWidth: "300px", height: "auto", my: 4 }}
         />
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-        >
-          {({ isSubmitting, values }) => (
-            <Form>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <FormikTextField
-                    name="email"
-                    label="Email"
-                    variant="outlined"
-                    fullWidth
-                  />
-                  <FormikTextField
-                    name="password"
-                    label="Password"
-                    type="Password"
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mt: 2 }}
-                  />
-                </Grid>
-              </Grid>
-              <Stack>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  aria-label="Sign Up"
-                  sx={{ mt: 2, color: "black", backgroundColor: "gold" }}
-                  onClick={() => {
-                    handleLogin("email", values);
-                  }}
-                >
-                  Sign up Member
-                </Button>
-                <Button
-                  variant="contained"
-                  aria-label="Sign Up With Google"
-                  startIcon={<GoogleIcon />}
-                  sx={{ mt: 2, color: "black", backgroundColor: "gold" }}
-                  onClick={() => handleLogin("google")}
-                >
-                  Sign up with Google
-                </Button>
-              </Stack>
-            </Form>
+        <SignedOut>
+          <Button
+            variant="contained"
+            aria-label="Sign Up With Google"
+            startIcon={<GoogleIcon />}
+            sx={{ mt: 2, color: "black", backgroundColor: "gold" }}
+            onClick={handleGoogleSignUp}
+          >
+            Sign up with Google
+          </Button>
+          {error && (
+            <Alert severity="error" color="error">
+              {error}
+            </Alert>
           )}
-        </Formik>
-        {error && (
-          <Alert severity="error" color="error">
-            {error}
-          </Alert>
-        )}
+        </SignedOut>
       </Stack>
     </Box>
   );
