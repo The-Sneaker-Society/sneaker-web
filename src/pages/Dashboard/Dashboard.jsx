@@ -42,7 +42,10 @@ export const Dashboard = () => {
           marginBottom: "20px",
         }}
       >
-        <Typography variant="h1" fontWeight="bold">
+        <Typography variant="h1" fontWeight="bold"
+        sx={{
+          marginLeft: "9rem"
+        }}>
           Welcome, {user.firstName || "User"}
         </Typography>
         <StyledButton onClick={handleLogout} style={{ marginTop: "10px" }}>Log Out</StyledButton>
