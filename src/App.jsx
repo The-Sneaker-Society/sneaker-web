@@ -10,7 +10,6 @@ import LoginPage from "./pages/Login/LoginPage";
 import { LogoutPage } from "./pages/Logout/LogoutPage";
 import SignupMember from "./pages/SignUpMemberPage/SignUpMemberPage";
 import { ProtectedRoute } from "./components/PrivateRoute";
-import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Blockers } from "./components/Blockers";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
@@ -19,6 +18,7 @@ import { LoginV2 } from "./pages/Login/LoginV2";
 
 import React from "react";
 import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
+import Dashboard from "./pages/Dashboard/Dashboard";
 
 function App() {
   const [theme, colorMode] = useMode();

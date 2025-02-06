@@ -6,7 +6,7 @@ import { StripeWidget } from "../../components/StripeWidget";
 import ContractWidget from "../HomePage/ContractWidget";
 import StyledButton from "../HomePage/StackedButton";
 import { useUser, useClerk } from "@clerk/clerk-react";
-import { UserDashboard } from "./UserDashBoard";
+import UserDashboard from "./UserDashBoard";
 
 export const Dashboard = () => {
   const { user } = useUser();
@@ -89,3 +89,5 @@ export const Dashboard = () => {
     return <MemberDashboard />;
   }
 };
+
+export default Dashboard;
