@@ -19,7 +19,6 @@ import { LoginV2 } from "./pages/Login/LoginV2";
 
 import React from "react";
 import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
-import { UserDashboard } from "./pages/Dashboard/UserDashBoard";
 
 function App() {
   const [theme, colorMode] = useMode();
