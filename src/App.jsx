@@ -20,6 +20,7 @@ import { LoginV2 } from "./pages/Login/LoginV2";
 import React from "react";
 import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
 import { UserDashboard } from "./pages/Dashboard/UserDashBoard";
+import UpdateProfilePage from "./pages/UpdateProfilePage/UpdateProfilePage";
 
 function App() {
   const [theme, colorMode] = useMode();
