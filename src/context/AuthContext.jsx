@@ -12,6 +12,11 @@ import {
 } from "../auth/services";
 import { CREATE_MEMBER } from "../pages/SignUpMemberPage/graphql/addMember";
 import { CREATE_USER } from "../pages/SignUpMemberPage/graphql/addUser";
+import {
+  UPDATE_MEMBER,
+  CHANGE_MEMBER_PASSWORD,
+} from "../pages/UpdateProfilePage/graphql/updateMember";
+import { update } from "lodash";
 
 const AuthContext = createContext();
 
@@ -32,12 +37,26 @@ export const AuthProvider = ({ children }) => {
     localStorage.getItem("authToken")
   );
 
+  const [updateMember] = useMutation(UPDATE_MEMBER, {
+    onError: (error) => {
+      console.error("Error updating member:", error);
+      throw error;
+    },
+  });
+
+  const [changeMemberPassword] = useMutation(CHANGE_MEMBER_PASSWORD, {
+    onError: (error) => {
+      console.error("Error changing password:", error);
+      throw error;
+    },
+  });
+
   const {
     data: currentMemberData,
     error: currentMemberError,
     refetch: currentMemberRefetch,
   } = useQuery(CURRENT_MEMBER, {
-    skip: !authToken || userType === 'USER',
+    skip: !authToken || userType === "USER",
     onError: (error) => {
       console.error("Error fetching current member:", error);
       if (error.message.includes("unauthorized")) {
@@ -51,7 +70,7 @@ export const AuthProvider = ({ children }) => {
     error: currentUserError,
     refetch: currentUserRefetch,
   } = useQuery(CURRENT_USER, {
-    skip: !authToken || userType === 'MEMBER',
+    skip: !authToken || userType === "MEMBER",
     onError: (error) => {
       console.error("Error fetching current user:", error);
       if (error.message.includes("unauthorized")) {
@@ -100,7 +119,7 @@ export const AuthProvider = ({ children }) => {
       const { data: memberData } = await currentMemberRefetch();
       if (memberData?.currentMember) {
         setUser(memberData.currentMember);
-        setUserType('MEMBER');
+        setUserType("MEMBER");
         setLoading(false);
         return;
       }
@@ -108,7 +127,7 @@ export const AuthProvider = ({ children }) => {
       const { data: userData } = await currentUserRefetch();
       if (userData?.currentUser) {
         setUser(userData.currentUser);
-        setUserType('USER');
+        setUserType("USER");
       }
     } catch (error) {
       console.error("Error refetching user:", error);
@@ -117,7 +136,6 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     const determineUserType = async () => {
@@ -129,7 +147,7 @@ export const AuthProvider = ({ children }) => {
       // Check for member first
       if (currentMemberData?.currentMember) {
         setUser(currentMemberData.currentMember);
-        setUserType('MEMBER');
+        setUserType("MEMBER");
         setLoading(false);
         return;
       }
@@ -137,7 +155,7 @@ export const AuthProvider = ({ children }) => {
       // Only check for user if not a member
       if (currentUserData?.currentUser) {
         setUser(currentUserData.currentUser);
-        setUserType('USER');
+        setUserType("USER");
       }
 
       setLoading(false);
@@ -147,8 +165,10 @@ export const AuthProvider = ({ children }) => {
   }, [currentMemberData, currentUserData, authToken]);
 
   useEffect(() => {
-    if (currentMemberError?.message.includes("unauthorized") || 
-        currentUserError?.message.includes("unauthorized")) {
+    if (
+      currentMemberError?.message.includes("unauthorized") ||
+      currentUserError?.message.includes("unauthorized")
+    ) {
       handleTokenError();
     }
   }, [currentMemberError, currentUserError]);
@@ -272,6 +292,38 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
+
+  const handleUpdateProfile = async (profileData) => {
+    setLoading(true);
+    try {
+      const { data } = await updateMember({
+        variables: { data: profileData },
+      });
+      await refetchUser();
+      return data.updateMember;
+    } catch (error) {
+      console.error("Profile update error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (currentPassword, newPassword) => {
+    setLoading(true);
+    try {
+      const { data } = await changeMemberPassword({
+        variables: { data: { currentPassword, newPassword } },
+      });
+      return data.changeMemberPassword;
+    } catch (error) {
+      console.error("Password change error", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Handle Member Data
     if (currentMemberData?.currentMember) {
@@ -312,6 +364,8 @@ export const AuthProvider = ({ children }) => {
     handleSignupWithEmailAndPassword,
     handleGoogleLogin,
     handleLogout,
+    handleUpdateProfile,
+    handleChangePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
