@@ -16,7 +16,6 @@ export const useSneakerUser = () => {
 
 export const UserProvider = ({ children }) => {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
-  // const test = clerkUser.unsafeMetadata;
 
   const role = clerkUser?.unsafeMetadata.role;
 
