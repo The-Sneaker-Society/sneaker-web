@@ -2,13 +2,14 @@ import { useClerk, useUser } from "@clerk/clerk-react";
 import { Box, Typography } from "@mui/material";
 import StyledButton from "../HomePage/StackedButton";
 
-export const UserDashboard = () => {
+const UserDashboard = () => {
   const { user } = useUser();
   const { signOut } = useClerk();
 
   const handleLogout = () => {
     signOut();
   };
+
   return (
     <>
       <Box
@@ -29,3 +30,5 @@ export const UserDashboard = () => {
     </>
   );
 };
+
+export default UserDashboard;
