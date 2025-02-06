@@ -1,5 +1,8 @@
+import { useQuery } from "@apollo/client";
 import { useUser } from "@clerk/clerk-react";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
+import { CURRENT_USER } from "./graphql/getCurrentUser";
+import { CURRENT_MEMBER } from "./graphql/getCurrentMember";
 
 const UserContext = createContext();
 
@@ -12,8 +15,23 @@ export const useSneakerUser = () => {
 };
 
 export const UserProvider = ({ children }) => {
-  const { user } = useUser();
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+  // const test = clerkUser.unsafeMetadata;
 
-  const values = { email: "", id: "", role: "" };
-  return <UserContext.Provider value={values}>{children}</UserContext.Provider>;
+  const role = clerkUser?.unsafeMetadata.role;
+
+  const { data, loading, error } = useQuery(
+    role === "member" ? CURRENT_MEMBER : CURRENT_USER
+  );
+
+  const user = useMemo(() => {
+    if (loading || error) return null;
+    return data?.currentUser || data?.currentMember || null;
+  }, [data, loading, error]);
+
+  return (
+    <UserContext.Provider value={{ user, loading, error, role }}>
+      {children}
+    </UserContext.Provider>
+  );
 };
