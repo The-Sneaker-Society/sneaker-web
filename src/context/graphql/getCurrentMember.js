@@ -6,6 +6,7 @@ export const CURRENT_MEMBER = gql`
       id
       email
       firstName
+      stripeConnectAccountId
     }
   }
 `;
