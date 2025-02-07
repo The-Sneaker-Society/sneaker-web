@@ -1,22 +1,22 @@
-import {
-  Button,
-  TextField,
-  Stack,
-  Box,
-  Alert,
-  Typography,
-} from "@mui/material";
-import React, { useContext, useState } from "react";
+import { Button, Stack, Box, Alert, CircularProgress } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import Logo from "../../assets/ss-logo.svg";
 import GoogleIcon from "@mui/icons-material/Google";
 
 import { useNavigate } from "react-router-dom";
-import { SignedOut, useClerk } from "@clerk/clerk-react";
+import { SignedOut, useClerk, useUser } from "@clerk/clerk-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const { isSignedIn, isLoaded } = useUser();
   const { openSignIn } = useClerk();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      navigate("/dashboard");
+    }
+  }, [isSignedIn, navigate]);
 
   const handleLogin = async (type, values) => {
     try {
@@ -34,6 +34,8 @@ export default function LoginPage() {
       setError(error.message);
     }
   };
+
+  if (!isLoaded) return <CircularProgress />;
 
   return (
     <Box

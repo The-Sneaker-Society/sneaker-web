@@ -6,13 +6,12 @@ import { StripeWidget } from "../../components/StripeWidget";
 import ContractWidget from "../HomePage/ContractWidget";
 import StyledButton from "../HomePage/StackedButton";
 import { useUser, useClerk } from "@clerk/clerk-react";
-import { UserDashboard } from "./UserDashBoard";
+import UserDashboard from "./UserDashboard";
+import { useSneakerUser } from "../../context/UserContext";
 
 export const Dashboard = () => {
-  const { user } = useUser();
+  const { user, role, loading } = useSneakerUser();
   const { signOut } = useClerk();
-
-  const { role } = user.unsafeMetadata;
 
   const handleLogout = () => {
     signOut();
@@ -83,9 +82,13 @@ export const Dashboard = () => {
     </div>
   );
 
+  if (loading) return <>Loading....</>;
+
   if (role === "client") {
     return <UserDashboard />;
   } else {
     return <MemberDashboard />;
   }
 };
+
+export default Dashboard;
