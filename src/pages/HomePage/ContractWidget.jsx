@@ -341,9 +341,12 @@ function ContractWidget() {
                 {...getStatusChipProps(contract.status)}
                 sx={{
                   borderRadius: 1,
-                  width: "fit-content",
+                  width: { xs: "90px", sm: "110px" },
                   px: "10px",
                   py: "4px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               />
             </Grid>
