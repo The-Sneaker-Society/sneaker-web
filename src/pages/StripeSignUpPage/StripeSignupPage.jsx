@@ -4,45 +4,31 @@ import {
   Typography,
   Button,
   CircularProgress,
-} from '@mui/material';
-import { FaStripe } from 'react-icons/fa';
+} from "@mui/material";
+import { FaStripe } from "react-icons/fa";
 
 export default function StripeSignupPage() {
   // TODO get the stripe link query
   const loading = false;
 
   const redirectToSripe = () => {
-    window.location.href = 'https://www.stripe.com';
+    window.location.href = "https://www.stripe.com";
   };
 
   if (loading) {
-    return (
-      <Container maxWidth="md" sx={{ height: '100vh' }}>
-        <Box
-          sx={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      </Container>
-    );
+    return <Loading />;
   }
 
   return (
-    <Container maxWidth="md" sx={{ height: '100vh' }}>
+    <Container maxWidth="md" sx={{ height: "100vh" }}>
       <Box
         sx={{
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center',
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
         }}
       >
         <Typography pb={4} variant="h1">
@@ -58,7 +44,7 @@ export default function StripeSignupPage() {
             variant="contained"
             color="primary"
             endIcon={<FaStripe />}
-            style={{ textTransform: 'none' }}
+            style={{ textTransform: "none" }}
             onClick={redirectToSripe}
           >
             Go to

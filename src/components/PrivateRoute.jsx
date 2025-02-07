@@ -1,17 +1,11 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import { useUser } from "@clerk/clerk-react";
+import { LoadingCircle } from "./Loaing";
 
 export const ProtectedRoute = ({ redirectPath = "/login", children }) => {
+  const { user, isLoaded } = useUser();
 
-  const { user,isLoaded } = useUser();
-
-  if (!isLoaded)
-    return (
-      <p className="loading">
-        <span>Checking credentials, wait a moment...</span>
-      </p>
-    );
+  if (!isLoaded) return <LoadingCircle />;
 
   if (!user) {
     return <Navigate to={redirectPath} replace />;

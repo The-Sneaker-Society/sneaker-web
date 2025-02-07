@@ -13,11 +13,11 @@ import { ProtectedRoute } from "./components/PrivateRoute";
 import { Blockers } from "./components/Blockers";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
-import StripePage from "./pages/StripePage";
 import { LoginV2 } from "./pages/Login/LoginV2";
 
 import React from "react";
 import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
+import StripeSubsriptionPage from "./pages/StripeSubsriptionPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
 
 function App() {
@@ -48,7 +48,7 @@ function App() {
                 path="/member/stripe"
                 element={
                   <ProtectedRoute>
-                    <StripePage />
+                    <StripeSubsriptionPage />
                   </ProtectedRoute>
                 }
               />
