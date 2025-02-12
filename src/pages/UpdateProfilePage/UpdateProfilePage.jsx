@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Formik, Form, useField } from "formik";
 import * as Yup from "yup";
 import {
@@ -9,12 +9,10 @@ import {
   CircularProgress,
   Container,
   Grid,
-  IconButton,
-  InputAdornment,
+  Alert,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { CURRENT_MEMBER, UPDATE_MEMBER } from "./graphql/updateMember";
+import { useQuery, useMutation } from "@apollo/client";
 
 const FormikTextField = ({ name, ...props }) => {
   const [field, meta] = useField(name);
@@ -31,19 +29,14 @@ const FormikTextField = ({ name, ...props }) => {
 };
 
 const UpdateProfilePage = () => {
-  const navigate = useNavigate();
-  // Update profile done through mutation
-  const { user, handleUpdateProfile, handleChangePassword } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: currentMemberData,
+    loading: currentMemberLoading,
+    error: currentMemberError,
+  } = useQuery(CURRENT_MEMBER);
+  const [updateMember] = useMutation(UPDATE_MEMBER);
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-
-  useEffect(() => {
-    if (user) {
-      setLoading(false);
-    }
-  }, [user]);
 
   const validationSchema = Yup.object({
     firstName: Yup.string(),
@@ -53,54 +46,31 @@ const UpdateProfilePage = () => {
     zipcode: Yup.string(),
     state: Yup.string(),
     phoneNumber: Yup.string(),
-    currentPassword: Yup.string().when("newPassword", {
-      is: (value) => Boolean(value),
-      then: (schema) =>
-        schema.required("Current password is required to change the password"),
-    }),
-    newPassword: Yup.string().min(8, "Password must be at least 8 characters"),
-    confirmNewPassword: Yup.string().when("newPassword", {
-      is: (value) => Boolean(value),
-      then: (schema) =>
-        schema.oneOf([Yup.ref("newPassword")], "Passwords must match"),
-    }),
   });
 
-  const handleSubmit = async (values, { setSubmitting, setValues }) => {
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const profileData = {};
-      const fields = [
-        "firstName",
-        "lastName",
-        "addressLineOne",
-        "addressLineTwo",
-        "zipcode",
-        "state",
-        "phoneNumber",
-      ];
-
-      fields.forEach((field) => {
-        if (values[field] !== user[field]) {
-          profileData[field] = values[field];
-        }
+      const { data } = await updateMember({
+        variables: {
+          data: {
+            firstName: values.firstName,
+            lastName: values.lastName,
+            addressLineOne: values.addressLineOne,
+            addressLineTwo: values.addressLineTwo,
+            zipcode: values.zipcode,
+            state: values.state,
+            phoneNumber: values.phoneNumber,
+          },
+        },
       });
 
-      if (Object.keys(profileData).length > 0) {
-        await handleUpdateProfile(profileData);
+      if (data.updateMember) {
+        setSuccessMessage("Profile updated successfully");
+        setErrorMessage(null);
+        refetch(); // Refetch the current member data
+      } else {
+        throw new Error("Failed to update profile");
       }
-
-      if (values.newPassword) {
-        await handleChangePassword(values.currentPassword, values.newPassword);
-      }
-
-      setSuccessMessage("Profile updated successfully");
-      setErrorMessage(null);
-      setValues({
-        ...values,
-        currentPassword: "",
-        newPassword: "",
-        confirmNewPassword: "",
-      });
     } catch (error) {
       setErrorMessage(error.message);
       setSuccessMessage(null);
@@ -109,11 +79,15 @@ const UpdateProfilePage = () => {
     }
   };
 
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-  if (loading) {
+  if (currentMemberLoading) {
     return <CircularProgress />;
+  }
+  if (currentMemberError) {
+    return (
+      <Alert severity="error">
+        Error loading profile data. Please try again later.
+      </Alert>
+    );
   }
 
   return (
@@ -153,17 +127,16 @@ const UpdateProfilePage = () => {
         )}
         <Formik
           initialValues={{
-            email: user?.email || "",
-            firstName: user?.firstName || "",
-            lastName: user?.lastName || "",
-            addressLineOne: user?.addressLineOne || "",
-            addressLineTwo: user?.addressLineTwo || "",
-            zipcode: user?.zipcode || "",
-            state: user?.state || "",
-            phoneNumber: user?.phoneNumber || "",
-            currentPassword: "",
-            newPassword: "",
-            confirmNewPassword: "",
+            email: currentMemberData?.currentMember?.email || "",
+            firstName: currentMemberData?.currentMember?.firstName || "",
+            lastName: currentMemberData?.currentMember?.lastName || "",
+            addressLineOne:
+              currentMemberData?.currentMember?.addressLineOne || "",
+            addressLineTwo:
+              currentMemberData?.currentMember?.addressLineTwo || "",
+            zipcode: currentMemberData?.currentMember?.zipcode || "",
+            state: currentMemberData?.currentMember?.state || "",
+            phoneNumber: currentMemberData?.currentMember?.phoneNumber || "",
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
@@ -235,69 +208,6 @@ const UpdateProfilePage = () => {
                     label="Phone Number"
                     variant="outlined"
                     fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormikTextField
-                    name="currentPassword"
-                    label="Current Password"
-                    type={showPassword ? "text" : "password"}
-                    variant="outlined"
-                    fullWidth
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={handleTogglePasswordVisibility}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormikTextField
-                    name="newPassword"
-                    label="New Password"
-                    type={showPassword ? "text" : "password"}
-                    variant="outlined"
-                    fullWidth
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={handleTogglePasswordVisibility}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormikTextField
-                    name="confirmNewPassword"
-                    label="Confirm New Password"
-                    type={showPassword ? "text" : "password"}
-                    variant="outlined"
-                    fullWidth
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={handleTogglePasswordVisibility}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
                   />
                 </Grid>
               </Grid>

@@ -24,3 +24,19 @@ export const CHANGE_MEMBER_PASSWORD = gql`
     }
   }
 `;
+
+export const CURRENT_MEMBER = gql`
+  query CurrentMember {
+    currentMember {
+      id
+      email
+      firstName
+      lastName
+      addressLineOne
+      addressLineTwo
+      zipcode
+      state
+      phoneNumber
+    }
+  }
+`;

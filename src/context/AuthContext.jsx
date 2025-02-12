@@ -293,22 +293,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const handleUpdateProfile = async (profileData) => {
-    setLoading(true);
-    try {
-      const { data } = await updateMember({
-        variables: { data: profileData },
-      });
-      await refetchUser();
-      return data.updateMember;
-    } catch (error) {
-      console.error("Profile update error:", error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleChangePassword = async (currentPassword, newPassword) => {
     setLoading(true);
     try {
@@ -364,12 +348,10 @@ export const AuthProvider = ({ children }) => {
     handleSignupWithEmailAndPassword,
     handleGoogleLogin,
     handleLogout,
-    handleUpdateProfile,
     handleChangePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
 
 export default AuthProvider;
