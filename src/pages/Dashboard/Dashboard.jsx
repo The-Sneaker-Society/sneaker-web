@@ -2,17 +2,18 @@ import React from "react";
 import { Container, Grid, Box, Typography } from "@mui/material";
 import ContractStatusWidget from "../../components/ContractStatusWidget";
 import { QrWidget } from "../../components/qrWidget";
-import { StripeWidget } from "../../components/StripeWidget";
+import { StripeWidget } from "../../components/StripeWidgets/StripeWidget";
 import ContractWidget from "../HomePage/ContractWidget";
 import StyledButton from "../HomePage/StackedButton";
 import { useUser, useClerk } from "@clerk/clerk-react";
 import UserDashboard from "./UserDashboard";
+import { useSneakerUser } from "../../context/UserContext";
+import { LoadingCircle } from "../../components/Loaing";
+import { StripeSetUpWidget } from "../../components/StripeWidgets/StripeSetUpWidget";
 
 export const Dashboard = () => {
-  const { user } = useUser();
+  const { user, role, loading } = useSneakerUser();
   const { signOut } = useClerk();
-
-  const { role } = user.unsafeMetadata;
 
   const handleLogout = () => {
     signOut();
@@ -55,7 +56,11 @@ export const Dashboard = () => {
                 <ContractStatusWidget />
               </WidgetPlaceholder>
               <WidgetPlaceholder height="100%">
-                <StripeWidget />
+                {user.stripeConnectAccountId ? (
+                  <StripeWidget />
+                ) : (
+                  <StripeSetUpWidget />
+                )}
               </WidgetPlaceholder>
               <WidgetPlaceholder color="red" height="100%">
                 <QrWidget />
@@ -82,6 +87,8 @@ export const Dashboard = () => {
       {children}
     </div>
   );
+
+  if (loading) return <LoadingCircle />;
 
   if (role === "client") {
     return <UserDashboard />;
