@@ -56,7 +56,7 @@ export const Dashboard = () => {
                 <ContractStatusWidget />
               </WidgetPlaceholder>
               <WidgetPlaceholder height="100%">
-                {user.stripeConnectAccountId ? (
+                {user?.stripeConnectAccountId ? (
                   <StripeWidget />
                 ) : (
                   <StripeSetUpWidget />

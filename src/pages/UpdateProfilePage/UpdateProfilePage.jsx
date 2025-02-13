@@ -33,6 +33,7 @@ const UpdateProfilePage = () => {
     data: currentMemberData,
     loading: currentMemberLoading,
     error: currentMemberError,
+    refetch,
   } = useQuery(CURRENT_MEMBER);
   const [updateMember] = useMutation(UPDATE_MEMBER);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -61,6 +62,12 @@ const UpdateProfilePage = () => {
             state: values.state,
             phoneNumber: values.phoneNumber,
           },
+        },
+        update: (cache, { data: { updateMember } }) => {
+          cache.writeQuery({
+            query: CURRENT_MEMBER,
+            data: { currentMember: updateMember },
+          });
         },
       });
 
