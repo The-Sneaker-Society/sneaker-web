@@ -19,6 +19,7 @@ import React from "react";
 import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
 import StripeSubsriptionPage from "./pages/StripeSubsriptionPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import UpdateProfilePage from "./pages/UpdateProfilePage/UpdateProfilePage";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -87,6 +88,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <UserSignupPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="user/update-profile"
+                element={
+                  <ProtectedRoute>
+                    <UpdateProfilePage />
                   </ProtectedRoute>
                 }
               />
