@@ -4,6 +4,7 @@ import StyledButton from "../HomePage/StackedButton";
 import { useClerk } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import Logo from "/assets/SNEAKER SOCIETY (Transparency).png";
+import { Link as RouterLink } from "react-router-dom";
 
 const DashboardHeader = () => {
   const { signOut } = useClerk();
@@ -31,21 +32,24 @@ const DashboardHeader = () => {
             alignItems: "center",
           }}
         >
-          <Box
-            component="img"
-            src={Logo}
-            alt="Logo"
-            sx={{
-              width: "100px",
-              height: "auto",
-              display: "block",
-              margin: 0,
-              padding: "0",
-              "@media (max-width:600px)": {
+          <RouterLink to="/dashboard">
+            <Box
+              component="img"
+              src={Logo}
+              alt="Logo"
+              sx={{
                 width: "100px",
-              },
-            }}
-          />
+                height: "auto",
+                display: "block",
+                margin: 0,
+                padding: "0",
+                cursor: "pointer",
+                "@media (max-width:600px)": {
+                  width: "100px",
+                },
+              }}
+            />
+          </RouterLink>
         </Box>
         <Box sx={{ display: "flex" }}>
           <StyledButton onClick={handleProfileClick}>Profile</StyledButton>
