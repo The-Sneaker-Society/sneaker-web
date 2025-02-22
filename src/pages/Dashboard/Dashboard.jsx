@@ -10,65 +10,62 @@ import UserDashboard from "./UserDashboard";
 import { useSneakerUser } from "../../context/UserContext";
 import { LoadingCircle } from "../../components/Loaing";
 import { StripeSetUpWidget } from "../../components/StripeWidgets/StripeSetUpWidget";
+import DashboardHeader from "./DashboardHeader";
 
 export const Dashboard = () => {
   const { user, role, loading } = useSneakerUser();
-  const { signOut } = useClerk();
-
-  const handleLogout = () => {
-    signOut();
-  };
 
   const MemberDashboard = () => {
     return (
-      <Container maxWidth="lg" style={{ height: "100vh" }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "20px",
-          }}
-        >
-          <Typography variant="h1" fontWeight="bold">
-            Welcome, {user?.firstName || "User"}
-          </Typography>
-          <StyledButton onClick={handleLogout} style={{ marginTop: "10px" }}>
-            Log Out
-          </StyledButton>
-        </Box>
+      <>
+        <DashboardHeader />
+        <Container maxWidth="lg" style={{ height: "100vh" }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: "20px",
+              marginLeft: "20px",
+            }}
+          >
+            <Typography variant="h1" fontWeight="bold">
+              Welcome, {user?.firstName || "User"}
+            </Typography>
+          </Box>
 
-        <Grid container spacing={2} style={{ height: "100%" }}>
-          <Grid item xs={12} md={6}>
-            <ContractWidget />
-          </Grid>
+          <Grid container spacing={2} style={{ height: "100%" }}>
+            <Grid item xs={12} md={6}>
+              <ContractWidget />
+            </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                height: "100%",
-              }}
-            >
-              <WidgetPlaceholder color="lightgreen" height="100%">
-                <ContractStatusWidget />
-              </WidgetPlaceholder>
-              <WidgetPlaceholder height="100%">
-                {user.stripeConnectAccountId ? (
-                  <StripeWidget />
-                ) : (
-                  <StripeSetUpWidget />
-                )}
-              </WidgetPlaceholder>
-              <WidgetPlaceholder color="red" height="100%">
-                <QrWidget />
-              </WidgetPlaceholder>
-            </Box>
+            <Grid item xs={12} md={6}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  height: "100%",
+                }}
+              >
+                <WidgetPlaceholder color="lightgreen" height="100%">
+                  <ContractStatusWidget />
+                </WidgetPlaceholder>
+                <WidgetPlaceholder height="100%">
+                  {user.stripeConnectAccountId ? (
+                    <StripeWidget />
+                  ) : (
+                    <StripeSetUpWidget />
+                  )}
+                </WidgetPlaceholder>
+                <WidgetPlaceholder color="red" height="100%">
+                  <QrWidget />
+                </WidgetPlaceholder>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
+        </Container>
+      </>
     );
   };
 
