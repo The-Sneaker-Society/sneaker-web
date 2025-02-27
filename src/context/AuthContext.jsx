@@ -12,10 +12,6 @@ import {
 } from "../auth/services";
 import { CREATE_MEMBER } from "../pages/SignUpMemberPage/graphql/addMember";
 import { CREATE_USER } from "../pages/SignUpMemberPage/graphql/addUser";
-import {
-  UPDATE_MEMBER,
-  CHANGE_MEMBER_PASSWORD,
-} from "../pages/UpdateProfilePage/graphql/updateMember";
 import { update } from "lodash";
 
 const AuthContext = createContext();
@@ -40,13 +36,6 @@ export const AuthProvider = ({ children }) => {
   const [updateMember] = useMutation(UPDATE_MEMBER, {
     onError: (error) => {
       console.error("Error updating member:", error);
-      throw error;
-    },
-  });
-
-  const [changeMemberPassword] = useMutation(CHANGE_MEMBER_PASSWORD, {
-    onError: (error) => {
-      console.error("Error changing password:", error);
       throw error;
     },
   });
@@ -293,21 +282,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const handleChangePassword = async (currentPassword, newPassword) => {
-    setLoading(true);
-    try {
-      const { data } = await changeMemberPassword({
-        variables: { data: { currentPassword, newPassword } },
-      });
-      return data.changeMemberPassword;
-    } catch (error) {
-      console.error("Password change error", error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     // Handle Member Data
     if (currentMemberData?.currentMember) {
@@ -348,7 +322,6 @@ export const AuthProvider = ({ children }) => {
     handleSignupWithEmailAndPassword,
     handleGoogleLogin,
     handleLogout,
-    handleChangePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
