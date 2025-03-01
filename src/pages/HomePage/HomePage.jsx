@@ -9,7 +9,6 @@ import ScrollToNextIcon from "./ScrollToNextIcon";
 import PricingTable from "./PricingTable";
 import { useNavigate } from "react-router-dom";
 import ContactSection from "./ContactSection";
-import ReviewSystem from "../../components/RatingReviewBar";
 
 function HomePage() {
   const isSmallScreen = useMediaQuery("(max-width:600px)");
@@ -128,11 +127,6 @@ function HomePage() {
             scrollToNext={() => scrollToRef(featuresSectionRef)}
           />
         </Box>
-
-        <Box>
-          <ReviewSystem />
-        </Box>
-
         <Box
           sx={{
             width: "100%",
