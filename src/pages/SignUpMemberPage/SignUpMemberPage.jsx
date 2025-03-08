@@ -1,12 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Logo from "../../assets/ss-logo.svg";
 import GoogleIcon from "@mui/icons-material/Google";
 import { Button, Alert, Stack, Box } from "@mui/material";
-import { SignedOut, useClerk } from "@clerk/clerk-react";
+import { SignedOut, useClerk, useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
 const SignUpMember = () => {
   const [error, setError] = useState("");
+  const { isSignedIn } = useUser();
   const { openSignUp } = useClerk();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      navigate("/dashboard");
+    }
+  }, [isSignedIn, navigate]);
 
   const handleGoogleSignUp = async () => {
     try {
