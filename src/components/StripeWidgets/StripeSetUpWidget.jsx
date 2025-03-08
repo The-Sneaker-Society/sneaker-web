@@ -38,58 +38,47 @@ export const StripeSetUpWidget = () => {
     <Box
       sx={{
         display: "flex",
+        flexDirection: "column",
+        flexWrap: "wrap",
         justifyContent: "center",
         alignItems: "center",
+        height: "100%",
         width: "100%",
-        bgcolor: "background.default",
+        bgcolor: "black",
+        color: "white",
+        borderRadius: "16px",
+        border: "4px solid white",
+        padding: "50px",
       }}
     >
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
-          flexWrap: "wrap",
-          justifyContent: "center",
           alignItems: "center",
-          height: "auto",
-          width: "100%",
-          maxWidth: "600px",
-          bgcolor: "black",
-          color: "white",
-          borderRadius: "16px",
-          border: "4px solid white",
-          padding: "50px",
+          gap: "8px",
+          marginBottom: "16px",
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            marginBottom: "16px",
-          }}
-        >
-          <GoAlertFill style={{ color: "red", fontSize: "24px" }} />
-          <Typography variant="body1" sx={{ fontSize: "24px" }}>
-            Please set up stripe to begin
-          </Typography>
-        </Box>
-        <Button
-          variant="outlined"
-          size="small"
-          loading={loading || isRedirecting}
-          sx={{
-            color: "white",
-            borderColor: "white",
-            textTransform: "none",
-            fontSize: "20px",
-            padding: "5px 15px",
-          }}
-          onClick={handleStripeAccountClick}
-        >
-          set up Stripe
-        </Button>
+        <GoAlertFill style={{ color: "red", fontSize: "24px" }} />
+        <Typography variant="body1" sx={{ fontSize: "24px" }}>
+          Please set up stripe to begin
+        </Typography>
       </Box>
+      <Button
+        variant="outlined"
+        size="small"
+        loading={loading || isRedirecting}
+        sx={{
+          color: "white",
+          borderColor: "white",
+          textTransform: "none",
+          fontSize: "20px",
+          padding: "5px 15px",
+        }}
+        onClick={handleStripeAccountClick}
+      >
+        set up Stripe
+      </Button>
     </Box>
   );
 };

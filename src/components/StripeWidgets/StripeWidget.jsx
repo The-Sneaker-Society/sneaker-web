@@ -25,21 +25,18 @@ export const StripeWidget = () => {
       sx={{
         border: "3px solid #ccc",
         borderRadius: "16px",
-        height: "auto",
+        height: "100%",
         width: "100%",
-        maxWidth: "600px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         boxShadow: "0px 0px 10px #000",
         padding: "20px",
-        marginBottom: "20px",
-        marginTop: "10px",
         bgcolor: "black",
         color: "white",
       }}
     >
-      <Stack spacing={2} sx={{ width: { xs: "100%", sm: "auto" } }}>
+      <Stack spacing={2}>
         <Box
           sx={{
             display: "flex",

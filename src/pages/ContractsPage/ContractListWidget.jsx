@@ -11,8 +11,8 @@ export const ContractListWidget = () => {
 
   const contractWidgetStyle = {
     minHeight: 400,
-    width: "100%",
     height: "100%",
+    width: "100%",
     p: 2,
     borderRadius: 2,
     boxShadow: 3,
