@@ -10,6 +10,7 @@ import UserDashboard from "./UserDashboard";
 import { useSneakerUser } from "../../context/UserContext";
 import { LoadingCircle } from "../../components/Loaing";
 import { StripeSetUpWidget } from "../../components/StripeWidgets/StripeSetUpWidget";
+import { ContractListWidget } from "../ContractsPage/ContractListWidget";
 
 export const Dashboard = () => {
   const { user, role, loading } = useSneakerUser();
@@ -38,9 +39,9 @@ export const Dashboard = () => {
           </StyledButton>
         </Box>
 
-        <Grid container spacing={2} style={{ height: "100%" }}>
+        <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
-            <ContractWidget />
+            <ContractListWidget />
           </Grid>
 
           <Grid item xs={12} md={6}>
