@@ -20,6 +20,7 @@ import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
 import StripeSubsriptionPage from "./pages/StripeSubsriptionPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import { ContractPage } from "./pages/ContractsPage/Contracts";
+import { ChatDashboard } from "./pages/Chats/ChatDashboard";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -69,6 +70,16 @@ function App() {
                     {/* <Blockers /> */}
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  </>
+                }
+              />
+              <Route
+                path="member/chats"
+                element={
+                  <>
+                    <ProtectedRoute>
+                      <ChatDashboard />
                     </ProtectedRoute>
                   </>
                 }
