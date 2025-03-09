@@ -6,7 +6,7 @@ import { useUser, useClerk } from "@clerk/clerk-react";
 import ContractStatusWidget from "../../components/ContractStatusWidget";
 import { QrWidget } from "../../components/qrWidget";
 import { StripeWidget } from "../../components/StripeWidgets/StripeWidget";
-import StyledButton from "../HomePage/StackedButton";
+import StyledButton from "../HomePage/StyledButton";
 import { StripeSetUpWidget } from "../../components/StripeWidgets/StripeSetUpWidget";
 import { ContractListWidget } from "../ContractsPage/ContractListWidget";
 import { useSneakerUser } from "../../context/UserContext";
@@ -34,7 +34,7 @@ export const MemberDashboard = () => {
 
   return (
     <>
-      <Grid container spacing={1} height="100vh">
+      <Grid container spacing={1} height="100%">
         <Grid size={12}>
           <Box
             sx={{
@@ -76,7 +76,7 @@ export const MemberDashboard = () => {
             <ContractStatusWidget />
           </WidgetWrapper>
           <WidgetWrapper>
-            {user.stripeConnectAccountId ? (
+            {user?.stripeConnectAccountId ? (
               <StripeWidget />
             ) : (
               <StripeSetUpWidget />

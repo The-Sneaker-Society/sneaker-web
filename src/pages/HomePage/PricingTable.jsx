@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography, Button, Box } from '@mui/material';
 import { Check } from '@mui/icons-material';
-import StyledButton from './StackedButton';
+import StyledButton from './StyledButton';
 
 const PricingTable = ({ features, onButtonClick }) => {
   return (

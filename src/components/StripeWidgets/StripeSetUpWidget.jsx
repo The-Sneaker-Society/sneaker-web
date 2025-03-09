@@ -46,7 +46,7 @@ export const StripeSetUpWidget = () => {
         width: "100%",
         bgcolor: "black",
         color: "white",
-        borderRadius: "16px",
+        borderRadius: 2,
         border: "4px solid white",
         padding: "50px",
       }}

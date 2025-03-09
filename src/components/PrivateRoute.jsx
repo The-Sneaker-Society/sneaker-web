@@ -1,8 +1,13 @@
 import { Navigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { LoadingCircle } from "./Loaing";
+import Layout from "./Layout";
 
-export const ProtectedRoute = ({ redirectPath = "/login", children }) => {
+export const ProtectedRoute = ({
+  redirectPath = "/login",
+  children,
+  withLayout = true, // Add a prop to control layout rendering
+}) => {
   const { user, isLoaded } = useUser();
 
   if (!isLoaded) return <LoadingCircle />;
@@ -11,5 +16,6 @@ export const ProtectedRoute = ({ redirectPath = "/login", children }) => {
     return <Navigate to={redirectPath} replace />;
   }
 
-  return children;
+  // Conditionally render the Layout component
+  return withLayout ? <Layout>{children}</Layout> : children;
 };

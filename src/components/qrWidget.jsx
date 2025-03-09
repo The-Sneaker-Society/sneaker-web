@@ -32,7 +32,7 @@ export const QrWidget = () => {
         justifyContent: "space-between",
         height: "100%",
         width: "100%",
-        borderRadius: "16px",
+        borderRadius: 2,
         border: "4px solid white",
         padding: "20px",
       }}
