@@ -17,11 +17,11 @@ export const ContractListWidget = () => {
     borderRadius: 2,
     boxShadow: 3,
     overflowX: "auto",
-    border: 2,
+    border: '4px solid white',
     borderColor: "white",
   };
 
-  const contracts = [
+  let contracts = [
     {
       id: "1",
       clientName: "Acme Corporation",
@@ -106,7 +106,51 @@ export const ContractListWidget = () => {
       status: "Completed",
       contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
     },
+    {
+      id: "14",
+      clientName: "Lambda Holdings",
+      status: "Completed",
+      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
+    },
+    {
+      id: "14",
+      clientName: "Lambda Holdings",
+      status: "Completed",
+      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
+    },
+    {
+      id: "14",
+      clientName: "Lambda Holdings",
+      status: "Completed",
+      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
+    },
+    {
+      id: "14",
+      clientName: "Lambda Holdings",
+      status: "Completed",
+      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
+    },
+    {
+      id: "14",
+      clientName: "Lambda Holdings",
+      status: "Completed",
+      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
+    },
+    {
+      id: "14",
+      clientName: "Lambda Holdings",
+      status: "Completed",
+      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
+    },
+    {
+      id: "14",
+      clientName: "Lambda Holdings",
+      status: "Completed",
+      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
+    },
   ];
+
+  // contracts = []
 
   const testContracts = contracts.map((contract) => ({
     ...contract,
@@ -170,7 +214,7 @@ export const ContractListWidget = () => {
   ];
 
   const handleRowClick = (row) => {
-    navigate(`/contracts/${row.id}`);
+    navigate(`/member/contract/${row.id}`);
     console.log(row.id);
   };
 
@@ -196,7 +240,7 @@ export const ContractListWidget = () => {
         }}
         rows={testContracts}
         columns={columns}
-        autoPageSize
+        autoPageSize={true}
         onRowClick={handleRowClick}
       />
     </Box>

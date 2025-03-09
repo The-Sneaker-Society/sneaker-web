@@ -3,7 +3,7 @@ import { Box, Stack, Typography, Divider, useMediaQuery } from "@mui/material";
 import Header from "./Header";
 import Footer from "./Footer";
 import { TypeAnimation } from "react-type-animation";
-import StyledButton from "./StackedButton";
+import StyledButton from "./StyledButton";
 import FeaturesSection from "./FeaturesSection";
 import ScrollToNextIcon from "./ScrollToNextIcon";
 import PricingTable from "./PricingTable";

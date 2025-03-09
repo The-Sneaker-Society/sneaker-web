@@ -24,7 +24,7 @@ export const StripeWidget = () => {
     <Box
       sx={{
         border: "3px solid #ccc",
-        borderRadius: "16px",
+        borderRadius: 2,
         height: "100%",
         width: "100%",
         display: "flex",
