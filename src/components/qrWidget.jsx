@@ -1,10 +1,9 @@
 import React from "react";
-import { Box, Icon, Typography } from "@mui/material";
+import { Box, Icon, Typography, Stack } from "@mui/material";
 import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
 
-// Define the query to get the current member's QR widget data
 const GET_MEMBER_QR_WIDGET_DATA = gql`
   query GetMemberQrWidgetData {
     currentMember {
@@ -16,39 +15,77 @@ const GET_MEMBER_QR_WIDGET_DATA = gql`
   }
 `;
 
+// export const QrWidget = () => {
+//   // const { loading, error, data } = useQuery(GET_MEMBER_QR_WIDGET_DATA);
+
+// Fallback UI while data is loading
+// if (loading) {
+
 export const QrWidget = () => {
-  const { loading, error, data } = useQuery(GET_MEMBER_QR_WIDGET_DATA);
+  // Mock data to bypass the query
+  const mockData = {
+    currentMember: {
+      qrWidgetData: {
+        image: "https://via.placeholder.com/150", // Replace with a placeholder image URL
+        url: "https://example.com", // Replace with a placeholder link
+      },
+    },
+  };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  // Extract QR data from the mock response
+  const { image, url } = mockData.currentMember.qrWidgetData;
 
-  // Extract QR data from the response
-  const { image, url } = data.currentMember.qrWidgetData;
   return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: "row",
+
         justifyContent: "space-between",
-        height: "100%",
         width: "100%",
         borderRadius: 2,
         border: "4px solid white",
         padding: "20px",
+        textAlign: "left",
+        gap: 2,
       }}
     >
-      <img src={image} alt="QR Code" style={{ maxWidth: "50%" }} />
-      <Box
-        sx={{
-          width: "50%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 1,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Box>
+        <Typography
+          sx={{
+            fontWeight: "bold",
+            fontSize: "25px",
+            color: "white",
+          }}
+        >
+          Custom Intake Link
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: "0.9rem",
+            color: "#aaa",
+            textAlign: "center",
+            marginBottom: "10px",
+          }}
+        >
+          Share you custom link to start getting intakes!
+        </Typography>
+      </Box>
+
+      <Stack direction="row">
+        <img
+          src={image}
+          alt="QR Code"
+          style={{ width: "120px", height: "120px", marginBottom: "10px" }}
+        />
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
           <Typography
             component="a"
             href={url}
@@ -57,25 +94,37 @@ export const QrWidget = () => {
             sx={{
               textDecoration: "none",
               color: "white",
-              fontWeight: "bold",
+              fontSize: "0.9rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
             }}
           >
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "center",
                 alignItems: "center",
+                gap: "8px",
+                marginBottom: "10px",
               }}
             >
+              <Box
+                sx={{
+                  width: "10px",
+                  height: "10px",
+                  backgroundColor: "red",
+                  borderRadius: "50%",
+                }}
+              />
               <Icon sx={{ paddingRight: "25px" }}>
                 <FaLink />
               </Icon>
               Link
             </Box>
           </Typography>
+          <ImageDownloadButton imageSrc={image} />
         </Box>
-        <ImageDownloadButton imageSrc={image} />
-      </Box>
+      </Stack>
     </Box>
   );
 };
