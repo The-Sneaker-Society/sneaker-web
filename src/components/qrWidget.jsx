@@ -39,7 +39,6 @@ export const QrWidget = () => {
     <Box
       sx={{
         display: "flex",
-
         justifyContent: "space-between",
         width: "100%",
         borderRadius: 2,
@@ -53,37 +52,47 @@ export const QrWidget = () => {
         <Typography
           sx={{
             fontWeight: "bold",
-            fontSize: "25px",
+            fontSize: "1.3rem",
             color: "white",
+            marginBottom: "8px",
           }}
         >
           Custom Intake Link
         </Typography>
         <Typography
           sx={{
-            fontSize: "0.9rem",
+            fontSize: "0.85rem",
             color: "#aaa",
-            textAlign: "center",
-            marginBottom: "10px",
+            marginBottom: "15px",
           }}
         >
           Share you custom link to start getting intakes!
         </Typography>
+        <Box>
+          <img
+            src={image}
+            alt="QR Code"
+            style={{
+              width: "120px",
+              height: "120px",
+              marginBottom: "10px",
+            }}
+          />
+        </Box>
       </Box>
 
-      <Stack direction="row">
-        <img
-          src={image}
-          alt="QR Code"
-          style={{ width: "120px", height: "120px", marginBottom: "10px" }}
-        />
-
+      <Box
+        sx={{
+          display: "flex",
+          marginTop: "50px",
+        }}
+      >
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 2,
+            gap: 1,
           }}
         >
           <Typography
@@ -105,13 +114,12 @@ export const QrWidget = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                marginBottom: "10px",
               }}
             >
               <Box
                 sx={{
-                  width: "10px",
-                  height: "10px",
+                  width: "15px",
+                  height: "15px",
                   backgroundColor: "red",
                   borderRadius: "50%",
                 }}
@@ -124,7 +132,7 @@ export const QrWidget = () => {
           </Typography>
           <ImageDownloadButton imageSrc={image} />
         </Box>
-      </Stack>
+      </Box>
     </Box>
   );
 };
