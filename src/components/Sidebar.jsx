@@ -39,7 +39,7 @@ const Sidebar = () => {
         edge="start"
         color="inherit"
         aria-label="menu"
-        // onClick={toggleDrawer(true)}
+        onClick={toggleDrawer(true)}
         sx={{ display: { xs: "block", sm: "none" } }}
       >
         <Menu />
@@ -56,8 +56,8 @@ const Sidebar = () => {
             flexDirection: "column",
           }}
           role="presentation"
-          // onClick={toggleDrawer(false)}
-          // onKeyDown={toggleDrawer(false)}
+          onClick={toggleDrawer(false)}
+          onKeyDown={toggleDrawer(false)}
         >
           {/* Sidebar Content */}
           <Box sx={{ padding: 2, textAlign: "center" }}>
