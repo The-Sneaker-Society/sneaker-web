@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
 import Sidebar from "./Sidebar";
 
 const Layout = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
     return () => clearTimeout(timer);
-  },);
+  }, []);
 
   return (
     <Box sx={{ display: "flex" }}>
-      {/* Sidebar */}
       <Box
         sx={{
           width: 250,
@@ -22,12 +23,12 @@ const Layout = ({ children }) => {
           position: "sticky",
           top: 0,
           zIndex: 10,
+          display: { xs: "none", sm: "block" },
         }}
       >
         <Sidebar />
       </Box>
 
-      {/* Main Content */}
       <Box
         sx={{
           flexGrow: 1,
@@ -39,12 +40,9 @@ const Layout = ({ children }) => {
           justifyContent: "center",
         }}
       >
-        {isLoading ? (
-          <CircularProgress />
-        ) : (
-          children
-        )}
+        {isLoading ? <CircularProgress /> : children}
       </Box>
+      {isMobile && <Sidebar />}
     </Box>
   );
 };
