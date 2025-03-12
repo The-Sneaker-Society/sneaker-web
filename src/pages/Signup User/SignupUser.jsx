@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../../assets/ss-logo.svg";
 import GoogleIcon from "@mui/icons-material/Google";
-import { Button, Alert, Stack, Box } from "@mui/material";
+import { Button, Alert, Stack, Box, Typography } from "@mui/material";
 import { SignedOut, useClerk, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 
@@ -58,6 +58,9 @@ const SignUpUser = () => {
           alt="Logo"
           sx={{ width: "80%", maxWidth: "300px", height: "auto", my: 4 }}
         />
+        <Typography variant="h6" sx={{ fontWeight: "bold", textAlign: "center", fontSize: "2rem" }}>
+          User Site
+        </Typography>
         <SignedOut>
           <Button
             variant="contained"
