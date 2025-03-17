@@ -23,10 +23,12 @@ const ChatSidebar = ({ onClose }) => {
     },
     { name: "Alice", message: "Did you get my email?", timestamp: "1 day ago" },
   ]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const filteredConversations = conversations.filter((conversation) =>
     conversation.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   return (
     <Drawer variant="permanent">
       <Box sx={{ p: 2 }}>

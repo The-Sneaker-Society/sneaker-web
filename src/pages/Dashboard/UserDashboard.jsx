@@ -1,6 +1,6 @@
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { Box, Typography } from "@mui/material";
-import StyledButton from "../HomePage/StackedButton";
+import StyledButton from "../HomePage/StyledButton";
 
 const UserDashboard = () => {
   const { user } = useUser();
