@@ -1,9 +1,10 @@
 import React from "react";
-import { Box, Icon, Typography, Stack } from "@mui/material";
+import { Box, Icon, Typography } from "@mui/material";
 import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
 
+// Define the query to get the current member's QR widget data
 const GET_MEMBER_QR_WIDGET_DATA = gql`
   query GetMemberQrWidgetData {
     currentMember {
@@ -15,25 +16,14 @@ const GET_MEMBER_QR_WIDGET_DATA = gql`
   }
 `;
 
-// export const QrWidget = () => {
-//   // const { loading, error, data } = useQuery(GET_MEMBER_QR_WIDGET_DATA);
-
-// Fallback UI while data is loading
-// if (loading) {
-
 export const QrWidget = () => {
-  // Mock data to bypass the query
-  const mockData = {
-    currentMember: {
-      qrWidgetData: {
-        image: "https://via.placeholder.com/150", // Replace with a placeholder image URL
-        url: "https://example.com", // Replace with a placeholder link
-      },
-    },
-  };
+  const { loading, error, data } = useQuery(GET_MEMBER_QR_WIDGET_DATA);
 
-  // Extract QR data from the mock response
-  const { image, url } = mockData.currentMember.qrWidgetData;
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  // Extract QR data from the response
+  const { image, url } = data.currentMember.qrWidgetData;
 
   return (
     <Box
