@@ -64,7 +64,9 @@ const Header = ({
           }}
         >
           {/* Logo visible on all screen sizes */}
-          <img src={Sneakers} alt="Logo" style={{ height: 50 }} />
+          <a href="/">
+            <img src={Sneakers} alt="Logo" style={{ height: 50 }} />
+          </a>
 
           {/* Desktop Navigation */}
           <Hidden mdDown>
