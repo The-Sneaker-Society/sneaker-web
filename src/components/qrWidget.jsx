@@ -58,6 +58,8 @@ export const QrWidget = () => {
         >
           Share you custom link to start getting intakes!
         </Typography>
+      </Box>
+      <Box>
         <Box>
           <img
             src={image}
@@ -106,14 +108,6 @@ export const QrWidget = () => {
                 gap: "8px",
               }}
             >
-              <Box
-                sx={{
-                  width: "15px",
-                  height: "15px",
-                  backgroundColor: "red",
-                  borderRadius: "50%",
-                }}
-              />
               <Icon sx={{ paddingRight: "25px" }}>
                 <FaLink />
               </Icon>
