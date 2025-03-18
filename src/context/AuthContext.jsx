@@ -33,13 +33,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.getItem("authToken")
   );
 
-  const [updateMember] = useMutation(UPDATE_MEMBER, {
-    onError: (error) => {
-      console.error("Error updating member:", error);
-      throw error;
-    },
-  });
-
   const {
     data: currentMemberData,
     error: currentMemberError,
