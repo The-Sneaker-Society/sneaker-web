@@ -7,7 +7,7 @@ import { Tab, IconButton, Box, Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import Sneakers from "../../../assets/sneakers-header.png";
-import StyledButton from "./StackedButton";
+import StyledButton from "./StyledButton";
 
 const Header = ({
   pricingRef,
@@ -64,7 +64,9 @@ const Header = ({
           }}
         >
           {/* Logo visible on all screen sizes */}
-          <img src={Sneakers} alt="Logo" style={{ height: 50 }} />
+          <a href="/">
+            <img src={Sneakers} alt="Logo" style={{ height: 50 }} />
+          </a>
 
           {/* Desktop Navigation */}
           <Hidden mdDown>

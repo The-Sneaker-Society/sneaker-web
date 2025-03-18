@@ -31,9 +31,9 @@ export const QrWidget = () => {
         flexDirection: "row",
         justifyContent: "space-between",
         height: "100%",
-        borderRadius: "16px",
-        border: "4px solid white",
         width: "100%",
+        borderRadius: 2,
+        border: "4px solid white",
         padding: "20px",
       }}
     >
@@ -56,7 +56,7 @@ export const QrWidget = () => {
             rel="noopener noreferrer"
             sx={{
               textDecoration: "none",
-              color: 'white',
+              color: "white",
               fontWeight: "bold",
             }}
           >

@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { MdCurrencyExchange } from "react-icons/md";
-import StyledButton from "./HomePage/StackedButton";
+import StyledButton from "./HomePage/StyledButton";
 import { gql, useQuery } from "@apollo/client";
 import { LoadingCircle } from "../components/Loaing";
 
@@ -27,11 +27,11 @@ const StripeSubsriptionPage = () => {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
         textAlign: "center",
+        width: "100%",
       }}
     >
-      <Box sx={{ fontSize: "120px", color: '#FFD100' }}>
+      <Box sx={{ fontSize: "120px", color: "#FFD100" }}>
         <MdCurrencyExchange />
       </Box>
 

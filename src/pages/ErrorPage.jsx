@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import StyledButton from "./HomePage/StackedButton";
+import StyledButton from "./HomePage/StyledButton";
 import Logo from "../../assets/SNEAKER SOCIETY (Transparency).png";
 
 export default function ErrorPage() {
