@@ -17,6 +17,7 @@ import React from "react";
 import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
 import StripeSubsriptionPage from "./pages/StripeSubsriptionPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import UpdateProfilePage from "./pages/UpdateProfilePage/UpdateProfilePage";
 import { ContractPage } from "./pages/ContractsPage/Contracts";
 import { ChatDashboard } from "./pages/Chats/ChatDashboard";
 import { ContractReviewPage } from "./pages/ContractsPage/ContractReviewPage";
@@ -104,6 +105,14 @@ function App() {
                 element={
                   <ProtectedRoute withLayout={false}>
                     <UserSignupPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="user/update-profile"
+                element={
+                  <ProtectedRoute>
+                    <UpdateProfilePage />
                   </ProtectedRoute>
                 }
               />
