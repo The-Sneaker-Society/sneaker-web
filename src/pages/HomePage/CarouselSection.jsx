@@ -1,27 +1,22 @@
-import React from 'react';
-import { Box, Container } from '@mui/material';
-import { Carousel } from 'react-responsive-carousel';
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import React, { useRef } from "react";
+import { Box, Container } from "@mui/material";
+import { Carousel } from "react-responsive-carousel";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 
-function CarouselSection() {
+export const ImageCarousel = ({ images }) => {
+  const carouselRef = useRef(null);
+
   return (
     <Container>
-      <Box my={8}>
-        <Carousel showThumbs={false} showStatus={false} infiniteLoop autoPlay>
-          <div>
-            <img src="https://via.placeholder.com/600x300" alt="Image 1" />
-          </div>
-          <div>
-            <img src="https://via.placeholder.com/600x300" alt="Image 2" />
-          </div>
-          <div>
-            <img src="https://via.placeholder.com/600x300" alt="Image 3" />
-          </div>
+      <Box my={8} position="relative">
+        <Carousel showThumbs={false} ref={carouselRef}>
+          {images.map((image, index) => (
+            <div key={index}>
+              <img src={image.src} alt={image.alt} />
+            </div>
+          ))}
         </Carousel>
       </Box>
     </Container>
   );
-}
-
-export default CarouselSection;
-
+};
