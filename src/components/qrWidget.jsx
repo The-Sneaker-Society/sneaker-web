@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Icon, Typography } from "@mui/material";
+import { Box, Icon, Typography, Stack } from "@mui/material";
 import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
@@ -38,7 +38,7 @@ export const QrWidget = () => {
         gap: 2,
       }}
     >
-      <Box>
+      <Stack direction="column">
         <Typography
           sx={{
             fontWeight: "bold",
@@ -58,8 +58,7 @@ export const QrWidget = () => {
         >
           Share you custom link to start getting intakes!
         </Typography>
-      </Box>
-      <Box>
+
         <Box>
           <img
             src={image}
@@ -71,12 +70,12 @@ export const QrWidget = () => {
             }}
           />
         </Box>
-      </Box>
-
+      </Stack>
       <Box
         sx={{
           display: "flex",
-          marginTop: "50px",
+          marginTop: "100px",
+          marginRight: "60px",
         }}
       >
         <Box
