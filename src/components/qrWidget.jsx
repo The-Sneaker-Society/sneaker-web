@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Icon, Typography } from "@mui/material";
+import { Box, Icon, Typography, Stack, Link } from "@mui/material";
 import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
@@ -24,57 +24,99 @@ export const QrWidget = () => {
 
   // Extract QR data from the response
   const { image, url } = data.currentMember.qrWidgetData;
+
   return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: "row",
         justifyContent: "space-between",
-        height: "100%",
         width: "100%",
         borderRadius: 2,
         border: "4px solid white",
         padding: "20px",
+        textAlign: "left",
+        gap: 2,
       }}
     >
-      <img src={image} alt="QR Code" style={{ maxWidth: "50%" }} />
+      <Stack direction="column">
+        <Typography
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1.3rem",
+            color: "white",
+            marginBottom: "8px",
+          }}
+        >
+          Custom Intake Link
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: "0.85rem",
+            color: "#aaa",
+            marginBottom: "15px",
+          }}
+        >
+          Share you custom link to start getting intakes!
+        </Typography>
+
+        <Box>
+          <img
+            src={image}
+            alt="QR Code"
+            style={{
+              width: "120px",
+              height: "120px",
+              marginBottom: "10px",
+            }}
+          />
+        </Box>
+      </Stack>
       <Box
         sx={{
-          width: "50%",
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 1,
+          marginTop: "100px",
+          marginRight: "60px",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography
-            component="a"
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{
-              textDecoration: "none",
-              color: "white",
-              fontWeight: "bold",
-            }}
-          >
-            <Box
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <Link href="/contract/:memberId" target="_blank">
+            <Typography
+              component="a"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
               sx={{
+                textDecoration: "none",
+                color: "white",
+                fontSize: "0.9rem",
                 display: "flex",
-                justifyContent: "center",
                 alignItems: "center",
+                gap: "8px",
               }}
             >
-              <Icon sx={{ paddingRight: "25px" }}>
-                <FaLink />
-              </Icon>
-              Link
-            </Box>
-          </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <Icon sx={{ paddingRight: "25px" }}>
+                  <FaLink />
+                </Icon>
+                Link
+              </Box>
+            </Typography>
+          </Link>
+          <ImageDownloadButton imageSrc={image} />
         </Box>
-        <ImageDownloadButton imageSrc={image} />
       </Box>
     </Box>
   );
