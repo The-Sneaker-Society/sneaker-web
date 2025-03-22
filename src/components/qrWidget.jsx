@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Icon, Typography, Stack } from "@mui/material";
+import { Box, Icon, Typography, Stack, Link } from "@mui/material";
 import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
@@ -86,33 +86,35 @@ export const QrWidget = () => {
             gap: 1,
           }}
         >
-          <Typography
-            component="a"
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{
-              textDecoration: "none",
-              color: "white",
-              fontSize: "0.9rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <Box
+          <Link href="/contract/:memberId" target="_blank">
+            <Typography
+              component="a"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
               sx={{
+                textDecoration: "none",
+                color: "white",
+                fontSize: "0.9rem",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
               }}
             >
-              <Icon sx={{ paddingRight: "25px" }}>
-                <FaLink />
-              </Icon>
-              Link
-            </Box>
-          </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <Icon sx={{ paddingRight: "25px" }}>
+                  <FaLink />
+                </Icon>
+                Link
+              </Box>
+            </Typography>
+          </Link>
           <ImageDownloadButton imageSrc={image} />
         </Box>
       </Box>
