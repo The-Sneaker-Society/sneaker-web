@@ -58,7 +58,7 @@ const SignUpUser = () => {
           alt="Logo"
           sx={{ width: "80%", maxWidth: "300px", height: "auto", my: 4 }}
         />
-        <Typography variant="h6" sx={{ fontWeight: "bold", textAlign: "center", fontSize: "2rem" }}>
+        <Typography variant="h6" sx={{ fontWeight: "bold", textAlign: "center" }}>
           User Site
         </Typography>
         <SignedOut>
