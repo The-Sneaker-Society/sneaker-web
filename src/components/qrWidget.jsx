@@ -4,7 +4,6 @@ import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
 
-// Define the query to get the current member's QR widget data
 const GET_MEMBER_QR_WIDGET_DATA = gql`
   query GetMemberQrWidgetData {
     currentMember {
@@ -22,7 +21,6 @@ export const QrWidget = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
-  // Extract QR data from the response
   const { image, url } = data.currentMember.qrWidgetData;
 
   return (
@@ -40,9 +38,9 @@ export const QrWidget = () => {
     >
       <Stack direction="column">
         <Typography
+          variant="h3"
           sx={{
             fontWeight: "bold",
-            fontSize: "1.3rem",
             color: "white",
             marginBottom: "8px",
           }}
@@ -50,8 +48,8 @@ export const QrWidget = () => {
           Custom Intake Link
         </Typography>
         <Typography
+          variant="h3"
           sx={{
-            fontSize: "0.85rem",
             color: "#aaa",
             marginBottom: "15px",
           }}
