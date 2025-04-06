@@ -21,6 +21,7 @@ import UpdateProfilePage from "./pages/UpdateProfilePage/UpdateProfilePage";
 import { ContractPage } from "./pages/ContractsPage/Contracts";
 import { ChatDashboard } from "./pages/Chats/ChatDashboard";
 import { ContractReviewPage } from "./pages/ContractsPage/ContractReviewPage";
+import { ContractForm } from "./pages/ContractForm/ContractForm";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -113,6 +114,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <UpdateProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="user/new-contract/:memberId"
+                element={
+                  <ProtectedRoute>
+                    <ContractForm />
                   </ProtectedRoute>
                 }
               />
