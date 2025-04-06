@@ -7,13 +7,24 @@ import ShoeInfoStep from "./ShoeInfoStep";
 import ImageUploadStep from "./ImageUploadStep";
 import ConfirmationStep from "./ConfirmStep";
 import { useParams } from "react-router-dom";
+import { gql, useMutation } from "@apollo/client";
+
+const CREATE_CONTRACT = gql`
+  mutation createContract($data: CreateContractInput!) {
+    createContract(data: $data) {
+      id
+    }
+  }
+`;
 
 const ShoeInfoSchema = Yup.object().shape({
   shoeDetails: Yup.object().shape({
     brand: Yup.string().required("Brand is required"),
     model: Yup.string().required("Model is required"),
     color: Yup.string().required("Color is required"),
+    material: Yup.string().required("Material is required"),
     size: Yup.string().required("Size is required"),
+    soleCondition: Yup.string().required("Sole condition is required"),
     clientNotes: Yup.string().required("Please explain your repair request"),
   }),
 });
@@ -23,7 +34,9 @@ const initialValues = {
     brand: "",
     model: "",
     color: "",
+    material: "",
     size: "",
+    soleCondition: "",
     clientNotes: "",
     photos: {
       leftSide: [],
@@ -40,6 +53,7 @@ const initialValues = {
 export const ContractForm = () => {
   const [activeStep, setActiveStep] = useState(0);
   const { memberId } = useParams();
+  const [createContract] = useMutation(CREATE_CONTRACT);
 
   const steps = ["Shoe Information", "Image Upload", "Confirmation"];
 
@@ -56,10 +70,37 @@ export const ContractForm = () => {
     setActiveStep((prevStep) => prevStep - 1);
   };
 
-  const handleSubmit = (values) => {
-    console.log("MemberId", memberId);
-    console.log("Final Form Values:", values);
-    // Handle final form submission
+  const handleSubmit = async (values) => {
+    const {
+      brand,
+      model,
+      material,
+      color,
+      size,
+      soleCondition,
+      clientNotes,
+      photos,
+    } = values.shoeDetails;
+
+    await createContract({
+      variables: {
+        data: {
+          memberId,
+          repairDetails: {
+            clientNotes,
+          },
+          shoeDetails: {
+            brand,
+            model,
+            color,
+            size,
+            soleCondition,
+            material,
+            photos: photos,
+          },
+        },
+      },
+    });
   };
 
   const getStepContent = (step, formik) => {

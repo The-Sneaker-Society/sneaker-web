@@ -26,6 +26,8 @@ const FormikTextField = ({ name, ...props }) => {
   );
 };
 
+const soleContionOptions = ["None", "Light wear", "Heavy wear", "Poor"];
+
 const ShoeInfoStep = ({ formik }) => {
   return (
     <Box>
@@ -64,6 +66,13 @@ const ShoeInfoStep = ({ formik }) => {
         margin="normal"
       />
 
+      <FormikTextField
+        label="Material"
+        name="shoeDetails.material"
+        fullWidth
+        margin="normal"
+      />
+
       <FormControl fullWidth margin="normal">
         <InputLabel id="size-label">Size (US)</InputLabel>
         <Field
@@ -80,6 +89,27 @@ const ShoeInfoStep = ({ formik }) => {
           {usShoeSizes.map((size) => (
             <MenuItem key={size} value={size}>
               {size}
+            </MenuItem>
+          ))}
+        </Field>
+      </FormControl>
+
+      <FormControl fullWidth margin="normal">
+        <InputLabel id="sole-condition-label">Sole Condition</InputLabel>
+        <Field
+          as={Select}
+          labelId="sole-condition-label"
+          id="shoeDetails.soleCondition"
+          name="shoeDetails.soleCondition"
+          label="Sole Condition"
+          error={
+            formik.touched.shoeDetails?.soleCondition &&
+            Boolean(formik.errors.shoeDetails?.soleCondition)
+          }
+        >
+          {soleContionOptions.map((condition) => (
+            <MenuItem key={condition} value={condition.toLocaleLowerCase()}>
+              {condition}
             </MenuItem>
           ))}
         </Field>
