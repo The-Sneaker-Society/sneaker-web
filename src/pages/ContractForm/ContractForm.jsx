@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import ShoeInfoStep from "./ShoeInfoStep";
 import ImageUploadStep from "./ImageUploadStep";
 import ConfirmationStep from "./ConfirmStep";
+import { useParams } from "react-router-dom";
 
 const ShoeInfoSchema = Yup.object().shape({
   shoeDetails: Yup.object().shape({
@@ -19,11 +20,11 @@ const ShoeInfoSchema = Yup.object().shape({
 
 const initialValues = {
   shoeDetails: {
-    brand: "nike",
-    model: "otheraash",
-    color: "red",
-    size: "12",
-    clientNotes: "sdigasf",
+    brand: "",
+    model: "",
+    color: "",
+    size: "",
+    clientNotes: "",
     photos: {
       leftSide: [],
       rightSide: [],
@@ -38,6 +39,7 @@ const initialValues = {
 
 export const ContractForm = () => {
   const [activeStep, setActiveStep] = useState(0);
+  const { memberId } = useParams();
 
   const steps = ["Shoe Information", "Image Upload", "Confirmation"];
 
@@ -55,6 +57,7 @@ export const ContractForm = () => {
   };
 
   const handleSubmit = (values) => {
+    console.log("MemberId", memberId);
     console.log("Final Form Values:", values);
     // Handle final form submission
   };
