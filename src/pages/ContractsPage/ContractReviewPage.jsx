@@ -1,11 +1,5 @@
-import { Typography } from "@mui/material";
-import Sidebar from "../../components/Sidebar";
-import Layout from "../../components/Layout";
+import ContractDetailsPage from "./ContractDetailsPage";
 
 export const ContractReviewPage = () => {
-  return (
-    <>
-      <Typography variant="h1"> Contract review page</Typography>
-    </>
-  );
+  return <ContractDetailsPage />;
 };
