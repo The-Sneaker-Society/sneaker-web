@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Icon, Typography, Stack, Link } from "@mui/material";
+import { Box, Icon, Typography, Link } from "@mui/material";
 import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
@@ -27,16 +27,15 @@ export const QrWidget = () => {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "space-between",
+        flexDirection: "column",
         width: "100%",
         borderRadius: 2,
         border: "4px solid white",
         padding: "20px",
-        textAlign: "left",
-        gap: 2,
+        gap: 4,
       }}
     >
-      <Stack direction="column">
+      <Box>
         <Typography
           variant="h3"
           sx={{
@@ -51,12 +50,21 @@ export const QrWidget = () => {
           variant="h3"
           sx={{
             color: "#aaa",
-            marginBottom: "15px",
           }}
         >
           Share you custom link to start getting intakes!
         </Typography>
+      </Box>
 
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 4,
+        }}
+      >
         <Box>
           <img
             src={image}
@@ -64,24 +72,15 @@ export const QrWidget = () => {
             style={{
               width: "120px",
               height: "120px",
-              marginBottom: "10px",
             }}
           />
         </Box>
-      </Stack>
-      <Box
-        sx={{
-          display: "flex",
-          marginTop: "100px",
-          marginRight: "60px",
-        }}
-      >
+
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            gap: 1,
+            alignItems: "flex-start",
           }}
         >
           <Link href="/contract/:memberId" target="_blank">
@@ -99,18 +98,10 @@ export const QrWidget = () => {
                 gap: "8px",
               }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <Icon sx={{ paddingRight: "25px" }}>
-                  <FaLink />
-                </Icon>
-                Link
-              </Box>
+              <Icon sx={{ display: "flex", alignItems: "center" }}>
+                <FaLink />
+              </Icon>
+              Link
             </Typography>
           </Link>
           <ImageDownloadButton imageSrc={image} />
