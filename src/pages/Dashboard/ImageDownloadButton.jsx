@@ -1,29 +1,38 @@
-import React from 'react';
-import Button from '@mui/material/Button'; // Import Button from Material-UI
-
+import React, { useState } from "react";
+import Button from "@mui/material/Button";
 const ImageDownloadButton = ({ imageSrc }) => {
-    const downloadImage = () => {
-        const link = document.createElement('a');
-        link.href = imageSrc;
-        link.download = 'downloaded_qr.png'; // Set the name for the downloaded file
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+  const [error, setError] = useState(null);
 
-    return (
-        <div>
-            {/* Replace the standard HTML button with a Material-UI Button */}
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={downloadImage}
-                style={{ marginTop: '10px' }}
-            >
-                Download
-            </Button>
-        </div>
-    );
+  const downloadImage = () => {
+    try {
+      const link = document.createElement("a");
+      link.href = imageSrc;
+      link.download = "sneaker_society_custom_qr_link.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div>
+      {error && <div style={{ color: "red" }}>An error occurred: {error}</div>}
+      <Button
+        variant="outlined"
+        onClick={downloadImage}
+        style={{ marginTop: "10px" }}
+        sx={{
+          color: "white",
+          borderColor: "white",
+          borderRadius: "5px",
+        }}
+      >
+        Download
+      </Button>
+    </div>
+  );
 };
 
 export default ImageDownloadButton;
