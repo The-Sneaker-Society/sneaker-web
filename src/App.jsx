@@ -100,6 +100,15 @@ function App() {
                 }
               />
 
+              <Route
+                path="member/subscribe"
+                element={
+                  <ProtectedRoute>
+                    <StripeSubsriptionPage />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Protected Routes - User */}
               <Route
                 path="user/signup-info"

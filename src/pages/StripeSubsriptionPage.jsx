@@ -1,24 +1,39 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
 import { MdCurrencyExchange } from "react-icons/md";
 import StyledButton from "./HomePage/StyledButton";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import { LoadingCircle } from "../components/Loaing";
+import { useNavigate } from "react-router-dom";
+import { useSneakerUser } from "../context/UserContext";
 
 const CREATE_MEMBER_SUBSCRIPTION = gql`
-  query CreateMemberSubsctiprion {
+  mutation CreateMemberSubsctiprion {
     createMemberSubsctiprion
   }
 `;
 
 const StripeSubsriptionPage = () => {
-  const { data, loading, error } = useQuery(CREATE_MEMBER_SUBSCRIPTION);
+  const navigate = useNavigate();
+  const { user } = useSneakerUser();
 
-  const handleSubscriptionClick = () => {
-    window.location.href = data.createMemberSubsctiprion;
+  const [createSubscription, { loading }] = useMutation(
+    CREATE_MEMBER_SUBSCRIPTION
+  );
+
+  useEffect(() => {
+    if (user?.stripeCustomerId) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
+  const handleSubscriptionClick = async () => {
+    await createSubscription({
+      onCompleted: (data) => {
+        window.location.href = data.createMemberSubsctiprion;
+      },
+    });
   };
-
-  if (loading) return <LoadingCircle />;
 
   return (
     <Box
@@ -73,12 +88,13 @@ const StripeSubsriptionPage = () => {
           fontSize: "24px",
           fontWeight: "700",
           height: "65px",
+          minWidth: "250px",
           "&::after": {
             height: "70px",
           },
         }}
       >
-        Start Subscription
+        {loading ? <LoadingCircle /> : "Start Subsctiption"}
       </StyledButton>
     </Box>
   );
