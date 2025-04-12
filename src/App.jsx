@@ -22,6 +22,7 @@ import { ContractPage } from "./pages/ContractsPage/Contracts";
 import { ChatDashboard } from "./pages/Chats/ChatDashboard";
 import { ContractReviewPage } from "./pages/ContractsPage/ContractReviewPage";
 import { ContractForm } from "./pages/ContractForm/ContractForm";
+import SuccessPage from "./pages/PaymentStatus/SubscriptionSuccess";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -105,6 +106,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <StripeSubsriptionPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="member/subscription-success"
+                element={
+                  <ProtectedRoute>
+                    <SuccessPage />
                   </ProtectedRoute>
                 }
               />
