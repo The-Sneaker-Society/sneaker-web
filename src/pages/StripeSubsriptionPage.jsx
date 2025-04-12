@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
 import { MdCurrencyExchange } from "react-icons/md";
 import StyledButton from "./HomePage/StyledButton";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import { LoadingCircle } from "../components/Loaing";
 import { useNavigate } from "react-router-dom";
 import { useSneakerUser } from "../context/UserContext";
@@ -15,14 +15,19 @@ const CREATE_MEMBER_SUBSCRIPTION = gql`
 
 const StripeSubsriptionPage = () => {
   const navigate = useNavigate();
-  const { user } = useSneakerUser();
+  const { user, isSubscribed } = useSneakerUser();
 
   const [createSubscription, { loading }] = useMutation(
     CREATE_MEMBER_SUBSCRIPTION
   );
 
   useEffect(() => {
-    if (user?.stripeCustomerId) {
+    // Member that once was a customer and not subscribed.
+    if (user.stripeCustomerId && !isSubscribed) {
+      navigate("/update-subscription");
+    }
+
+    if (user.stripeCustomerId && isSubscribed) {
       navigate("/dashboard");
     }
   }, [user, navigate]);
