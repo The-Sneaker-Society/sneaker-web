@@ -23,6 +23,7 @@ import { ChatDashboard } from "./pages/Chats/ChatDashboard";
 import { ContractReviewPage } from "./pages/ContractsPage/ContractReviewPage";
 import { ContractForm } from "./pages/ContractForm/ContractForm";
 import SuccessPage from "./pages/PaymentStatus/SubscriptionSuccess";
+import { Subscriptions } from "./pages/PaymentStatus/Subscriptions";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -52,6 +53,14 @@ function App() {
               <Route path="user/signup" element={<SignUpUser />} />
 
               {/* Protected Routes - Member */}
+              <Route
+                path="/member/subscriptions"
+                element={
+                  <ProtectedRoute>
+                    <Subscriptions />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/member/stripe"
                 element={

@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
 import { MdCurrencyExchange } from "react-icons/md";
-import StyledButton from "./HomePage/StyledButton";
+import StyledButton from "../HomePage/StyledButton";
 import { gql, useMutation } from "@apollo/client";
-import { LoadingCircle } from "../components/Loaing";
 import { useNavigate } from "react-router-dom";
-import { useSneakerUser } from "../context/UserContext";
+import { useSneakerUser } from "../../context/UserContext";
 
 const CREATE_MEMBER_SUBSCRIPTION = gql`
   mutation CreateMemberSubsctiprion {
@@ -13,7 +12,7 @@ const CREATE_MEMBER_SUBSCRIPTION = gql`
   }
 `;
 
-const StripeSubsriptionPage = () => {
+export const NewSubscription = () => {
   const navigate = useNavigate();
   const { user, isSubscribed } = useSneakerUser();
 
@@ -23,11 +22,11 @@ const StripeSubsriptionPage = () => {
 
   useEffect(() => {
     // Member that once was a customer and not subscribed.
-    if (user.stripeCustomerId && !isSubscribed) {
+    if (user?.stripeCustomerId && !isSubscribed) {
       navigate("/member/subscriptions");
     }
 
-    if (user.stripeCustomerId && isSubscribed) {
+    if (user?.stripeCustomerId && isSubscribed) {
       navigate("/dashboard");
     }
   }, [user, navigate]);
@@ -104,5 +103,3 @@ const StripeSubsriptionPage = () => {
     </Box>
   );
 };
-
-export default StripeSubsriptionPage;
