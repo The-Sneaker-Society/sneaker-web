@@ -53,14 +53,7 @@ function App() {
               <Route path="user/signup" element={<SignUpUser />} />
 
               {/* Protected Routes - Member */}
-              <Route
-                path="/member/subscriptions"
-                element={
-                  <ProtectedRoute>
-                    <Subscriptions />
-                  </ProtectedRoute>
-                }
-              />
+
               <Route
                 path="/member/stripe"
                 element={
@@ -111,10 +104,10 @@ function App() {
               />
 
               <Route
-                path="member/subscribe"
+                path="/member/subscriptions"
                 element={
                   <ProtectedRoute>
-                    <StripeSubsriptionPage />
+                    <Subscriptions />
                   </ProtectedRoute>
                 }
               />
