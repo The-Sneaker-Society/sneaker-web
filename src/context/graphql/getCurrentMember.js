@@ -8,6 +8,7 @@ export const CURRENT_MEMBER = gql`
       firstName
       stripeConnectAccountId
       stripeCustomerId
+      isSubscribed
     }
   }
 `;

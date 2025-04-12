@@ -63,7 +63,7 @@ function App() {
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute subscriptionRequired>
                     <Dashboard />
                   </ProtectedRoute>
                 }
@@ -95,7 +95,7 @@ function App() {
               <Route
                 path="member/contracts"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute subscriptionRequired>
                     <ContractPage />
                   </ProtectedRoute>
                 }

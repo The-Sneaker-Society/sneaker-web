@@ -28,8 +28,15 @@ export const UserProvider = ({ children }) => {
     return data?.currentUser || data?.currentMember || null;
   }, [data, loading, error]);
 
+  const isSubscribed = useMemo(() => {
+    if (user) {
+      return user.isSubscribed || false;
+    }
+    return false;
+  }, [user, clerkLoaded]);
+
   return (
-    <UserContext.Provider value={{ user, loading, error, role }}>
+    <UserContext.Provider value={{ user, loading, error, role, isSubscribed }}>
       {children}
     </UserContext.Provider>
   );
