@@ -21,11 +21,6 @@ export const NewSubscription = () => {
   );
 
   useEffect(() => {
-    // Member that once was a customer and not subscribed.
-    if (user?.stripeCustomerId && !isSubscribed) {
-      navigate("/member/subscriptions");
-    }
-
     if (user?.stripeCustomerId && isSubscribed) {
       navigate("/dashboard");
     }
