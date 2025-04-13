@@ -67,6 +67,7 @@ function HomePage() {
             justifyContent: "center",
             textAlign: "center",
             flexDirection: "column",
+            height: "100vh",
           }}
         >
           <Typography
@@ -81,7 +82,7 @@ function HomePage() {
               lineHeight: { xs: 1.2, sm: 1.3 },
             }}
           >
-            <Box sx={{ height: "100px" }}>
+            <Box sx={{ height: "100%" }}>
               <TypeAnimation
                 sequence={[
                   "Elevate your Collection",
