@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useMutation, gql } from "@apollo/client";
+import { Navigate } from "react-router-dom";
 
 const SYNC_STRIPE_DATA = gql`
   mutation SyncStripeData {
@@ -16,13 +17,15 @@ const SuccessPage = () => {
   useEffect(() => {
     const syncStripeData = async () => {
       try {
-        const { data } = await syncStripeDataMutation();
+        const { data } = await syncStripeDataMutation({
+          onCompleted: () => {
+            setSyncStatus("success");
+          },
+        });
 
         if (!data.syncStripeData.success) {
           throw new Error("Failed to sync Stripe data.");
         }
-
-        setSyncStatus("success");
       } catch (error) {
         console.error("Error syncing Stripe data:", error);
         setSyncStatus("error");
@@ -37,7 +40,7 @@ const SuccessPage = () => {
   }
 
   if (syncStatus === "success") {
-    return <div>Sync successful! You will be redirected shortly.</div>; // Add redirection here
+    return <Navigate to="/dashboard" replace />;
   }
 
   if (syncStatus === "error") {

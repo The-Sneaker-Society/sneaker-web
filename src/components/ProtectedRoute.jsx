@@ -4,6 +4,7 @@ import { useUser } from "@clerk/clerk-react";
 import { LoadingCircle } from "./Loaing";
 import Layout from "./Layout";
 import { useSneakerUser } from "../context/UserContext";
+import { Box } from "@mui/material";
 
 export const ProtectedRoute = ({
   redirectPath = "/login",
@@ -25,8 +26,24 @@ export const ProtectedRoute = ({
   }
 
   if (subscriptionRequired && role === "member" && !isSubscribed) {
-    return <Navigate to="/subscribe" replace />;
+    return <Navigate to="/member/subscriptions" replace />;
   }
 
-  return withLayout ? <Layout>{children}</Layout> : children;
+  return withLayout ? (
+    <Layout>{children}</Layout>
+  ) : (
+    <Box
+      sx={{
+        flexGrow: 1,
+        p: 3,
+        overflowY: "auto",
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {children}
+    </Box>
+  );
 };

@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { MdCurrencyExchange } from "react-icons/md";
 import StyledButton from "../HomePage/StyledButton";
 import { gql, useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 import { useSneakerUser } from "../../context/UserContext";
+import { LoadingCircle } from "../../components/Loaing";
 
 const CREATE_MEMBER_SUBSCRIPTION = gql`
   mutation CreateMemberSubsctiprion {
@@ -15,10 +16,9 @@ const CREATE_MEMBER_SUBSCRIPTION = gql`
 export const NewSubscription = () => {
   const navigate = useNavigate();
   const { user, isSubscribed } = useSneakerUser();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [createSubscription, { loading }] = useMutation(
-    CREATE_MEMBER_SUBSCRIPTION
-  );
+  const [createSubscription] = useMutation(CREATE_MEMBER_SUBSCRIPTION);
 
   useEffect(() => {
     if (user?.stripeCustomerId && isSubscribed) {
@@ -27,11 +27,22 @@ export const NewSubscription = () => {
   }, [user, navigate]);
 
   const handleSubscriptionClick = async () => {
-    await createSubscription({
-      onCompleted: (data) => {
-        window.location.href = data.createMemberSubsctiprion;
-      },
-    });
+    setIsSubmitting(true);
+    try {
+      const { data } = await createSubscription();
+      if (data && data.createMemberSubsctiprion) {
+        setIsSubmitting(false);
+        window.location.href = data.createMemberSubsctiprion; // Correct: Redirect to Stripe
+      } else {
+        setIsSubmitting(false);
+        console.error(
+          "Error: createMemberSubsctiprion is missing in the response."
+        );
+      }
+    } catch (err) {
+      setIsSubmitting(false);
+      console.error("Error creating subscription:", err);
+    }
   };
 
   return (
@@ -55,7 +66,7 @@ export const NewSubscription = () => {
           fontWeight: "600",
         }}
       >
-        Subscription
+        Subscribe
       </Typography>
 
       <Typography
@@ -93,7 +104,7 @@ export const NewSubscription = () => {
           },
         }}
       >
-        {loading ? <LoadingCircle /> : "Start Subsctiption"}
+        {isSubmitting ? <LoadingCircle /> : "Start Subsctiption"}
       </StyledButton>
     </Box>
   );

@@ -9,7 +9,7 @@ import StripeSignupPage from "./pages/StripeSignUpPage/StripeSignupPage";
 import LoginPage from "./pages/Login/LoginPage";
 import { LogoutPage } from "./pages/Logout/LogoutPage";
 import SignupMember from "./pages/SignUpMemberPage/SignUpMemberPage";
-import { ProtectedRoute } from "./components/PrivateRoute";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
 import { LoginV2 } from "./pages/Login/LoginV2";
@@ -106,7 +106,7 @@ function App() {
               <Route
                 path="/member/subscriptions"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute withLayout={false}>
                     <Subscriptions />
                   </ProtectedRoute>
                 }
@@ -115,7 +115,7 @@ function App() {
               <Route
                 path="member/subscription-success"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute withLayout={false}>
                     <SuccessPage />
                   </ProtectedRoute>
                 }
