@@ -9,7 +9,7 @@ import StripeSignupPage from "./pages/StripeSignUpPage/StripeSignupPage";
 import LoginPage from "./pages/Login/LoginPage";
 import { LogoutPage } from "./pages/Logout/LogoutPage";
 import SignupMember from "./pages/SignUpMemberPage/SignUpMemberPage";
-import { ProtectedRoute } from "./components/PrivateRoute";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
 import { LoginV2 } from "./pages/Login/LoginV2";
@@ -17,9 +17,13 @@ import React from "react";
 import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
 import StripeSubsriptionPage from "./pages/StripeSubsriptionPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import UpdateProfilePage from "./pages/UpdateProfilePage/UpdateProfilePage";
 import { ContractPage } from "./pages/ContractsPage/Contracts";
 import { ChatDashboard } from "./pages/Chats/ChatDashboard";
 import { ContractReviewPage } from "./pages/ContractsPage/ContractReviewPage";
+import { ContractForm } from "./pages/ContractForm/ContractForm";
+import SuccessPage from "./pages/PaymentStatus/SubscriptionSuccess";
+import { Subscriptions } from "./pages/PaymentStatus/Subscriptions";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -49,6 +53,7 @@ function App() {
               <Route path="user/signup" element={<SignUpUser />} />
 
               {/* Protected Routes - Member */}
+
               <Route
                 path="/member/stripe"
                 element={
@@ -60,7 +65,7 @@ function App() {
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute subscriptionRequired>
                     <Dashboard />
                   </ProtectedRoute>
                 }
@@ -92,8 +97,26 @@ function App() {
               <Route
                 path="member/contracts"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute subscriptionRequired>
                     <ContractPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/member/subscriptions"
+                element={
+                  <ProtectedRoute withLayout={false}>
+                    <Subscriptions />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="member/subscription-success"
+                element={
+                  <ProtectedRoute withLayout={false}>
+                    <SuccessPage />
                   </ProtectedRoute>
                 }
               />
@@ -104,6 +127,22 @@ function App() {
                 element={
                   <ProtectedRoute withLayout={false}>
                     <UserSignupPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="user/update-profile"
+                element={
+                  <ProtectedRoute>
+                    <UpdateProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="user/new-contract/:memberId"
+                element={
+                  <ProtectedRoute>
+                    <ContractForm />
                   </ProtectedRoute>
                 }
               />

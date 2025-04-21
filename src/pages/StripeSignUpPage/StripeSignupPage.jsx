@@ -1,10 +1,4 @@
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Container, Typography, Button } from "@mui/material";
 import { FaStripe } from "react-icons/fa";
 
 export default function StripeSignupPage() {

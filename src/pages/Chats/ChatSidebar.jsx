@@ -30,7 +30,7 @@ const ChatSidebar = ({ onClose }) => {
   );
 
   return (
-    <Drawer variant="permanent">
+    <Drawer anchor="none" variant="permanent">
       <Box sx={{ p: 2 }}>
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <IconButton onClick={onClose} aria-label="close-sidebar">
