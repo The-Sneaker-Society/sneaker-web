@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { MdCurrencyExchange } from "react-icons/md";
-import StyledButton from "./HomePage/StyledButton";
+import StyledButton from "../HomePage/StyledButton";
 import { gql, useMutation } from "@apollo/client";
-import { LoadingCircle } from "../components/Loaing";
 import { useNavigate } from "react-router-dom";
-import { useSneakerUser } from "../context/UserContext";
+import { useSneakerUser } from "../../context/UserContext";
+import { LoadingCircle } from "../../components/Loaing";
 
 const CREATE_MEMBER_SUBSCRIPTION = gql`
   mutation CreateMemberSubsctiprion {
@@ -13,31 +13,36 @@ const CREATE_MEMBER_SUBSCRIPTION = gql`
   }
 `;
 
-const StripeSubsriptionPage = () => {
+export const NewSubscription = () => {
   const navigate = useNavigate();
   const { user, isSubscribed } = useSneakerUser();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [createSubscription, { loading }] = useMutation(
-    CREATE_MEMBER_SUBSCRIPTION
-  );
+  const [createSubscription] = useMutation(CREATE_MEMBER_SUBSCRIPTION);
 
   useEffect(() => {
-    // Member that once was a customer and not subscribed.
-    if (user.stripeCustomerId && !isSubscribed) {
-      navigate("/member/subscriptions");
-    }
-
-    if (user.stripeCustomerId && isSubscribed) {
+    if (user?.stripeCustomerId && isSubscribed) {
       navigate("/dashboard");
     }
   }, [user, navigate]);
 
   const handleSubscriptionClick = async () => {
-    await createSubscription({
-      onCompleted: (data) => {
-        window.location.href = data.createMemberSubsctiprion;
-      },
-    });
+    setIsSubmitting(true);
+    try {
+      const { data } = await createSubscription();
+      if (data && data.createMemberSubsctiprion) {
+        setIsSubmitting(false);
+        window.location.href = data.createMemberSubsctiprion; // Correct: Redirect to Stripe
+      } else {
+        setIsSubmitting(false);
+        console.error(
+          "Error: createMemberSubsctiprion is missing in the response."
+        );
+      }
+    } catch (err) {
+      setIsSubmitting(false);
+      console.error("Error creating subscription:", err);
+    }
   };
 
   return (
@@ -61,7 +66,7 @@ const StripeSubsriptionPage = () => {
           fontWeight: "600",
         }}
       >
-        Subscription
+        Subscribe
       </Typography>
 
       <Typography
@@ -99,10 +104,8 @@ const StripeSubsriptionPage = () => {
           },
         }}
       >
-        {loading ? <LoadingCircle /> : "Start Subsctiption"}
+        {isSubmitting ? <LoadingCircle /> : "Start Subsctiption"}
       </StyledButton>
     </Box>
   );
 };
-
-export default StripeSubsriptionPage;
