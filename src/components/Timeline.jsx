@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 
-// Utility function to map event types to display text
 const getEventDisplay = (eventType) => {
     const eventMap = {
         CONTRACT_CREATED: "Contract Created",
@@ -12,11 +11,13 @@ const getEventDisplay = (eventType) => {
         SHIPPED_BY_CLIENT: "Shipped By Client"
     };
 
-    return eventMap[eventType] || eventType;
+    return eventMap[eventType];
 };
 
-// TimelineItem component
-const TimelineItem = ({ event, isLast, isMobile }) => {
+const TimelineItem = ({ event, date, isLast }) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
     return (
         <Box
             sx={{
@@ -25,9 +26,7 @@ const TimelineItem = ({ event, isLast, isMobile }) => {
                 marginBottom: "60px",
             }}
         >
-            {/* Left column with dot and line */}
             <Box sx={{ position: "relative", width: "20px", mr: "30px" }}>
-                {/* White dot */}
                 <Box
                     sx={{
                         width: "20px",
@@ -40,7 +39,6 @@ const TimelineItem = ({ event, isLast, isMobile }) => {
                     }}
                 />
 
-                {/* Vertical line */}
                 {!isLast && (
                     <Box
                         sx={{
@@ -56,7 +54,6 @@ const TimelineItem = ({ event, isLast, isMobile }) => {
                 )}
             </Box>
 
-            {/* Right column with text */}
             <Box>
                 <Typography
                     variant="h2"
@@ -67,7 +64,7 @@ const TimelineItem = ({ event, isLast, isMobile }) => {
                         lineHeight: 1.2,
                     }}
                 >
-                    {getEventDisplay(event.event)}
+                    {event}
                 </Typography>
                 <Typography
                     color="#FFFFFF"
@@ -78,7 +75,7 @@ const TimelineItem = ({ event, isLast, isMobile }) => {
                         textAlign: "left",
                     }}
                 >
-                    {format(parseISO(event.timestamp), "MM/dd/yyyy h:mmaa")}
+                    {date}
                 </Typography>
             </Box>
         </Box>
@@ -88,6 +85,10 @@ const TimelineItem = ({ event, isLast, isMobile }) => {
 const Timeline = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+    const formatTimestamp = (timestamp) => {
+        return format(new Date(timestamp), "MM/dd/yyyy h:mma");
+    };
 
     const timelineData = [
         {
@@ -112,10 +113,14 @@ const Timeline = () => {
         }
     ];
 
-    // Sort the timeline events chronologically
-    const sortedTimelineEvents = [...timelineData].sort((a, b) =>
-        new Date(a.timestamp) - new Date(b.timestamp)
-    );
+    const sortedTimelineEvents = useMemo(() => {
+        return [...timelineData]
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+            .map(item => ({
+                title: getEventDisplay(item.event),
+                date: formatTimestamp(item.timestamp)
+            }));
+    }, [timelineData]);
 
     return (
         <Box sx={{ maxWidth: "750px", margin: "0 auto", padding: isMobile ? "0 20px" : "0 40px" }}>
@@ -132,13 +137,13 @@ const Timeline = () => {
                 Timeline
             </Typography>
 
-            <Box>
+            <Box sx={{ width: "100%", height: "400px", overflowY: "scroll" }}>
                 {sortedTimelineEvents.map((event, index) => (
                     <TimelineItem
                         key={index}
-                        event={event}
+                        event={event.title}
+                        date={event.date}
                         isLast={index === sortedTimelineEvents.length - 1}
-                        isMobile={isMobile}
                     />
                 ))}
             </Box>
