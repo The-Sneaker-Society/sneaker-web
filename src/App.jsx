@@ -22,6 +22,7 @@ import { ContractPage } from "./pages/ContractsPage/Contracts";
 import { ChatDashboard } from "./pages/Chats/ChatDashboard";
 import { ContractReviewPage } from "./pages/ContractsPage/ContractReviewPage";
 import { ContractForm } from "./pages/ContractForm/ContractForm";
+import ShippingInfo from "./components/ShippingInfo";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -39,6 +40,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/logout" element={<LogoutPage />} />
               <Route path="stripeOnboarding" element={<StripeSignupPage />} />
+              <Route path="/shippinginfo" element={<ShippingInfo />} />
               <Route
                 path="/paymentSuccess/:contractId"
                 element={<PaymentStatus success={true} />}
