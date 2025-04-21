@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Typography, Button, Grid, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Typography, Button, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
+import { Grid2 } from "@mui/material/Unstable_Grid2";
 import { useParams } from "react-router-dom";
 // Import the GraphQL query (commented out for now, will be used in the future)
 // import { GET_CONTRACT_DETAILS } from "../../context/graphql/getContractDetails";
@@ -110,7 +111,7 @@ export const ContractDetailsPage = () => {
     // Show loading state
     if (loading) {
         return (
-            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", bgcolor: "black" }}>
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
                 <CircularProgress color="primary" />
             </Box>
         );
@@ -119,7 +120,7 @@ export const ContractDetailsPage = () => {
     // Show error state
     if (error) {
         return (
-            <Box sx={{ p: 3, backgroundColor: "black", color: "white", minHeight: "100vh" }}>
+            <Box sx={{ p: 3, color: "white", height: "100%", width: "100%" }}>
                 <Typography variant="h6" color="error">
                     Error loading contract details: {error.message}
                 </Typography>
@@ -130,7 +131,7 @@ export const ContractDetailsPage = () => {
     // If no contract data is available
     if (!contract) {
         return (
-            <Box sx={{ p: 3, backgroundColor: "black", color: "white", minHeight: "100vh" }}>
+            <Box sx={{ p: 3, color: "white", height: "100%", width: "100%" }}>
                 <Typography variant="h6">
                     No contract details found for ID: {id}
                 </Typography>
@@ -139,15 +140,12 @@ export const ContractDetailsPage = () => {
     }
 
     return (
-        <Box sx={{ p: isMobile ? 2 : 4, backgroundColor: "black", color: "white", minHeight: "100vh" }}>
+        <Box sx={{ p: isMobile ? 2 : 4, color: "white", height: "100%", width: "100%" }}>
             <Box
                 sx={{
                     border: "2px solid white",
                     borderRadius: "12px",
                     p: isMobile ? 3 : 4,
-                    backgroundColor: "black",
-                    maxWidth: "900px",
-                    mx: "auto"
                 }}
             >
                 {/* Header Section */}
@@ -166,18 +164,20 @@ export const ContractDetailsPage = () => {
                 </Box>
 
                 {/* Price Section */}
-                <Box sx={{ mb: isMobile ? 4 : 6 }}>
-                    <Typography variant="h5" sx={{ mb: 2, fontSize: isMobile ? "1.5rem" : "1.75rem", fontWeight: "normal" }}>
-                        Proposed Price
-                    </Typography>
-                    <Typography variant="h4" sx={{ fontWeight: "normal", fontSize: isMobile ? "1.75rem" : "2rem" }}>
-                        ${contract.proposedPrice.toFixed(2)}
-                    </Typography>
-                </Box>
+                {contract.proposedPrice !== null && (
+                    <Box sx={{ mb: isMobile ? 4 : 6 }}>
+                        <Typography variant="h5" sx={{ mb: 2, fontSize: isMobile ? "1.5rem" : "1.75rem", fontWeight: "normal" }}>
+                            Proposed Price
+                        </Typography>
+                        <Typography variant="h4" sx={{ fontWeight: "normal", fontSize: isMobile ? "1.75rem" : "2rem" }}>
+                            ${contract.proposedPrice.toFixed(2)}
+                        </Typography>
+                    </Box>
+                )}
 
                 {/* Address and Shipping Section */}
-                <Grid container spacing={isMobile ? 4 : 6} sx={{ mb: isMobile ? 4 : 6 }}>
-                    <Grid item xs={12} md={6}>
+                <Grid2 container spacing={isMobile ? 4 : 6} sx={{ mb: isMobile ? 4 : 6 }}>
+                    <Grid2 xs={12} md={6}>
                         <Typography variant="h5" sx={{ mb: 2, fontSize: isMobile ? "1.5rem" : "1.75rem", fontWeight: "normal" }}>
                             Address
                         </Typography>
@@ -187,9 +187,9 @@ export const ContractDetailsPage = () => {
                         <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
                             {`${contract.client.address.city}, ${contract.client.address.state}, ${contract.client.address.zipCode}`}
                         </Typography>
-                    </Grid>
+                    </Grid2>
 
-                    <Grid item xs={12} md={6}>
+                    <Grid2 xs={12} md={6}>
                         <Typography variant="h5" sx={{ mb: 2, fontSize: isMobile ? "1.5rem" : "1.75rem", fontWeight: "normal" }}>
                             Shipping
                         </Typography>
@@ -222,16 +222,16 @@ export const ContractDetailsPage = () => {
                                 Add Tracking
                             </Button>
                         )}
-                    </Grid>
-                </Grid>
+                    </Grid2>
+                </Grid2>
 
                 {/* Sneaker Details Section */}
                 <Box sx={{ mb: isMobile ? 4 : 6 }}>
                     <Typography variant="h5" sx={{ mb: isMobile ? 2 : 3, fontSize: isMobile ? "1.5rem" : "1.75rem", fontWeight: "normal" }}>
                         Details
                     </Typography>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
+                    <Grid2 container spacing={2}>
+                        <Grid2 xs={12} sm={6}>
                             <Box sx={{ display: "flex", mb: 2 }}>
                                 <Typography variant="body1" sx={{ fontWeight: "bold", mr: 1, fontSize: "1.1rem" }}>
                                     Brand:
@@ -256,8 +256,8 @@ export const ContractDetailsPage = () => {
                                     {contract.sneakerDetails.color}
                                 </Typography>
                             </Box>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
+                        </Grid2>
+                        <Grid2 xs={12} sm={6}>
                             <Box sx={{ display: "flex", mb: 2 }}>
                                 <Typography variant="body1" sx={{ fontWeight: "bold", mr: 1, fontSize: "1.1rem" }}>
                                     Size:
@@ -282,8 +282,8 @@ export const ContractDetailsPage = () => {
                                     {contract.sneakerDetails.soleCondition}
                                 </Typography>
                             </Box>
-                        </Grid>
-                    </Grid>
+                        </Grid2>
+                    </Grid2>
                 </Box>
 
                 {/* Repair Details Section */}
