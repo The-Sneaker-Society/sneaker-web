@@ -1,7 +1,7 @@
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { format } from "date-fns";
-import { Box, Typography } from "@mui/material";
+import { Box, Skeleton, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useQuery, gql } from "@apollo/client";
 import { PostAddOutlined } from "@mui/icons-material";
@@ -36,7 +36,7 @@ export const ContractListWidget = () => {
     borderRadius: 2,
     boxShadow: 3,
     overflowX: "auto",
-    border: '4px solid white',
+    border: "4px solid white",
     borderColor: "white",
   };
 
@@ -60,7 +60,10 @@ export const ContractListWidget = () => {
     id: contract.id,
     clientName: contract.name,
     status: contract.status,
-    contractCreatedAt: format(new Date(Number(contract.createdAt)), "MM-dd-yyyy"),
+    contractCreatedAt: format(
+      new Date(Number(contract.createdAt)),
+      "MM-dd-yyyy"
+    ),
   }));
 
   const columns = [
@@ -72,7 +75,10 @@ export const ContractListWidget = () => {
       filterable: true,
       sortable: true,
       renderCell: (params) => {
-        const stage = stageTypeColors[params.value] || { name: params.value, color: "#E0E0E0" }; // Default to light gray for unknown statuses
+        const stage = stageTypeColors[params.value] || {
+          name: params.value,
+          color: "#E0E0E0",
+        }; // Default to light gray for unknown statuses
 
         return (
           <div
@@ -117,7 +123,8 @@ export const ContractListWidget = () => {
       >
         <PostAddOutlined sx={{ fontSize: 80, mb: 2 }} />
         <Typography variant="h3" align="center">
-          Share your QR code at the bottom right and start building your contracts today!
+          Share your QR code at the bottom right and start building your
+          contracts today!
         </Typography>
       </Box>
     );
