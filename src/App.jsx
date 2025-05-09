@@ -48,7 +48,7 @@ function App() {
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requireRole={["member", "client"]}>
                     <DashboardRouter />
                   </ProtectedRoute>
                 }
@@ -58,7 +58,7 @@ function App() {
               <Route
                 path="/member/*"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requireRole="member" >
                     <MemberRoutes />
                   </ProtectedRoute>
                 }
@@ -68,7 +68,7 @@ function App() {
               <Route
                 path="/user/*"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requireRole="client">
                     <UserRoutes />
                   </ProtectedRoute>
                 }
