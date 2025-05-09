@@ -10,10 +10,6 @@ export const Subscriptions = () => {
   const { user, isSubscribed, loading } = useSneakerUser();
   const [subscriptionState, setSubscriptionState] = useState("loading");
 
-  if (loading) {
-    return <LoadingCircle />;
-  }
-
   // Determine subscription state
   useEffect(() => {
     if (user) {
@@ -27,10 +23,10 @@ export const Subscriptions = () => {
     } else {
       setSubscriptionState("none");
     }
-  }, [user]);
+  }, [user, isSubscribed]);
 
-  const renderSubscriptionContent = () => {
-    switch (subscriptionState) {
+  const renderSubscriptionContent = (state) => {
+    switch (state) {
       case "previously_active":
         return <ActivateSubscription />;
       case "active":
@@ -42,5 +38,9 @@ export const Subscriptions = () => {
     }
   };
 
-  return <Box>{renderSubscriptionContent()}</Box>;
+  if (loading) {
+    return <LoadingCircle />;
+  }
+
+  return <Box>{renderSubscriptionContent(subscriptionState)}</Box>;
 };

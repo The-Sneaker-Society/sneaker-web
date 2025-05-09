@@ -20,7 +20,10 @@ export const UserProvider = ({ children }) => {
   const role = clerkUser?.unsafeMetadata.role;
 
   const { data, loading, error } = useQuery(
-    role === "member" ? CURRENT_MEMBER : CURRENT_USER
+    role === "member" ? CURRENT_MEMBER : CURRENT_USER,
+    {
+      fetchPolicy: "cache-first", // Use cached data first, then fetch from the network if needed
+    }
   );
 
   const user = useMemo(() => {
@@ -29,11 +32,12 @@ export const UserProvider = ({ children }) => {
   }, [data, loading, error]);
 
   const isSubscribed = useMemo(() => {
+    if (loading || !clerkLoaded) return undefined; // Wait until both user and Clerk data are fully loaded
     if (user) {
       return user.isSubscribed || false;
     }
     return false;
-  }, [user, clerkLoaded]);
+  }, [user, loading, clerkLoaded]);
 
   return (
     <UserContext.Provider value={{ user, loading, error, role, isSubscribed }}>

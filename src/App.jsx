@@ -24,6 +24,7 @@ import { ContractReviewPage } from "./pages/ContractsPage/ContractReviewPage";
 import { ContractForm } from "./pages/ContractForm/ContractForm";
 import SuccessPage from "./pages/PaymentStatus/SubscriptionSuccess";
 import { Subscriptions } from "./pages/PaymentStatus/Subscriptions";
+import { Blockers } from "./components/Blockers";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -32,6 +33,7 @@ function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        <Blockers />
         <div className="App">
           <div className="content-container">
             <Routes>
@@ -65,7 +67,7 @@ function App() {
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute subscriptionRequired>
+                  <ProtectedRoute>
                     <Dashboard />
                   </ProtectedRoute>
                 }
@@ -97,7 +99,7 @@ function App() {
               <Route
                 path="member/contracts"
                 element={
-                  <ProtectedRoute subscriptionRequired>
+                  <ProtectedRoute>
                     <ContractPage />
                   </ProtectedRoute>
                 }

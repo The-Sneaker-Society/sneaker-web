@@ -22,9 +22,10 @@ export const NewSubscription = () => {
 
   useEffect(() => {
     if (user?.stripeCustomerId && isSubscribed) {
-      navigate("/dashboard");
+      // Prevent automatic redirection for subscribed users
+      console.log("User is subscribed and has a Stripe customer ID.");
     }
-  }, [user, navigate]);
+  }, [user, isSubscribed, navigate]);
 
   const handleSubscriptionClick = async () => {
     setIsSubmitting(true);

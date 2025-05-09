@@ -1,40 +1,20 @@
-import React, { useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useSneakerUser } from "../context/UserContext";
 
 export const Blockers = () => {
-    const { user, loading } = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
+  const navigate = useNavigate();
+  const { role, isLoading, isSubscribed } = useSneakerUser();
 
-    useEffect(() => {
-        if (!loading) {
-            // Handle cases where user is undefined or not authenticated
-            if (!user) {
-                console.log('navigate to login cinve no user')
-                if (location.pathname !== '/login') {
-                    navigate('/login'); // Redirect to login if user is not authenticated
-                }
-                return;
-            }
+  useEffect(() => {
+    if (isLoading || isSubscribed === undefined) return; // Wait until the user and subscription status are fully loaded
 
-            // Handle new user redirection to signup
-            if (user.isNewUser === true) {
-                console.log('navigation to signup')
-                if (location.pathname !== '/signup') {
-                    navigate('/signup');
-                }
-            } 
-            // Handle authenticated users and prevent access to login/signup
-            else {
-                if (location.pathname === '/login' || location.pathname === '/signup') {
-                    console.log('navigating to dashboard')
-                    navigate('/dashboard'); // Redirect authenticated users away from login/signup
-                }
-            }
-        }
-    }, [loading, user, navigate, location.pathname]);
+    console.log("Current role:", { role });
 
-    // No need to render anything; the component is purely for redirection
-    return null;
+    if (role === "member" && !isSubscribed) {
+      navigate("member/subscriptions", { replace: true });
+    }
+  }, [role, isLoading, navigate, isSubscribed]);
+
+  return null;
 };

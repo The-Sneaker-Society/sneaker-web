@@ -3,30 +3,26 @@ import { Navigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { LoadingCircle } from "./Loaing";
 import Layout from "./Layout";
-import { useSneakerUser } from "../context/UserContext";
 import { Box } from "@mui/material";
 
 export const ProtectedRoute = ({
   redirectPath = "/login",
   children,
   withLayout = true,
-  subscriptionRequired = false,
+  requireMember = false,
 }) => {
-  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
-  const { role, isSubscribed, loading: sneakerLoading } = useSneakerUser();
+  const { user: clerkUser, isSignedIn, isLoaded } = useUser();
 
-  const combinedLoading = !clerkLoaded || sneakerLoading;
-
-  if (combinedLoading) {
+  if (!isLoaded) {
     return <LoadingCircle />;
   }
 
-  if (!clerkUser) {
+  if (!isSignedIn) {
     return <Navigate to={redirectPath} replace />;
   }
 
-  if (subscriptionRequired && role === "member" && !isSubscribed) {
-    return <Navigate to="/member/subscriptions" replace />;
+  if (requireMember && clerkUser?.publicMetadata?.role !== "member") {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return withLayout ? (
