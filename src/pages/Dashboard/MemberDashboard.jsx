@@ -1,8 +1,8 @@
 import React from "react";
 import Grid from "@mui/material/Grid2";
-import { Container, Box, Typography } from "@mui/material";
-import { extendTheme, styled } from "@mui/material/styles";
-import { useUser, useClerk } from "@clerk/clerk-react";
+import { Box, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { useClerk } from "@clerk/clerk-react";
 import ContractStatusWidget from "../../components/ContractStatusWidget";
 import { QrWidget } from "../../components/qrWidget";
 import { StripeWidget } from "../../components/StripeWidgets/StripeWidget";
@@ -10,15 +10,15 @@ import StyledButton from "../HomePage/StyledButton";
 import { StripeSetUpWidget } from "../../components/StripeWidgets/StripeSetUpWidget";
 import { ContractListWidget } from "../ContractsPage/ContractListWidget";
 import { useSneakerUser } from "../../context/UserContext";
+import SubscribeModal from "../../components/SubscribeModal";
 
 export const MemberDashboard = () => {
   const { user } = useSneakerUser();
+  const { signOut } = useClerk();
 
   const handleLogout = () => {
     signOut();
   };
-
-  const { signOut } = useClerk();
 
   const Skeleton = styled("div")(({ theme, height }) => ({
     backgroundColor: theme.palette.action.hover,
@@ -32,8 +32,11 @@ export const MemberDashboard = () => {
     return <Box sx={{ height: "100%", width: "100%" }}>{children}</Box>;
   };
 
+  const isSubscribed = user?.isSubscribed; // Assuming `isSubscribed` is part of the user object
+
   return (
     <>
+      <SubscribeModal isSubscribed={isSubscribed} />
       <Grid container spacing={1} height="100%">
         <Grid size={12}>
           <Box
