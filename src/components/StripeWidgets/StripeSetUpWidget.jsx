@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Typography, Button, Stack } from "@mui/material";
+import { Box, Typography, Button, Stack, Skeleton } from "@mui/material";
 import { gql, useMutation } from "@apollo/client";
 import { GoAlertFill } from "react-icons/go";
 import { useSneakerUser } from "../../context/UserContext";
@@ -32,7 +32,28 @@ export const StripeSetUpWidget = () => {
     });
   };
 
-  if (sneakerLoading) return <p>Loading...</p>;
+  if (sneakerLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          width: "100%",
+          bgcolor: "black",
+          color: "white",
+          borderRadius: 2,
+          border: "4px solid white",
+          padding: "50px",
+        }}
+      >
+        <Skeleton variant="text" width={200} height={30} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" width={150} height={40} />
+      </Box>
+    );
+  }
 
   return (
     <Box
