@@ -7,7 +7,7 @@ import { Box } from "@mui/material";
 export const ProtectedRoute = ({
   redirectPath = "/login",
   children,
-  requireMember = false,
+  requireRole = null, // Default to null, making it optional
 }) => {
   const { user: clerkUser, isSignedIn, isLoaded } = useUser();
 
@@ -19,9 +19,14 @@ export const ProtectedRoute = ({
     return <Navigate to={redirectPath} replace />;
   }
 
-  if (requireMember && clerkUser?.publicMetadata?.role !== "member") {
-    return <Navigate to="/unauthorized" replace />;
+  if (requireRole) {
+    const userRole = clerkUser?.unsafeMetadata?.role;
+    const allowedRoles = Array.isArray(requireRole) ? requireRole : [requireRole];
+
+    if (!allowedRoles.includes(userRole)) {
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
-  
+
   return <>{children}</>;
 };
