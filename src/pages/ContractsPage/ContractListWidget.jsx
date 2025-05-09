@@ -1,13 +1,32 @@
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { format } from "date-fns";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useQuery, gql } from "@apollo/client";
+import { PostAddOutlined } from "@mui/icons-material";
+
+const GET_CONTRACT_LIST = gql`
+  query GetContractList {
+    getContractList {
+      id
+      name
+      status
+      createdAt
+    }
+  }
+`;
+
+const stageTypeColors = {
+  NOT_STARTED: { name: "Not Started", color: "#E67E22" }, // Orange
+  PENDING_REVIEW: { name: "Pending Review", color: "#2ECC71" }, // Green
+  STARTED: { name: "Started", color: "#D4AC0D" }, // Golden yellow
+  FINISHED: { name: "Finished", color: "#3498DB" }, // Blue
+};
 
 export const ContractListWidget = () => {
   const navigate = useNavigate();
-
-  // Input gql here
+  const { data, loading, error } = useQuery(GET_CONTRACT_LIST);
 
   const contractWidgetStyle = {
     minHeight: 400,
@@ -21,144 +40,27 @@ export const ContractListWidget = () => {
     borderColor: "white",
   };
 
-  let contracts = [
-    {
-      id: "1",
-      clientName: "Acme Corporation",
-      status: "In Progress",
-      contractCreatedAt: new Date("2023-10-26T10:00:00Z").toISOString(),
-    },
-    {
-      id: "2",
-      clientName: "Beta Industries",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-11-15T14:30:00Z").toISOString(),
-    },
-    {
-      id: "3",
-      clientName: "Gamma Solutions",
-      status: "Pending",
-      contractCreatedAt: new Date("2023-12-01T09:15:00Z").toISOString(),
-    },
-    {
-      id: "4",
-      clientName: "Delta Enterprises",
-      status: "In Progress",
-      contractCreatedAt: new Date("2024-01-10T16:45:00Z").toISOString(),
-    },
-    {
-      id: "5",
-      clientName: "Epsilon Group",
-      status: "Completed",
-      contractCreatedAt: new Date("2024-02-20T11:00:00Z").toISOString(),
-    },
-    {
-      id: "6",
-      clientName: "Zeta Systems",
-      status: "Pending",
-      contractCreatedAt: new Date("2024-03-05T13:20:00Z").toISOString(),
-    },
-    {
-      id: "7",
-      clientName: "Eta Technologies",
-      status: "In Progress",
-      contractCreatedAt: new Date("2023-09-18T08:00:00Z").toISOString(),
-    },
-    {
-      id: "8",
-      clientName: "Theta Innovations",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-11-28T15:55:00Z").toISOString(),
-    },
-    {
-      id: "9",
-      clientName: "Iota Ventures",
-      status: "Pending",
-      contractCreatedAt: new Date("2024-01-03T10:30:00Z").toISOString(),
-    },
-    {
-      id: "10",
-      clientName: "Kappa Limited",
-      status: "In Progress",
-      contractCreatedAt: new Date("2024-02-12T12:40:00Z").toISOString(),
-    },
-    {
-      id: "11",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-    {
-      id: "12",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-    {
-      id: "13",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-    {
-      id: "14",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-    {
-      id: "14",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-    {
-      id: "14",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-    {
-      id: "14",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-    {
-      id: "14",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-    {
-      id: "14",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-    {
-      id: "14",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-    {
-      id: "14",
-      clientName: "Lambda Holdings",
-      status: "Completed",
-      contractCreatedAt: new Date("2023-12-22T14:10:00Z").toISOString(),
-    },
-  ];
+  if (loading) {
+    return (
+      <Box sx={contractWidgetStyle}>
+        <p>Loading contracts...</p>
+      </Box>
+    );
+  }
 
-  // contracts = []
+  if (error) {
+    return (
+      <Box sx={contractWidgetStyle}>
+        <p>Error loading contracts: {error.message}</p>
+      </Box>
+    );
+  }
 
-  const testContracts = contracts.map((contract) => ({
-    ...contract,
+  const contracts = data?.getContractList.map((contract) => ({
     id: contract.id,
-    contractCreatedAt: format(
-      new Date(contract.contractCreatedAt),
-      "MM-dd-yyyy"
-    ),
+    clientName: contract.name,
+    status: contract.status,
+    contractCreatedAt: format(new Date(Number(contract.createdAt)), "MM-dd-yyyy"),
   }));
 
   const columns = [
@@ -170,28 +72,12 @@ export const ContractListWidget = () => {
       filterable: true,
       sortable: true,
       renderCell: (params) => {
-        let backgroundColor = "";
-        switch (params.value) {
-          case "In Progress":
-            backgroundColor = "#D4AC0D"; // Golden yellow
-            break;
-          case "Pending":
-            backgroundColor = "#2ECC71"; // Green
-            break;
-          case "Completed":
-            backgroundColor = "#3498DB"; // Blue
-            break;
-          case "Not Started":
-            backgroundColor = "#E67E22"; // Orange
-            break;
-          default:
-            backgroundColor = "#E0E0E0"; // Light gray for unknown statuses
-        }
+        const stage = stageTypeColors[params.value] || { name: params.value, color: "#E0E0E0" }; // Default to light gray for unknown statuses
 
         return (
           <div
             style={{
-              backgroundColor,
+              backgroundColor: stage.color,
               borderRadius: 2,
               minWidth: { xs: "250px" },
               px: "10px",
@@ -201,7 +87,7 @@ export const ContractListWidget = () => {
               alignItems: "center",
             }}
           >
-            {params.value}
+            {stage.name}
           </div>
         );
       },
@@ -220,8 +106,19 @@ export const ContractListWidget = () => {
 
   if (contracts.length === 0) {
     return (
-      <Box sx={contractWidgetStyle}>
-        <p>No contracts found.</p>
+      <Box
+        sx={{
+          ...contractWidgetStyle,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <PostAddOutlined sx={{ fontSize: 80, mb: 2 }} />
+        <Typography variant="h3" align="center">
+          Share your QR code at the bottom right and start building your contracts today!
+        </Typography>
       </Box>
     );
   }
@@ -238,7 +135,7 @@ export const ContractListWidget = () => {
             borderTop: "none",
           },
         }}
-        rows={testContracts}
+        rows={contracts}
         columns={columns}
         autoPageSize={true}
         onRowClick={handleRowClick}

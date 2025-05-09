@@ -21,59 +21,96 @@ export const MemberDashboard = () => {
   };
 
   const WidgetWrapper = ({ children }) => {
-    return <Box sx={{ height: "100%", width: "100%" }}>{children}</Box>;
+    return (
+      <Box
+        sx={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {children}
+      </Box>
+    );
   };
 
   if (loading) {
     return <LoadingCircle />;
   }
 
-  const isSubscribed = member?.isSubscribed; // Assuming `isSubscribed` is part of the member object
+  const isSubscribed = member?.isSubscribed;
 
   return (
-    <>
+    <Box
+      sx={{
+        height: "100%",
+        width: "100vw",
+        display: "flex",
+        flexDirection: "column",
+        overflow: { xs: "auto", md: "hidden" },
+      }}
+    >
       <SubscribeModal isSubscribed={isSubscribed} />
-      <Grid container spacing={1} height="100%">
-        <Grid size={12}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "20px",
-            }}
-          >
-            <Typography variant="h1" fontWeight="bold">
-              Welcome, {member?.firstName || "member"}
-            </Typography>
-            <StyledButton onClick={handleLogout} style={{ marginTop: "10px" }}>
-              Log Out
-            </StyledButton>
-          </Box>
-        </Grid>
-        {/* Left */}
-        <Grid
-          size={{ sm: 12, md: 6 }}
-          sx={{
-            width: "100%",
-          }}
-        >
-          <ContractListWidget />
-        </Grid>
-
-        {/* Right */}
-        <Grid
-          size={{ sm: 12, md: 6 }}
+      <Box
+        sx={{
+          flexShrink: 0,
+          padding: "20px",
+        }}
+      >
+        <Box
           sx={{
             display: "flex",
-            flexDirection: "column",
             justifyContent: "space-between",
-            gap: 1,
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="h1" fontWeight="bold">
+            Welcome, {member?.firstName || "member"}
+          </Typography>
+          <StyledButton onClick={handleLogout} style={{ marginTop: "10px" }}>
+            Log Out
+          </StyledButton>
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          height: "100%",
+        }}
+      >
+        {/* Left Side */}
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            padding: "10px",
+          }}
+        >
+          <WidgetWrapper>
+            <ContractListWidget />
+          </WidgetWrapper>
+        </Box>
+
+        {/* Right Side */}
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-evenly",
+            padding: "10px",
           }}
         >
           <WidgetWrapper>
             <ContractStatusWidget />
           </WidgetWrapper>
+          <Box sx={{ height: "40px" }} />
           <WidgetWrapper>
             {member?.stripeConnectAccountId ? (
               <StripeWidget />
@@ -81,11 +118,12 @@ export const MemberDashboard = () => {
               <StripeSetUpWidget />
             )}
           </WidgetWrapper>
+          <Box sx={{ height: "40px" }} />
           <WidgetWrapper>
             <QrWidget />
           </WidgetWrapper>
-        </Grid>
-      </Grid>
-    </>
+        </Box>
+      </Box>
+    </Box>
   );
 };
