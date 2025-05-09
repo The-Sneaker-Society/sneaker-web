@@ -51,7 +51,7 @@ const Sidebar = () => {
         color="inherit"
         aria-label="menu"
         onClick={toggleDrawer(true)}
-        sx={{ display: { xs: "block", sm: "none" } }}
+        sx={{ display: open ? "none" : "block", display: { xs: "block", sm: "none" }, position: "absolute", left: 0 }}
       >
         <Menu />
       </IconButton>
