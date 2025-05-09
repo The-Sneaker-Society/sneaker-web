@@ -17,6 +17,7 @@ import {
 import SidebarItem from "./SidebarItem";
 import Logo from "../assets/ss-logo-black.svg";
 import StyledButton from "../pages/HomePage/StyledButton";
+import SettingsModal from "./SettingsModal";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
@@ -30,6 +31,16 @@ const Sidebar = () => {
     }
 
     setOpen(isOpen);
+  };
+
+  const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
+
+  const handleSettingsClick = () => {
+    setSettingsModalOpen(true);
+  };
+
+  const handleCloseSettingsModal = () => {
+    setSettingsModalOpen(false);
   };
 
   return (
@@ -70,7 +81,9 @@ const Sidebar = () => {
                 maxWidth: "300px",
                 height: "auto",
                 my: 4,
+                cursor: "pointer",
               }}
+              onClick={() => window.location.href = "/dashboard"}
             />
           </Box>
 
@@ -91,7 +104,11 @@ const Sidebar = () => {
           </List>
 
           <Box sx={{ padding: 2, borderTop: "1px solid #eee" }}>
-            <SidebarItem text="Settings" icon={<SettingsOutlined />} />
+            <SidebarItem
+              text="Settings"
+              icon={<SettingsOutlined />}
+              onClick={handleSettingsClick}
+            />
           </Box>
         </Box>
       </Drawer>
@@ -118,7 +135,9 @@ const Sidebar = () => {
                 maxWidth: "300px",
                 height: "auto",
                 my: 4,
+                cursor: "pointer",
               }}
+              onClick={() => window.location.href = "/dashboard"}
             />
           </Box>
 
@@ -139,10 +158,20 @@ const Sidebar = () => {
           </List>
 
           <Box sx={{ padding: 2, borderTop: "1px solid #eee" }}>
-            <SidebarItem text="Settings" icon={<SettingsOutlined />} />
+            <SidebarItem
+              text="Settings"
+              icon={<SettingsOutlined />}
+              onClick={handleSettingsClick}
+            />
           </Box>
         </Box>
       </Box>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        open={isSettingsModalOpen}
+        onClose={handleCloseSettingsModal}
+      />
     </Box>
   );
 };
