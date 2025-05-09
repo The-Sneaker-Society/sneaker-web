@@ -1,15 +1,16 @@
 import React from "react";
 import { ListItem, ListItemIcon, ListItemText, Badge } from "@mui/material";
 
-const SidebarItem = ({ text, icon, notification }) => (
+const SidebarItem = ({ text, icon, notification, onClick }) => (
   <ListItem
     button
+    onClick={onClick}
     sx={{
-      borderRadius: 2, 
+      borderRadius: 2,
       "&:hover": {
-        boxShadow: 3, 
+        boxShadow: 3,
       },
-      cursor: 'pointer'
+      cursor: "pointer",
     }}
   >
     <ListItemIcon s sx={{ color: "black" }}>

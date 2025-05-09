@@ -31,7 +31,7 @@ const FormikTextField = ({ name, ...props }) => {
   );
 };
 
-const SignupPage = () => {
+const MemberSignupPage = () => {
   const navigate = useNavigate();
   const { data: testData } = useQuery(TEST_QUERY);
 
@@ -218,4 +218,4 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage;
+export default MemberSignupPage;

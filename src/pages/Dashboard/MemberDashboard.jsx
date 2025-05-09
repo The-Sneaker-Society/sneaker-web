@@ -1,7 +1,6 @@
 import React from "react";
 import Grid from "@mui/material/Grid2";
 import { Box, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { useClerk } from "@clerk/clerk-react";
 import ContractStatusWidget from "../../components/ContractStatusWidget";
 import { QrWidget } from "../../components/qrWidget";
@@ -9,30 +8,27 @@ import { StripeWidget } from "../../components/StripeWidgets/StripeWidget";
 import StyledButton from "../HomePage/StyledButton";
 import { StripeSetUpWidget } from "../../components/StripeWidgets/StripeSetUpWidget";
 import { ContractListWidget } from "../ContractsPage/ContractListWidget";
-import { useSneakerUser } from "../../context/UserContext";
 import SubscribeModal from "../../components/SubscribeModal";
+import { useSneakerMember } from "../../context/MemberContext";
+import { LoadingCircle } from "../../components/Loaing";
 
 export const MemberDashboard = () => {
-  const { user } = useSneakerUser();
+  const { member, loading } = useSneakerMember();
   const { signOut } = useClerk();
 
   const handleLogout = () => {
     signOut();
   };
 
-  const Skeleton = styled("div")(({ theme, height }) => ({
-    backgroundColor: theme.palette.action.hover,
-    border: 1,
-    borderRadius: theme.shape.borderRadius,
-    height,
-    content: '" "',
-  }));
-
   const WidgetWrapper = ({ children }) => {
     return <Box sx={{ height: "100%", width: "100%" }}>{children}</Box>;
   };
 
-  const isSubscribed = user?.isSubscribed; // Assuming `isSubscribed` is part of the user object
+  if (loading) {
+    return <LoadingCircle />;
+  }
+
+  const isSubscribed = member?.isSubscribed; // Assuming `isSubscribed` is part of the member object
 
   return (
     <>
@@ -48,7 +44,7 @@ export const MemberDashboard = () => {
             }}
           >
             <Typography variant="h1" fontWeight="bold">
-              Welcome, {user?.firstName || "User"}
+              Welcome, {member?.firstName || "member"}
             </Typography>
             <StyledButton onClick={handleLogout} style={{ marginTop: "10px" }}>
               Log Out
@@ -79,7 +75,7 @@ export const MemberDashboard = () => {
             <ContractStatusWidget />
           </WidgetWrapper>
           <WidgetWrapper>
-            {user?.stripeConnectAccountId ? (
+            {member?.stripeConnectAccountId ? (
               <StripeWidget />
             ) : (
               <StripeSetUpWidget />
