@@ -2,10 +2,12 @@ import React from "react";
 import { Box, Typography, Button, Stack, Skeleton } from "@mui/material";
 import { gql, useQuery } from "@apollo/client";
 import { GoAlertFill } from "react-icons/go";
+import { format } from "date-fns";
+
 const GET_STRIPE_WIDGET_DATA = gql`
   query GetStripeWidgetData {
     stripeWidgetData {
-      nextPayoutDays
+      nextPayoutDate
       stripeConnectAccountId
       payoutAmount
       percentChange
@@ -53,6 +55,8 @@ export const StripeWidget = () => {
 
   if (error) return <p>Error: {error.message}</p>;
 
+  const formattedDate = format(new Date(data.stripeWidgetData.nextPayoutDate), "MM-dd-yyyy");
+
   return (
     <Box
       sx={{
@@ -96,7 +100,7 @@ export const StripeWidget = () => {
             fontSize: { xs: "14px", sm: "18px", md: "24px" },
           }}
         >
-          Next Payout: {data.stripeWidgetData.nextPayoutDays} days
+          Next Payout: {formattedDate}
         </Typography>
         <Typography
           gutterBottom
