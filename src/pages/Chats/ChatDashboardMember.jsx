@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
-import MemberChat from "../MemberChat/Chat"; // Renamed from ChatInterface
-import UserChat from "../MemberChat/UserChat"; // Import the new UserChat component
 import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
 import { useEffect, useState } from "react";
+import Chat from "../MemberChat/Chat";
+import { useSneakerMember } from "../../context/MemberContext";
 
 const GET_CHAT_BY_ID = gql`
   query GetChatById($id: ID!) {
@@ -43,38 +43,38 @@ const CREATE_MESSAGE = gql`
 `;
 
 const SUBSCRIBE_TO_CHAT = gql`
-  subscription SubscribeToChat($data: ChatSubscriptionInput!) {
+  subscription SubscribeToChat($data: SubscribeToChatInput!) {
     subscribeToChat(data: $data) {
       id
       chatId
-      content
       senderId
+      content
       senderType
       createdAt
     }
   }
 `;
 
-export const ChatDashboard = () => {
+export const ChatDashboardMember = () => {
   const { id } = useParams();
-
-  if (!id) {
-    return <div>Chat ID is required</div>;
-  }
+  const { member: currentUser, loading: userLoading } = useSneakerMember();
 
   const { data, loading, error } = useQuery(GET_CHAT_BY_ID, {
     variables: { id },
+    skip: !id,
   });
 
   const [createMessage] = useMutation(CREATE_MESSAGE);
 
   const { data: subscriptionData } = useSubscription(SUBSCRIBE_TO_CHAT, {
     variables: { data: { chatId: id } },
+    skip: !id,
   });
 
   const [isSending, setIsSending] = useState(false);
+  const [messages, setMessages] = useState([]);
 
-  const sendMessage = async (content, senderType) => {
+  const sendMessage = async (content) => {
     setIsSending(true);
     try {
       await createMessage({
@@ -82,7 +82,7 @@ export const ChatDashboard = () => {
           data: {
             chatId: id,
             content,
-            senderType,
+            senderType: "MEMBER",
           },
         },
       });
@@ -93,39 +93,49 @@ export const ChatDashboard = () => {
     }
   };
 
-  const onNewMessage = (callback) => {
-    if (subscriptionData) {
-      callback(subscriptionData.subscribeToChat);
+  useEffect(() => {
+    if (data?.getChatById?.messages) {
+      setMessages((prevMessages) => {
+        const uniqueMessages = data.getChatById.messages.filter(
+          (newMessage) => !prevMessages.some((msg) => msg.id === newMessage.id)
+        );
+        return [...prevMessages, ...uniqueMessages];
+      });
     }
-  };
+  }, [data]);
 
   useEffect(() => {
-    if (subscriptionData) {
-      onNewMessage(subscriptionData.subscribeToChat);
+    if (subscriptionData?.subscribeToChat) {
+      setMessages((prevMessages) => {
+        const isDuplicate = prevMessages.some(
+          (message) => message.id === subscriptionData.subscribeToChat.id
+        );
+        if (!isDuplicate) {
+          return [...prevMessages, subscriptionData.subscribeToChat];
+        }
+        return prevMessages;
+      });
     }
-  }, [subscriptionData, onNewMessage]);
+  }, [subscriptionData]);
 
-  if (loading) {
+  if (!id) {
+    return <div>Chat ID is required</div>;
+  }
+
+  if (loading || userLoading) {
     return <div>Loading...</div>;
   }
 
-  // Render UserChat for user-specific chat functionality
+  const otherUserName = data?.getChatById?.user?.email || "Chat";
+
   return (
-    <>
-      <UserChat
-        messages={data?.getChatById?.messages || []}
-        sendMessage={sendMessage}
-        onNewMessage={onNewMessage}
-        isSending={isSending}
-        setIsSending={setIsSending}
-      />
-      <MemberChat
-        messages={data?.getChatById?.messages || []}
-        sendMessage={sendMessage}
-        onNewMessage={onNewMessage}
-        isSending={isSending}
-        setIsSending={setIsSending}
-      />
-    </>
+    <Chat
+      messages={messages}
+      sendMessage={sendMessage}
+      isSending={isSending}
+      setIsSending={setIsSending}
+      currentUser={currentUser?.id}
+      otherUserName={otherUserName}
+    />
   );
 };

@@ -1,6 +1,5 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { ChatDashboard } from "../pages/Chats/ChatDashboard";
 import { ContractReviewPage } from "../pages/ContractsPage/ContractReviewPage";
 import { ContractPage } from "../pages/ContractsPage/Contracts";
 import { Subscriptions } from "../pages/PaymentStatus/Subscriptions";
@@ -9,6 +8,7 @@ import { MemberProvider } from "../context/MemberContext";
 import { MemberDashboard } from "../pages/Dashboard/MemberDashboard";
 import MemberSignupPage from "../pages/SignupPage/SignupPage";
 import Layout from "../components/Layout";
+import { ChatDashboardMember } from "../pages/Chats/ChatDashboardMember";
 
 const MemberRoutes = () => {
   return (
@@ -24,10 +24,10 @@ const MemberRoutes = () => {
           }
         />
         <Route
-          path="chats"
+          path="chats/:id"
           element={
             <Layout>
-              <ChatDashboard />
+              <ChatDashboardMember />
             </Layout>
           }
         />
