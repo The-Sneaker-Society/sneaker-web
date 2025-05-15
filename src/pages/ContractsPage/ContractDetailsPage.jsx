@@ -1,63 +1,30 @@
 import React from "react";
-import { Box, Typography, Button, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
-import { Grid2 } from "@mui/material/Unstable_Grid2";
+import {
+    Box,
+    Typography,
+    Button,
+    CircularProgress,
+    useMediaQuery,
+    useTheme,
+    Grid2
+} from "@mui/material";
 import { useParams } from "react-router-dom";
-// Import the GraphQL query (commented out for now, will be used in the future)
-// import { GET_CONTRACT_DETAILS } from "../../context/graphql/getContractDetails";
-// import { useQuery } from "@apollo/client";
-
-// Hardcoded contract data for initial development
-const CONTRACT_DATA = {
-    id: "1",
-    client: {
-        firstName: "John",
-        lastName: "Doe",
-        address: {
-            street: "123 N Main Street",
-            city: "Jacksonville",
-            state: "FL",
-            zipCode: "32246"
-        }
-    },
-    status: "In Progress",
-    proposedPrice: 45.56,
-    shipping: {
-        trackingNumber: null,
-        carrier: null
-    },
-    sneakerDetails: {
-        brand: "Nike",
-        model: "Air Max 90",
-        color: "White/Blue",
-        size: "US 11.4",
-        material: "Suede",
-        soleCondition: "Worn"
-    },
-    repairDetails: {
-        clientNotes: "Sole separation on left shoe. Would like to have it cleaned and possibly a color change if you can do tha let me know!"
-    },
-    memberNotes: null
-};
+import { useQuery } from "@apollo/client";
+import { GET_CONTRACT_BY_ID } from "../../context/graphql/getContractDetails";
 
 export const ContractDetailsPage = () => {
     const { id } = useParams();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    // For now, use hardcoded data. In the future, we'll use GraphQL to fetch data
-    // const { loading, error, data } = useQuery(GET_CONTRACT_DETAILS, {
-    //   variables: { contractId: id },
-    // });
+    // Fetch contract data using GraphQL
+    const { loading, error, data } = useQuery(GET_CONTRACT_BY_ID, {
+        variables: { id },
+        fetchPolicy: "cache-and-network"
+    });
 
-    // Simulate loading for now
-    const loading = false;
-    const error = null;
-
-    // Use hardcoded data for now
-    const contract = CONTRACT_DATA;
-
-    // In the future, we'll use the data from the GraphQL query
-    // const contract = data?.contractDetails;
+    // Get contract data from the query result
+    const contract = data?.contractById;
 
     // Function to handle adding tracking information
     const handleAddTracking = () => {
@@ -75,15 +42,19 @@ export const ContractDetailsPage = () => {
     const renderStatusBadge = (status) => {
         let backgroundColor = "";
         switch (status) {
+            case "IN_PROGRESS":
             case "In Progress":
                 backgroundColor = "#D4AC0D"; // Golden yellow
                 break;
+            case "PENDING":
             case "Pending":
                 backgroundColor = "#2ECC71"; // Green
                 break;
+            case "COMPLETED":
             case "Completed":
                 backgroundColor = "#3498DB"; // Blue
                 break;
+            case "NOT_STARTED":
             case "Not Started":
                 backgroundColor = "#E67E22"; // Orange
                 break;
@@ -145,7 +116,7 @@ export const ContractDetailsPage = () => {
                 sx={{
                     border: "2px solid white",
                     borderRadius: "12px",
-                    p: isMobile ? 3 : 4,
+                    p: isMobile ? 3 : 4
                 }}
             >
                 {/* Header Section */}
@@ -158,7 +129,7 @@ export const ContractDetailsPage = () => {
                     gap: isMobile ? 2 : 0
                 }}>
                     <Typography variant="h4" sx={{ fontWeight: "normal", fontSize: isMobile ? "2rem" : "2.5rem" }}>
-                        {`${contract.client.firstName} ${contract.client.lastName}`}
+                        {contract.client?.name || "Client Name"}
                     </Typography>
                     {renderStatusBadge(contract.status)}
                 </Box>
@@ -170,7 +141,7 @@ export const ContractDetailsPage = () => {
                             Proposed Price
                         </Typography>
                         <Typography variant="h4" sx={{ fontWeight: "normal", fontSize: isMobile ? "1.75rem" : "2rem" }}>
-                            ${contract.proposedPrice.toFixed(2)}
+                            ${parseFloat(contract.proposedPrice).toFixed(2)}
                         </Typography>
                     </Box>
                 )}
@@ -179,13 +150,13 @@ export const ContractDetailsPage = () => {
                 <Grid2 container spacing={isMobile ? 4 : 6} sx={{ mb: isMobile ? 4 : 6 }}>
                     <Grid2 xs={12} md={6}>
                         <Typography variant="h5" sx={{ mb: 2, fontSize: isMobile ? "1.5rem" : "1.75rem", fontWeight: "normal" }}>
-                            Address
+                            Client
                         </Typography>
                         <Typography variant="body1" sx={{ fontSize: "1.1rem", mb: 1 }}>
-                            {contract.client.address.street}
+                            Name: {contract.client?.name || "N/A"}
                         </Typography>
                         <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                            {`${contract.client.address.city}, ${contract.client.address.state}, ${contract.client.address.zipCode}`}
+                            Email: {contract.client?.email || "N/A"}
                         </Typography>
                     </Grid2>
 
@@ -193,13 +164,13 @@ export const ContractDetailsPage = () => {
                         <Typography variant="h5" sx={{ mb: 2, fontSize: isMobile ? "1.5rem" : "1.75rem", fontWeight: "normal" }}>
                             Shipping
                         </Typography>
-                        {contract.shipping.trackingNumber ? (
+                        {contract.trackingNumber ? (
                             <>
                                 <Typography variant="body1" sx={{ fontSize: "1.1rem", mb: 1 }}>
-                                    Tracking: {contract.shipping.trackingNumber}
+                                    Tracking: {contract.trackingNumber.trackingNumber}
                                 </Typography>
                                 <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                                    Carrier: {contract.shipping.carrier}
+                                    Carrier: {contract.trackingNumber.carrier || contract.shippingCarrier}
                                 </Typography>
                             </>
                         ) : (
@@ -237,7 +208,7 @@ export const ContractDetailsPage = () => {
                                     Brand:
                                 </Typography>
                                 <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                                    {contract.sneakerDetails.brand}
+                                    {contract.shoeDetails?.brand || "N/A"}
                                 </Typography>
                             </Box>
                             <Box sx={{ display: "flex", mb: 2 }}>
@@ -245,7 +216,7 @@ export const ContractDetailsPage = () => {
                                     Model:
                                 </Typography>
                                 <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                                    {contract.sneakerDetails.model}
+                                    {contract.shoeDetails?.model || "N/A"}
                                 </Typography>
                             </Box>
                             <Box sx={{ display: "flex", mb: 2 }}>
@@ -253,7 +224,7 @@ export const ContractDetailsPage = () => {
                                     Color:
                                 </Typography>
                                 <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                                    {contract.sneakerDetails.color}
+                                    {contract.shoeDetails?.color || "N/A"}
                                 </Typography>
                             </Box>
                         </Grid2>
@@ -263,23 +234,7 @@ export const ContractDetailsPage = () => {
                                     Size:
                                 </Typography>
                                 <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                                    {contract.sneakerDetails.size}
-                                </Typography>
-                            </Box>
-                            <Box sx={{ display: "flex", mb: 2 }}>
-                                <Typography variant="body1" sx={{ fontWeight: "bold", mr: 1, fontSize: "1.1rem" }}>
-                                    Material:
-                                </Typography>
-                                <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                                    {contract.sneakerDetails.material}
-                                </Typography>
-                            </Box>
-                            <Box sx={{ display: "flex", mb: 2 }}>
-                                <Typography variant="body1" sx={{ fontWeight: "bold", mr: 1, fontSize: "1.1rem" }}>
-                                    Sole Condition:
-                                </Typography>
-                                <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                                    {contract.sneakerDetails.soleCondition}
+                                    {contract.shoeDetails?.size || "N/A"}
                                 </Typography>
                             </Box>
                         </Grid2>
@@ -295,7 +250,7 @@ export const ContractDetailsPage = () => {
                         Client Notes
                     </Typography>
                     <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                        {contract.repairDetails.clientNotes}
+                        {contract.repairDetails?.clientNotes || "No client notes provided"}
                     </Typography>
                 </Box>
 
@@ -304,9 +259,9 @@ export const ContractDetailsPage = () => {
                     <Typography variant="h5" sx={{ mb: 2, fontSize: isMobile ? "1.5rem" : "1.75rem", fontWeight: "normal" }}>
                         Member Notes
                     </Typography>
-                    {contract.memberNotes ? (
+                    {contract.repairDetails?.memberNotes ? (
                         <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                            {contract.memberNotes}
+                            {contract.repairDetails.memberNotes}
                         </Typography>
                     ) : (
                         <Button

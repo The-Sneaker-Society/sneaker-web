@@ -1,38 +1,42 @@
 import { gql } from "@apollo/client";
 
-export const GET_CONTRACT_DETAILS = gql`
-  query GetContractDetails($contractId: ID!) {
-    contractDetails(contractId: $contractId) {
+const GET_CONTRACT_BY_ID = gql`
+  query GetContractById($id: ID!) {
+    contractById(id: $id) {
       id
-      status
-      proposedPrice
       client {
-        id
-        firstName
-        lastName
-        address {
-          street
-          city
-          state
-          zipCode
-        }
+        name
+        email
       }
-      shipping {
-        trackingNumber
-        carrier
+      member {
+        name
+        email
       }
-      sneakerDetails {
+      shoeDetails {
         brand
         model
         color
         size
-        material
-        soleCondition
       }
       repairDetails {
         clientNotes
+        memberNotes
       }
-      memberNotes
+      proposedPrice
+      price
+      status
+      trackingNumber {
+        carrier
+        trackingNumber
+      }
+      timeline {
+        event
+        date
+      }
+      shippingCarrier
+      paymentStatus
+      createdAt
+      updatedAt
     }
   }
-`; 
+`;
