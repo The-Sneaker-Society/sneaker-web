@@ -138,7 +138,10 @@ const ImageUploadStep = () => {
                 id={`upload-${section}`}
                 hidden
                 accept=".jpg,.jpeg,.png"
-                onChange={(e) => handleSingleImageUpload(section, e.target.files)}
+                onChange={(e) => {
+                  e.preventDefault(); // Prevent the default behavior
+                  handleSingleImageUpload(section, e.target.files);
+                }}
               />
               <FiUpload size={24} />
               <Typography>Upload Image</Typography>
@@ -183,7 +186,10 @@ const ImageUploadStep = () => {
               hidden
               multiple
               accept=".jpg,.jpeg,.png"
-              onChange={(e) => handleMultipleImageUpload(section, e.target.files)}
+              onChange={(e) => {
+                e.preventDefault(); // Prevent the default behavior
+                handleMultipleImageUpload(section, e.target.files);
+              }}
             />
             <FiUpload size={24} />
             <Typography>Upload Images (Max 5)</Typography>
