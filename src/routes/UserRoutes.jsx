@@ -6,6 +6,7 @@ import { ContractForm } from "../pages/ContractForm/ContractForm";
 import { UserProvider } from "../context/UserContext";
 import UserDashboard from "../pages/Dashboard/UserDashboard";
 import Layout from "../components/Layout";
+import { ChatDashboardUser } from "../pages/Chats/ChatDashboardUser";
 
 const UserRoutes = () => {
   return (
@@ -17,6 +18,14 @@ const UserRoutes = () => {
           element={
             <Layout>
               <UserDashboard />
+            </Layout>
+          }
+        />
+        <Route
+          path="chats/:id"
+          element={
+            <Layout>
+              <ChatDashboardUser />
             </Layout>
           }
         />
