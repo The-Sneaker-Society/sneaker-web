@@ -22,7 +22,7 @@ import { ContractPage } from "./pages/ContractsPage/Contracts";
 import { ChatDashboard } from "./pages/Chats/ChatDashboard";
 import { ContractReviewPage } from "./pages/ContractsPage/ContractReviewPage";
 import { ContractForm } from "./pages/ContractForm/ContractForm";
-import ShippingInfo from "./components/ShippingInfo";
+import ShippingInfo from "./components/ShippingInfoModal/ShippingInfoModal";
 import DashboardRouter from "./routes/DashboardRouter";
 
 import MemberRoutes from "./routes/MemberRoutes";
