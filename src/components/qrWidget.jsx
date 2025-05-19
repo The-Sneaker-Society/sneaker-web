@@ -58,6 +58,7 @@ export const QrWidget = () => {
       sx={{
         display: "flex",
         flexDirection: "column",
+        justifyContent: "space-around",
         width: "100%",
         borderRadius: 2,
         border: "4px solid white",
@@ -125,7 +126,6 @@ export const QrWidget = () => {
                 fontSize: "0.9rem",
                 display: "flex",
                 alignItems: "center",
-                gap: "8px",
               }}
             >
               <Icon sx={{ display: "flex", alignItems: "center" }}>
