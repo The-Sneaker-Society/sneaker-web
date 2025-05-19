@@ -1,24 +1,21 @@
 import React, { useState } from "react";
 import { Formik, Form, useField } from "formik";
+import * as Yup from "yup";
 import {
-  Button,
-  Typography,
-  Grid,
-  TextField,
-  Container,
-  Alert,
   Box,
+  TextField,
+  Typography,
+  Button,
+  CircularProgress,
+  Container,
+  Grid,
+  Alert,
 } from "@mui/material";
-import { useMutation, useQuery } from "@apollo/client";
-import { UPDATE_MEMBER } from "./signup";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
-import { TEST_QUERY } from "../../context/graphql/testQuery";
-import { CREATE_MEMBER } from "../SignUpMemberPage/graphql/addMember";
+import { CURRENT_MEMBER, UPDATE_MEMBER } from "./graphql/updateMember";
+import { useQuery, useMutation } from "@apollo/client";
 
 const FormikTextField = ({ name, ...props }) => {
   const [field, meta] = useField(name);
-
   const isError = meta.touched && meta.error;
 
   return (
@@ -31,20 +28,32 @@ const FormikTextField = ({ name, ...props }) => {
   );
 };
 
-const MemberSignupPage = () => {
-  const navigate = useNavigate();
-  const { data: testData } = useQuery(TEST_QUERY);
+const UpdateProfilePage = () => {
+  const {
+    data: currentMemberData,
+    loading: currentMemberLoading,
+    error: currentMemberError,
+    refetch,
+  } = useQuery(CURRENT_MEMBER);
+  const [updateMember] = useMutation(UPDATE_MEMBER);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
-  const { user } = useUser();
+  const validationSchema = Yup.object({
+    firstName: Yup.string(),
+    lastName: Yup.string(),
+    addressLineOne: Yup.string(),
+    addressLineTwo: Yup.string(),
+    zipcode: Yup.string(),
+    state: Yup.string(),
+    phoneNumber: Yup.string(),
+  });
 
-
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      await createMember({
+      const { data } = await updateMember({
         variables: {
           data: {
-            clerkId: user.id,
-            email: user.primaryEmailAddress.emailAddress,
             firstName: values.firstName,
             lastName: values.lastName,
             addressLineOne: values.addressLineOne,
@@ -54,19 +63,38 @@ const MemberSignupPage = () => {
             phoneNumber: values.phoneNumber,
           },
         },
+        update: (cache, { data: { updateMember } }) => {
+          cache.writeQuery({
+            query: CURRENT_MEMBER,
+            data: { currentMember: updateMember },
+          });
+        },
       });
-      navigate("/dashboard");
+
+      if (data.updateMember) {
+        setSuccessMessage("Profile updated successfully");
+        setErrorMessage(null);
+        refetch(); // Refetch the current member data
+      } else {
+        throw new Error("Failed to update profile");
+      }
     } catch (error) {
       setErrorMessage(error.message);
+      setSuccessMessage(null);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const [createMember, { data, loading }] = useMutation(CREATE_MEMBER);
-
-  if (loading) {
-    return <>loading</>;
+  if (currentMemberLoading) {
+    return <CircularProgress />;
+  }
+  if (currentMemberError) {
+    return (
+      <Alert severity="error">
+        Error loading profile data. Please try again later.
+      </Alert>
+    );
   }
 
   return (
@@ -92,44 +120,42 @@ const MemberSignupPage = () => {
             fontWeight: "bold",
           }}
         >
-          Contact Info
+          Update Profile
         </Typography>
+        {errorMessage && (
+          <Alert severity="error" sx={{ width: "100%", marginBottom: 2 }}>
+            {errorMessage}
+          </Alert>
+        )}
+        {successMessage && (
+          <Alert severity="success" sx={{ width: "100%", marginBottom: 2 }}>
+            {successMessage}
+          </Alert>
+        )}
         <Formik
           initialValues={{
-            email: user.emailAddresses || "",
-            firstName: "",
-            lastName: "",
-            addressLineOne: "",
-            addressLineTwo: "",
-            zipcode: "",
-            state: "",
-            phoneNumber: "",
+            email: currentMemberData?.currentMember?.email || "",
+            firstName: currentMemberData?.currentMember?.firstName || "",
+            lastName: currentMemberData?.currentMember?.lastName || "",
+            addressLineOne:
+              currentMemberData?.currentMember?.addressLineOne || "",
+            addressLineTwo:
+              currentMemberData?.currentMember?.addressLineTwo || "",
+            zipcode: currentMemberData?.currentMember?.zipcode || "",
+            state: currentMemberData?.currentMember?.state || "",
+            phoneNumber: currentMemberData?.currentMember?.phoneNumber || "",
           }}
+          validationSchema={validationSchema}
           onSubmit={handleSubmit}
-          validate={(values) => {
-            const errors = {};
-
-            if (!values.firstName) {
-              errors.firstName = "First Name is required";
-            }
-
-            if (!values.lastName) {
-              errors.lastName = "Last Name is required";
-            }
-
-            if (!values.zipcode) {
-              errors.zipcode = "Zipcode is required";
-            }
-
-            return errors;
-          }}
+          enableReinitialize
         >
-          {() => (
+          {({ isSubmitting }) => (
             <Form>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <FormikTextField
                     name="email"
+                    label="Email"
                     variant="outlined"
                     disabled
                     fullWidth
@@ -143,7 +169,6 @@ const MemberSignupPage = () => {
                     fullWidth
                   />
                 </Grid>
-
                 <Grid item xs={12} sm={6}>
                   <FormikTextField
                     name="lastName"
@@ -193,29 +218,30 @@ const MemberSignupPage = () => {
                   />
                 </Grid>
               </Grid>
-              <Box sx={{ paddingTop: 2 }}>
+              <Box>
                 <Button
                   type="submit"
                   variant="contained"
+                  disabled={isSubmitting}
                   sx={{
                     color: "black",
                     backgroundColor: "gold",
+                    marginTop: "30px",
                   }}
                 >
-                  Submit
+                  {isSubmitting ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    "Update Profile"
+                  )}
                 </Button>
               </Box>
             </Form>
           )}
         </Formik>
-        {errorMessage ? (
-          <Alert severity="error" color="error">
-            {errorMessage}
-          </Alert>
-        ) : null}
       </div>
     </Container>
   );
 };
 
-export default MemberSignupPage;
+export default UpdateProfilePage;

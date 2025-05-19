@@ -1,167 +1,242 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
-  AppBar,
-  Avatar,
   Box,
-  IconButton,
-  List,
-  ListItem,
   TextField,
+  Avatar,
+  Paper,
   Typography,
-  Drawer,
+  IconButton,
+  Container,
+  AppBar,
+  Toolbar,
+  CircularProgress,
+  useTheme,
 } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import MenuIcon from "@mui/icons-material/Menu";
-import MicOff from "./Icons/MicOff";
-import InsertPhoto from "./Icons/InsertPhoto";
-import AttachFile from "./Icons/AttachFile";
-import ChatSidebar from "../Chats/ChatSidebar";
+import { styled } from "@mui/system";
+import { FiSend } from "react-icons/fi";
+import { format } from "date-fns";
 
-const Chat = () => {
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([
-    { text: "Hi John!", sender: "Jane", timestamp: new Date() },
-    { text: "Hey Jane!", sender: "John", timestamp: new Date() },
-    { text: "How are you?", sender: "Jane", timestamp: new Date() },
-    {
-      text: "I'm good, thanks. How about you?",
-      sender: "John",
-      timestamp: new Date(),
-    },
-    { text: "I am doing well!", sender: "Jane", timestamp: new Date() },
-    { text: "I am doing well!", sender: "me", timestamp: new Date() },
-    { text: "I am doing well!", sender: "Jane", timestamp: new Date() },
-    { text: "I am doing well!", sender: "me", timestamp: new Date() },
-    { text: "I am doing well!", sender: "Jane", timestamp: new Date() },
-    { text: "I am doing well!", sender: "Jane", timestamp: new Date() },
-    { text: "I am doing well!", sender: "Jane", timestamp: new Date() },
-  ]);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+const ChatContainer = styled(Box)(({ theme }) => ({
+  height: "100%",
+  width: "100%",
+  display: "flex",
+  flexDirection: "column",
+  background: theme.palette.background.default,
+}));
 
-  const open = Boolean(anchorEl);
-  const lastMessageRef = useRef(null);
+const MessageArea = styled(Box)(({ theme }) => ({
+  flex: 1,
+  overflowY: "auto",
+  padding: theme.spacing(2.5),
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(1.25),
+}));
 
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (message.trim() === "") return;
-    setMessages([
-      ...messages,
-      { text: message, sender: "me", timestamp: new Date() },
-    ]);
-    setMessage("");
-  };
+const MessageBubble = styled(Paper)(({ theme, isuser }) => ({
+  padding: theme.spacing(1.5, 2),
+  maxWidth: "70%",
+  width: "fit-content",
+  marginLeft: isuser === "true" ? "auto" : 0,
+  backgroundColor:
+    isuser === "true"
+      ? theme.palette.primary.main
+      : theme.palette.background.paper,
+  color:
+    isuser === "true"
+      ? theme.palette.primary.contrastText
+      : theme.palette.text.primary,
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: theme.shadows[2],
+  transition: "transform 0.2s",
+  minWidth: 80,
+  "&:hover": {
+    transform: "scale(1.02)",
+  },
+}));
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+const InputArea = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2.5),
+  backgroundColor: theme.palette.background.paper,
+  borderTop: `1px solid ${theme.palette.divider}`,
+}));
+
+const MessageRow = styled(Box)(({ theme, isuser }) => ({
+  display: "flex",
+  alignItems: "flex-start",
+  gap: theme.spacing(1),
+  flexDirection: isuser === "true" ? "row-reverse" : "row",
+}));
+
+const Chat = ({
+  messages,
+  sendMessage,
+  isSending,
+  setIsSending,
+  currentUser,
+  otherUserName,
+}) => {
+  const theme = useTheme();
+  const [newMessage, setNewMessage] = useState("");
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
+  const messageEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    scrollToBottom();
   }, [messages]);
 
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <Drawer anchor="left" open={sidebarOpen} onClose={toggleSidebar}>
-        <Box sx={{ width: 250, overflow: "auto" }} role="presentation">
-          <ChatSidebar onClose={toggleSidebar} />
-        </Box>
-      </Drawer>
-      <AppBar position="static">
-        <Box
-          sx={{ display: "flex", alignItems: "center", padding: "8px 12px" }}
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isSending]);
+
+  const handleSend = async () => {
+    if (newMessage.trim()) {
+      setIsSending(true);
+      try {
+        await sendMessage(newMessage.trim());
+        setNewMessage("");
+        // Focus back on the input field after sending a message
+        inputRef.current?.focus();
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      } finally {
+        setIsSending(false);
+      }
+    }
+  };
+
+  function formatTimestampWithDateFns(timestamp) {
+    // Create a new Date object from the timestamp.
+    const date = new Date(Number(timestamp));
+
+    // Format the date using date-fns' format function.
+    // The format string 'PPPppp' provides a localized, human-readable date and time.
+    const formattedDate = format(date, "EEE h:mm a");
+
+    return formattedDate;
+  }
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleSendPaymentLink = async () => {
+    setIsPaymentLoading(true);
+    // Simulate a GraphQL mutation call with a fake async delay
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // In a real application, you would get the payment URL from the mutation result
+    const paymentUrl = "https://stripe.com/your-payment-link";
+
+    const paymentMessage = (
+      <span>
+        Click here to make a payment:{" "}
+        <a
+          href={paymentUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "blue", textDecoration: "underline" }}
         >
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="toggle-sidebar"
-            onClick={toggleSidebar}
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Avatar sx={{ bgcolor: "white", mr: 2 }}>J</Avatar>
-          <Typography variant="h6">John</Typography>
-        </Box>
-      </AppBar>
-      <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
-        <List sx={{ marginBottom: "16px" }}>
-          {messages.map((msg, index) => (
-            <ListItem
-              key={index}
-              alignItems="flex-start"
-              sx={{
-                justifyContent: msg.sender === "me" ? "flex-end" : "flex-start",
-              }}
-              ref={index === messages.length - 1 ? lastMessageRef : null}
+          {paymentUrl}
+        </a>
+      </span>
+    );
+
+    const newMsg = {
+      id: messages.length + 1,
+      text: paymentMessage,
+      sender: currentUser,
+      timestamp: new Date(),
+    };
+    setMessages([...messages, newMsg]);
+    setIsPaymentLoading(false);
+  };
+
+  return (
+    <Container maxWidth="xl" disableGutters sx={{ height: "100%" }}>
+      <ChatContainer>
+        <AppBar
+          position="static"
+          sx={{
+            background: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+          }}
+        >
+          <Toolbar>
+            <Typography variant="h3" component="div">
+              {otherUserName}
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <MessageArea>
+          {messages.map((message) => (
+            <MessageRow
+              key={message.id}
+              isuser={(message.senderId === currentUser).toString()}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: msg.sender === "me" ? "row-reverse" : "row",
-                  alignItems: "flex-start",
-                }}
-              >
-                <Avatar
-                  sx={{
-                    bgcolor:
-                      msg.sender === "me" ? "secondary.main" : "primary.main",
-                    mr: msg.sender === "me" ? 0 : 2,
-                    ml: msg.sender === "me" ? 2 : 0,
-                  }}
+              <Avatar
+                src={
+                  message.senderId === currentUser
+                    ? "https://images.unsplash.com/photo-1599566150163-29194dcaad36"
+                    : "https://images.unsplash.com/photo-1494790108377-be9c29b29330"
+                }
+                alt={message.senderId}
+              />
+              <Box sx={{ minWidth: "400px" }}>
+                <MessageBubble
+                  isuser={(message.senderId === currentUser).toString()}
+                  elevation={2}
                 >
-                  {msg.sender[0].toUpperCase()}
-                </Avatar>
-                <Box
-                  component="div"
-                  sx={{
-                    borderRadius: "10px",
-                    padding: "8px 12px",
-                    backgroundColor:
-                      msg.sender === "me" ? "secondary.light" : "primary.light",
-                    maxWidth: "70%",
-                  }}
-                >
-                  <Typography sx={{ color: "common.white" }}>
-                    {msg.text}
+                  <Typography variant="body1">{message.content}</Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ display: "block", mt: 0.5, opacity: 0.8 }}
+                  >
+                    {formatTimestampWithDateFns(message.createdAt)}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {new Date(msg.timestamp).toLocaleString()}
-                  </Typography>
-                </Box>
+                </MessageBubble>
               </Box>
-            </ListItem>
+            </MessageRow>
           ))}
-        </List>
-      </Box>
-      <form onSubmit={handleSend}>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <TextField
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type your message here..."
-            sx={{ flexGrow: 1, mr: 1 }}
-            fullWidth
-          />
-          {/* Commenting out Until we sepport on Backend */}
-          {/* <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="end"
-            sx={{ px: 2, py: 1, bgcolor: "background.default" }}
-          >
-            <AttachFile />
-            <InsertPhoto />
-          </Stack> */}
-          <IconButton type="submit">
-            <SendIcon />
-          </IconButton>
-        </Box>
-      </form>
-    </Box>
+          <div ref={messageEndRef} />
+        </MessageArea>
+        <InputArea>
+          <Box display="flex" gap={1}>
+            <TextField
+              inputRef={inputRef}
+              fullWidth
+              multiline
+              maxRows={4}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type a message..."
+              variant="outlined"
+              size="small"
+              disabled={isSending}
+            />
+            <IconButton
+              color="primary"
+              onClick={handleSend}
+              disabled={!newMessage.trim() || isSending}
+              aria-label="Send message"
+            >
+              {isSending ? <CircularProgress size={24} /> : <FiSend />}
+            </IconButton>
+          </Box>
+        </InputArea>
+      </ChatContainer>
+    </Container>
   );
 };
 
