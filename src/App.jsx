@@ -13,6 +13,16 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
 import { LoginV2 } from "./pages/Login/LoginV2";
+import React from "react";
+import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
+import StripeSubsriptionPage from "./pages/StripeSubsriptionPage";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import UpdateProfilePage from "./pages/UpdateProfilePage/UpdateProfilePage";
+import { ContractPage } from "./pages/ContractsPage/Contracts";
+import { ChatDashboard } from "./pages/Chats/ChatDashboard";
+import { ContractReviewPage } from "./pages/ContractsPage/ContractReviewPage";
+import { ContractForm } from "./pages/ContractForm/ContractForm";
+import ShippingInfo from "./components/ShippingInfoModal/ShippingInfoModal";
 import DashboardRouter from "./routes/DashboardRouter";
 
 import MemberRoutes from "./routes/MemberRoutes";
@@ -34,6 +44,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/logout" element={<LogoutPage />} />
               <Route path="stripeOnboarding" element={<StripeSignupPage />} />
+              <Route path="/shippinginfo" element={<ShippingInfo />} />
               <Route
                 path="/paymentSuccess/:contractId"
                 element={<PaymentStatus success={true} />}
@@ -58,7 +69,7 @@ function App() {
               <Route
                 path="/member/*"
                 element={
-                  <ProtectedRoute requireRole="member" >
+                  <ProtectedRoute requireRole="member">
                     <MemberRoutes />
                   </ProtectedRoute>
                 }
