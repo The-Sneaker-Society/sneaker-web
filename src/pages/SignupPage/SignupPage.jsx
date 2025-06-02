@@ -30,7 +30,11 @@ const FormikTextField = ({ name, ...props }) => {
 
 const MemberSignupPage = ({ onComplete }) => {
   const { user } = useUser();
-  const [updateMember, { data, loading }] = useMutation(UPDATE_MEMBER);
+  const [updateMember, { data, loading }] = useMutation(UPDATE_MEMBER, {
+    onCompleted: () => {
+      onComplete();
+    },
+  });
 
   const handleSubmit = async (values) => {
     try {
@@ -48,7 +52,6 @@ const MemberSignupPage = ({ onComplete }) => {
           },
         },
       });
-      onComplete();
     } catch (error) {
       setErrorMessage(error.message);
     }

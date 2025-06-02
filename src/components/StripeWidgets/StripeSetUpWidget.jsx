@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Typography, Button, Stack, Skeleton } from "@mui/material";
 import { gql, useMutation } from "@apollo/client";
 import { GoAlertFill } from "react-icons/go";
-import { useSneakerUser } from "../../context/UserContext";
+import { useSneakerMember } from "../../context/MemberContext";
 
 const ONBOARD_MEMBER_TO_STRIPE_MUTATION = gql`
   mutation OnboardMemberToStripe {
@@ -10,29 +10,51 @@ const ONBOARD_MEMBER_TO_STRIPE_MUTATION = gql`
   }
 `;
 
+const RESUME_ONBOARDING = gql`
+  mutation ResumeAccountOnboarding {
+    resumeAccountOnboarding
+  }
+`;
+
 export const StripeSetUpWidget = () => {
-  const { user, loading: sneakerLoading } = useSneakerUser();
-  const [onboardMemberToStripe, { loading }] = useMutation(
+  const { member, loading: memberLoading } = useSneakerMember();
+  const [onboardMemberToStripe, { loading: onboardLoading }] = useMutation(
     ONBOARD_MEMBER_TO_STRIPE_MUTATION
   );
+  const [resumeAccountOnboarding, { loading: resumeOnboardLoading }] =
+    useMutation(RESUME_ONBOARDING);
 
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleStripeAccountClick = async () => {
-    onboardMemberToStripe({
-      onCompleted: (data) => {
-        setIsRedirecting(true);
-        setTimeout(() => {
-          window.location.href = data.onboardMemberToStripe;
-        }, 0);
-      },
-      onError: () => {
-        setIsRedirecting(false);
-      },
-    });
+    if (!member.stripeConnectAccountId) {
+      onboardMemberToStripe({
+        onCompleted: (data) => {
+          setIsRedirecting(true);
+          setTimeout(() => {
+            window.location.href = data.onboardMemberToStripe;
+          }, 0);
+        },
+        onError: () => {
+          setIsRedirecting(false);
+        },
+      });
+    } else {
+      resumeAccountOnboarding({
+        onCompleted: (data) => {
+          setIsRedirecting(true);
+          setTimeout(() => {
+            window.location.href = data.resumeAccountOnboarding;
+          }, 0);
+        },
+        onError: () => {
+          setIsRedirecting(false);
+        },
+      });
+    }
   };
 
-  if (sneakerLoading) {
+  if (memberLoading) {
     return (
       <Box
         sx={{
@@ -85,21 +107,25 @@ export const StripeSetUpWidget = () => {
           Please set up stripe to begin
         </Typography>
       </Box>
-      <Button
-        variant="outlined"
-        size="small"
-        loading={loading || isRedirecting}
-        sx={{
-          color: "white",
-          borderColor: "white",
-          textTransform: "none",
-          fontSize: "20px",
-          padding: "5px 15px",
-        }}
-        onClick={handleStripeAccountClick}
-      >
-        set up Stripe
-      </Button>
+      {!member?.isOnboardedWithStripe && (
+        <Button
+          variant="outlined"
+          size="small"
+          loading={resumeOnboardLoading || onboardLoading || isRedirecting}
+          sx={{
+            color: "white",
+            borderColor: "white",
+            textTransform: "none",
+            fontSize: "20px",
+            padding: "5px 15px",
+          }}
+          onClick={handleStripeAccountClick}
+        >
+          {member.stripeConnectAccountId
+            ? "Resume Onboarding"
+            : "Set up stripe"}
+        </Button>
+      )}
     </Box>
   );
 };

@@ -23,7 +23,7 @@ export const GenerateMember = () => {
   const [createMember, { loading: mutationLoading, error: mutationError }] =
     useMutation(CREATE_MEMBER_MUTATION, {
       onCompleted: () => {
-        navigate("/member/signup-info", { replace: true });
+        navigate("/member/onboarding", { replace: true });
       },
       onError: (err) => {
         console.error("Error initializing member in DB:", err);

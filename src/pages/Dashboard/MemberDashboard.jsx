@@ -1,5 +1,3 @@
-import React from "react";
-import Grid from "@mui/material/Grid2";
 import { Box, Typography } from "@mui/material";
 import { useClerk } from "@clerk/clerk-react";
 import ContractStatusWidget from "../../components/ContractStatusWidget";
@@ -112,7 +110,7 @@ export const MemberDashboard = () => {
           </WidgetWrapper>
           <Box sx={{ height: "40px" }} />
           <WidgetWrapper>
-            {member?.stripeConnectAccountId ? (
+            {member?.isOnboardedWithStripe ? (
               <StripeWidget />
             ) : (
               <StripeSetUpWidget />
