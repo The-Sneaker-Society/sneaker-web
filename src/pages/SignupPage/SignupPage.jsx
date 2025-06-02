@@ -9,12 +9,9 @@ import {
   Alert,
   Box,
 } from "@mui/material";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { UPDATE_MEMBER } from "./signup";
-import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-import { TEST_QUERY } from "../../context/graphql/testQuery";
-import { CREATE_MEMBER } from "../SignUpMemberPage/graphql/addMember";
 
 const FormikTextField = ({ name, ...props }) => {
   const [field, meta] = useField(name);
@@ -31,20 +28,16 @@ const FormikTextField = ({ name, ...props }) => {
   );
 };
 
-const MemberSignupPage = () => {
-  const navigate = useNavigate();
-  const { data: testData } = useQuery(TEST_QUERY);
-
+const MemberSignupPage = ({ onComplete }) => {
   const { user } = useUser();
-
+  const [updateMember, { data, loading }] = useMutation(UPDATE_MEMBER);
 
   const handleSubmit = async (values) => {
     try {
-      await createMember({
+      await updateMember({
         variables: {
           data: {
-            clerkId: user.id,
-            email: user.primaryEmailAddress.emailAddress,
+            businessName: values.businessName,
             firstName: values.firstName,
             lastName: values.lastName,
             addressLineOne: values.addressLineOne,
@@ -55,15 +48,13 @@ const MemberSignupPage = () => {
           },
         },
       });
-      navigate("/dashboard");
+      onComplete();
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
 
   const [errorMessage, setErrorMessage] = useState("");
-
-  const [createMember, { data, loading }] = useMutation(CREATE_MEMBER);
 
   if (loading) {
     return <>loading</>;
@@ -94,9 +85,13 @@ const MemberSignupPage = () => {
         >
           Contact Info
         </Typography>
+        <Typography variant="p" mb={4}>
+          Lets gather some information about you!
+        </Typography>
         <Formik
           initialValues={{
             email: user.emailAddresses || "",
+            businessName: "",
             firstName: "",
             lastName: "",
             addressLineOne: "",
@@ -132,6 +127,14 @@ const MemberSignupPage = () => {
                     name="email"
                     variant="outlined"
                     disabled
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormikTextField
+                    name="businessName"
+                    label="Business Name (optional)"
+                    variant="outlined"
                     fullWidth
                   />
                 </Grid>

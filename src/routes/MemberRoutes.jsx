@@ -9,11 +9,15 @@ import { MemberDashboard } from "../pages/Dashboard/MemberDashboard";
 import MemberSignupPage from "../pages/SignupPage/SignupPage";
 import Layout from "../components/Layout";
 import { ChatDashboardMember } from "../pages/Chats/ChatDashboardMember";
+import { GenerateMember } from "../pages/GenerateMember/GenerateMember";
+import { OnboardMember } from "../pages/OnboardMember/OnboardMember";
 
 const MemberRoutes = () => {
   return (
     <MemberProvider>
       <Routes>
+        <Route path="generate" element={<GenerateMember />} />
+        <Route path="onboarding" element={<OnboardMember />} />
         <Route path="signup-info" element={<MemberSignupPage />} />
         <Route
           path="dashboard"
