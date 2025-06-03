@@ -15,7 +15,10 @@ export const CancelSubscription = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [processing, setProcessing] = useState(false);
+
+  // Separate states for cancel and pause loading
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [pauseLoading, setPauseLoading] = useState(false);
 
   // Query subscription details
   const { loading, error, data } = useQuery(GET_SUBSCRIPTION_DETAILS);
@@ -26,27 +29,25 @@ export const CancelSubscription = () => {
 
   // Handle cancel subscription
   const handleCancel = async () => {
-    setProcessing(true);
+    setCancelLoading(true);
     try {
       await cancelSubscription();
       navigate('/dashboard');
     } catch (err) {
       console.error("Error cancelling subscription:", err);
-    } finally {
-      setProcessing(false);
+      setCancelLoading(false);
     }
   };
 
   // Handle pause subscription
   const handlePause = async () => {
-    setProcessing(true);
+    setPauseLoading(true);
     try {
       await pauseSubscription();
       navigate('/dashboard');
     } catch (err) {
       console.error("Error pausing subscription:", err);
-    } finally {
-      setProcessing(false);
+      setPauseLoading(false);
     }
   };
 
@@ -153,17 +154,17 @@ export const CancelSubscription = () => {
         }}>
           <StyledButton
             onClick={handleCancel}
-            disabled={processing}
+            disabled={cancelLoading || pauseLoading}
             style={{ borderColor: '#FF5252' }}
           >
-            {processing ? <LoadingCircle /> : "Cancel"}
+            {cancelLoading ? <LoadingCircle /> : "Cancel"}
           </StyledButton>
 
           <StyledButton
             onClick={handlePause}
-            disabled={processing}
+            disabled={pauseLoading || cancelLoading}
           >
-            {processing ? <LoadingCircle /> : "Pause"}
+            {pauseLoading ? <LoadingCircle /> : "Pause"}
           </StyledButton>
         </Box>
       </Box>
