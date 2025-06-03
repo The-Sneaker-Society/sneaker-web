@@ -2,16 +2,16 @@ import React from "react";
 import { Modal, Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const SubscribeModal = ({ isSubscribed }) => {
+const OnboardModal = ({ isOnboarded }) => {
   const navigate = useNavigate();
 
   const handleSubscribe = () => {
-    navigate("/member/subscriptions");
+    navigate("/member/onboarding");
   };
 
   return (
     <Modal
-      open={!isSubscribed}
+      open={!isOnboarded}
       aria-labelledby="subscribe-modal-title"
       aria-describedby="subscribe-modal-description"
     >
@@ -29,10 +29,10 @@ const SubscribeModal = ({ isSubscribed }) => {
         }}
       >
         <Typography id="subscribe-modal-title" variant="h6" component="h2">
-          Subscription Required
+          Complete Onboarding
         </Typography>
         <Typography id="subscribe-modal-description" sx={{ mt: 2 }}>
-          Activate your subsctiption
+          You need to complete your Onboarding
         </Typography>
         <Button
           variant="contained"
@@ -40,11 +40,11 @@ const SubscribeModal = ({ isSubscribed }) => {
           onClick={handleSubscribe}
           sx={{ mt: 2 }}
         >
-          Go to Subscriptons
+          Go to onboarding
         </Button>
       </Box>
     </Modal>
   );
 };
 
-export default SubscribeModal;
+export default OnboardModal;
