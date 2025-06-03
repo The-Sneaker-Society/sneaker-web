@@ -31,13 +31,13 @@ const ShoeInfoSchema = Yup.object().shape({
 
 const initialValues = {
   shoeDetails: {
-    brand: "",
-    model: "",
-    color: "",
-    material: "",
-    size: "",
-    soleCondition: "",
-    clientNotes: "",
+    brand: "nike",
+    model: "dfhad",
+    color: "dbhad",
+    material: "fdbad",
+    size: "12",
+    soleCondition: "none",
+    clientNotes: "zdjgvadf",
     photos: {
       leftSide: [],
       rightSide: [],
@@ -130,7 +130,6 @@ export const ContractForm = () => {
           initialValues={initialValues}
           validationSchema={validationSchemas[activeStep]}
           onSubmit={activeStep === steps.length - 1 ? handleSubmit : handleNext}
-          enableReinitialize
         >
           {(formik) => (
             <Form>
