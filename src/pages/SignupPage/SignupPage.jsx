@@ -30,7 +30,7 @@ const FormikTextField = ({ name, ...props }) => {
 
 const MemberSignupPage = ({ onComplete }) => {
   const { user } = useUser();
-  const [updateMember, { data, loading }] = useMutation(UPDATE_MEMBER, {
+  const [updateMember, { loading }] = useMutation(UPDATE_MEMBER, {
     onCompleted: () => {
       onComplete();
     },

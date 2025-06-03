@@ -1,115 +1,101 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
-  Typography,
-} from "@mui/material";
-import MemberSignupPage from "../SignupPage/SignupPage";
-import { StripeOnobarding } from "./StripeOnboarding";
-import { Subscriptions } from "../PaymentStatus/Subscriptions";
+import { Box, Typography } from "@mui/material";
+import MemberSignupPage from "../SignupPage/SignupPage"; // Assuming this path is correct
+import { StripeOnobarding } from "./StripeOnboarding"; // Assuming this path is correct
+import { Subscriptions } from "../PaymentStatus/Subscriptions"; // Assuming this path is correct
 import { useSneakerMember } from "../../context/MemberContext";
 import { useNavigate } from "react-router-dom";
-import { LoadingCircle } from "../../components/Loaing";
+import { LoadingCircle } from "../../components/Loaing"; // Assuming this path is correct
+import WelcomePage from "./WelcomePage";
 
 export const OnboardMember = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  const steps = ["Info", "Stripe account Creation", "Subscription"];
-  const [isLoadingInitialStep, setIsLoadingInitialStep] = useState(true);
+  const [activePage, setActivePage] = useState(0);
+  const [isLoadingInitialState, setIsLoadingInitialState] = useState(true);
+  const [isRefetchingAfterSignup, setIsRefetchingAfterSignup] = useState(false);
   const {
     member,
     loading: memberLoading,
     error: memberError,
+    refetch,
   } = useSneakerMember();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // This console log is very helpful for debugging step transitions
-    console.log(
-      "OnboardMember useEffect. MemberLoading:",
-      memberLoading,
-      "Member:",
-      member
-        ? {
-            firstName: member.firstName,
-            stripeConnectAccountId: member.stripeConnectAccountId,
-            isSubscribed: member.isSubscribed,
-          }
-        : null
-    );
-
     if (!memberLoading && member) {
-      let determinedStep = 0;
+      console.log(member)
+      let determinedPage = 0;
       if (member.firstName) {
-        // Basic info submitted
-        determinedStep = 1;
-        if (member.isOnboardedWithStripe) {
-          // Stripe account linked
-          determinedStep = 2;
-          if (member.isSubscribed) {
-            // Subscription active
-            determinedStep = 3; // All done
-          }
+        determinedPage = 1;
+        if (!member.isOnboardedWithStripe) {
+          determinedPage = 2;
+        } else if (!member.isSubscribed) {
+          determinedPage = 3;
+        } else {
+          determinedPage = 4; // All onboarding complete
         }
       }
+      console.log(determinedPage)
 
-      console.log("Determined step based on member data:", determinedStep);
-
-      if (determinedStep >= steps.length) {
-        console.log("All steps complete, navigating to dashboard.");
+      if (determinedPage === 4) {
         navigate("/member/dashboard", { replace: true });
       } else {
-        setActiveStep(determinedStep);
+        setActivePage(determinedPage);
       }
-      setIsLoadingInitialStep(false);
+      setIsLoadingInitialState(false);
     } else if (!memberLoading && (memberError || !member)) {
       console.error(
         "OnboardMember: Error loading member data or member is null.",
         { memberError, member }
       );
-      setIsLoadingInitialStep(false);
-      setActiveStep(0); // Default to first step on error or no member
+
+      setActivePage(0);
+      setIsLoadingInitialState(false);
     }
-    // Not including steps.length in dependencies as it's constant for this component instance
   }, [member, memberLoading, memberError, navigate]);
 
-  const handleNext = () => {
-    console.log("handleNext called from activeStep:", activeStep);
-    setActiveStep((prevActiveStep) => {
-      const nextStep = prevActiveStep + 1;
-      if (nextStep >= steps.length) {
-        navigate("/member/dashboard", { replace: true });
-        return prevActiveStep; // Or return steps.length to show completion message if no redirect
-      }
-      return nextStep;
-    });
-  };
-
-  const renderStepContent = (step) => {
-    switch (step) {
+  const renderPageContent = () => {
+    switch (activePage) {
       case 0:
-        return <MemberSignupPage onComplete={handleNext} />;
+        return <WelcomePage onContinue={() => setActivePage(1)} />;
       case 1:
-        // StripeOnobarding might redirect externally. If it does, the useEffect
-        // will handle picking up the correct step when the user returns and member data is updated.
-        // If StripeOnobarding can complete its task and then call onComplete without a full page redirect away from this flow,
-        // then onComplete={handleNext} is useful.
-        return <StripeOnobarding />;
+        return (
+          <MemberSignupPage
+            onComplete={async () => {
+              setActivePage(2);
+              setIsRefetchingAfterSignup(true);
+              await refetch();
+              setIsRefetchingAfterSignup(false);
+            }}
+          />
+        );
       case 2:
+        if (memberLoading || isRefetchingAfterSignup) {
+          return (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="200px"
+            >
+              <LoadingCircle />
+            </Box>
+          );
+        }
+        return (
+          <StripeOnobarding member={member} memberLoading={memberLoading} />
+        );
+      case 3:
         return <Subscriptions />;
       default:
-        // This should ideally not be reached if redirection happens correctly
         return (
           <Typography variant="h5" align="center" sx={{ mt: 4 }}>
-            Onboarding complete! Redirecting...
+            Loading next step or completing onboarding...
           </Typography>
         );
     }
   };
 
-  if (isLoadingInitialStep) {
+  if (isLoadingInitialState || memberLoading) {
     return (
       <Box
         display="flex"
@@ -122,16 +108,5 @@ export const OnboardMember = () => {
     );
   }
 
-  return (
-    <>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      {renderStepContent(activeStep)}
-    </>
-  );
+  return <Box sx={{ height: "100vh" }}>{renderPageContent()}</Box>;
 };

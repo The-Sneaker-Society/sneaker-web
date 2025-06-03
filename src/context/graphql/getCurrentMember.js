@@ -10,6 +10,7 @@ export const CURRENT_MEMBER = gql`
       stripeCustomerId
       isSubscribed
       isOnboardedWithStripe
+      isNewUser
     }
   }
 `;

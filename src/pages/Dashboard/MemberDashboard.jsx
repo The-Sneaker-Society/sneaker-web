@@ -6,7 +6,7 @@ import { StripeWidget } from "../../components/StripeWidgets/StripeWidget";
 import StyledButton from "../HomePage/StyledButton";
 import { StripeSetUpWidget } from "../../components/StripeWidgets/StripeSetUpWidget";
 import { ContractListWidget } from "../ContractsPage/ContractListWidget";
-import SubscribeModal from "../../components/SubscribeModal";
+import OnboardModal from "../../components/SubscribeModal";
 import { useSneakerMember } from "../../context/MemberContext";
 import { LoadingCircle } from "../../components/Loaing";
 
@@ -39,7 +39,7 @@ export const MemberDashboard = () => {
     return <LoadingCircle />;
   }
 
-  const isSubscribed = member?.isSubscribed;
+  const isOnboarded = !member.isNewUser;
 
   return (
     <Box
@@ -51,7 +51,7 @@ export const MemberDashboard = () => {
         overflow: { xs: "auto", md: "hidden" },
       }}
     >
-      <SubscribeModal isSubscribed={isSubscribed} />
+      <OnboardModal isOnboarded={isOnboarded} />
       <Box
         sx={{
           flexShrink: 0,
