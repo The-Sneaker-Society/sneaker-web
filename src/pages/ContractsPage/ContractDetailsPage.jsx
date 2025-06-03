@@ -8,13 +8,15 @@ import {
     useTheme,
     Grid2
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { GET_CONTRACT_BY_ID } from "../../context/graphql/getContractDetails";
+import StyledButton from "../../pages/HomePage/StyledButton";
 
 export const ContractDetailsPage = () => {
     const { id } = useParams();
     const theme = useTheme();
+    const navigate = useNavigate();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     // Fetch contract data using GraphQL
@@ -23,7 +25,6 @@ export const ContractDetailsPage = () => {
         fetchPolicy: "cache-and-network"
     });
 
-    // Get contract data from the query result
     const contract = data?.contractById;
 
     // Function to handle adding tracking information
@@ -38,24 +39,32 @@ export const ContractDetailsPage = () => {
         // Future implementation will open a modal or form to add member notes
     };
 
+    // Function to handle message button click
+    const handleMessageClick = () => {
+        // Navigate to the chat with this client
+        navigate(`/member/chat/${id}`);
+    };
+
+    // Function to handle support button click
+    const handleSupportClick = () => {
+        // Open mailto link
+        window.location.href = "mailto:support@thesneakersociety.com";
+    };
+
     // Renders the status badge with appropriate color
     const renderStatusBadge = (status) => {
         let backgroundColor = "";
         switch (status) {
             case "IN_PROGRESS":
-            case "In Progress":
                 backgroundColor = "#D4AC0D"; // Golden yellow
                 break;
             case "PENDING":
-            case "Pending":
                 backgroundColor = "#2ECC71"; // Green
                 break;
             case "COMPLETED":
-            case "Completed":
                 backgroundColor = "#3498DB"; // Blue
                 break;
             case "NOT_STARTED":
-            case "Not Started":
                 backgroundColor = "#E67E22"; // Orange
                 break;
             default:
@@ -116,7 +125,8 @@ export const ContractDetailsPage = () => {
                 sx={{
                     border: "2px solid white",
                     borderRadius: "12px",
-                    p: isMobile ? 3 : 4
+                    p: isMobile ? 3 : 4,
+                    position: "relative" // Added for absolute positioning of the action buttons
                 }}
             >
                 {/* Header Section */}
@@ -129,7 +139,7 @@ export const ContractDetailsPage = () => {
                     gap: isMobile ? 2 : 0
                 }}>
                     <Typography variant="h4" sx={{ fontWeight: "normal", fontSize: isMobile ? "2rem" : "2.5rem" }}>
-                        {contract.client?.name || "Client Name"}
+                        {`${contract.client?.firstName || ""} ${contract.client?.lastName || ""}`}
                     </Typography>
                     {renderStatusBadge(contract.status)}
                 </Box>
@@ -153,7 +163,7 @@ export const ContractDetailsPage = () => {
                             Client
                         </Typography>
                         <Typography variant="body1" sx={{ fontSize: "1.1rem", mb: 1 }}>
-                            Name: {contract.client?.name || "N/A"}
+                            Name: {`${contract.client?.firstName || ""} ${contract.client?.lastName || ""}`}
                         </Typography>
                         <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
                             Email: {contract.client?.email || "N/A"}
@@ -255,7 +265,7 @@ export const ContractDetailsPage = () => {
                 </Box>
 
                 {/* Member Notes Section */}
-                <Box>
+                <Box sx={{ mb: isMobile ? 8 : 10 }}>
                     <Typography variant="h5" sx={{ mb: 2, fontSize: isMobile ? "1.5rem" : "1.75rem", fontWeight: "normal" }}>
                         Member Notes
                     </Typography>
@@ -283,6 +293,25 @@ export const ContractDetailsPage = () => {
                             Add Notes
                         </Button>
                     )}
+                </Box>
+
+                {/* Action Buttons - Message and Support */}
+                <Box
+                    sx={{
+                        position: "absolute",
+                        bottom: isMobile ? 16 : 24,
+                        right: isMobile ? 16 : 24,
+                        display: "flex",
+                        gap: 2,
+                        flexDirection: isMobile ? "column" : "row"
+                    }}
+                >
+                    <StyledButton onClick={handleMessageClick}>
+                        Message
+                    </StyledButton>
+                    <StyledButton onClick={handleSupportClick}>
+                        Support
+                    </StyledButton>
                 </Box>
             </Box>
         </Box>
