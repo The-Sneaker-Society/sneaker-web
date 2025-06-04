@@ -1,5 +1,4 @@
-import React from "react";
-import { Box, Icon, Typography, Skeleton } from "@mui/material";
+import { Box, Icon, Typography, Skeleton, Link } from "@mui/material";
 import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
@@ -78,7 +77,7 @@ export const QrWidget = () => {
           Custom Intake Link
         </Typography>
         <Typography
-          variant="h3"
+          variant="h6"
           sx={{
             color: "#aaa",
           }}
@@ -90,7 +89,7 @@ export const QrWidget = () => {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "space-around",
           alignItems: "center",
           flexWrap: "wrap",
           gap: 4,
