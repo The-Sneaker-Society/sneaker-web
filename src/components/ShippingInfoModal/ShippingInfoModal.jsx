@@ -1,10 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   TextField,
-  Typography,
-  Container,
   Grid,
-  Box,
   CircularProgress,
   Alert,
   Dialog,
@@ -16,8 +13,14 @@ import * as Yup from "yup";
 import StyledButton from "../../pages/HomePage/StyledButton";
 import { useMutation } from "@apollo/client";
 import { Formik, Form, useField } from "formik";
-import { GET_CONTRACT_DETAILS } from "./graphql/getContractDetails";
-import { UPDATE_SHIPPING_INFO } from "./graphql/updateShippingInfo";
+import { gql } from "@apollo/client";
+
+const UPDATE_SHIPPING_INFO = gql`
+  query UpdateShippingInfo {
+    trackingNumber
+    carrier
+  }
+`;
 
 const FormikTextField = ({ name, ...props }) => {
   const [field, meta] = useField(name);

@@ -13,18 +13,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
 import { LoginV2 } from "./pages/Login/LoginV2";
-import React from "react";
-import UserSignupPage from "./pages/SignupPage/UserSIgnupPage";
-import StripeSubsriptionPage from "./pages/StripeSubsriptionPage";
-import Dashboard from "./pages/Dashboard/Dashboard";
-import UpdateProfilePage from "./pages/UpdateProfilePage/UpdateProfilePage";
-import { ContractPage } from "./pages/ContractsPage/Contracts";
-import { ChatDashboard } from "./pages/Chats/ChatDashboard";
-import { ContractReviewPage } from "./pages/ContractsPage/ContractReviewPage";
-import { ContractForm } from "./pages/ContractForm/ContractForm";
 import ShippingInfo from "./components/ShippingInfoModal/ShippingInfoModal";
 import DashboardRouter from "./routes/DashboardRouter";
-
 import MemberRoutes from "./routes/MemberRoutes";
 import UserRoutes from "./routes/UserRoutes";
 

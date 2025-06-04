@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import StyledButton from "../../pages/HomePage/StyledButton";
 import ShippingInfoModal from "./ShippingInfoModal";
 
