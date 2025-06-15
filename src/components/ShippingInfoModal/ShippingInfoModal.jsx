@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   TextField,
-  Grid,
+  Grid2,
   CircularProgress,
   Alert,
   Dialog,
@@ -16,9 +16,11 @@ import { Formik, Form, useField } from "formik";
 import { gql } from "@apollo/client";
 
 const UPDATE_SHIPPING_INFO = gql`
-  query UpdateShippingInfo {
-    trackingNumber
-    carrier
+  mutation UpdateShippingInfo($data: ShippingInput!) {
+    updateShippingInfo(data: $data) {
+      trackingNumber
+      carrier
+    }
   }
 `;
 
@@ -117,31 +119,31 @@ const ShippingInfoModal = ({ open, onClose, onSuccess }) => {
         >
           {({ isSubmitting }) => (
             <Form>
-              <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid2 container spacing={2} sx={{ mt: 1 }}>
                 {errorMessage && (
-                  <Grid item xs={12}>
+                  <Grid2 item xs={12}>
                     <Alert severity="error">{errorMessage}</Alert>
-                  </Grid>
+                  </Grid2>
                 )}
                 {successMessage && (
-                  <Grid>
+                  <Grid2>
                     <Alert severity="success">{successMessage}</Alert>
-                  </Grid>
+                  </Grid2>
                 )}
-                <Grid item xs={12}>
+                <Grid2 item xs={12}>
                   <FormikTextField
                     name="carrier"
                     label="Shipping Carrier"
                     autoFocus
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </Grid2>
+                <Grid2 item xs={12}>
                   <FormikTextField
                     name="trackingNumber"
                     label="Tracking Number"
                   />
-                </Grid>
-              </Grid>
+                </Grid2>
+              </Grid2>
               <DialogActions>
                 <StyledButton type="submit" disabled={isSubmitting}>
                   {isSubmitting ? <CircularProgress size={24} /> : "Confirm"}
