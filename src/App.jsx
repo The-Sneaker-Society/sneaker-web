@@ -13,7 +13,6 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
 import { LoginV2 } from "./pages/Login/LoginV2";
-import ShippingInfo from "./components/ShippingInfoModal/ShippingInfoModal";
 import DashboardRouter from "./routes/DashboardRouter";
 import MemberRoutes from "./routes/MemberRoutes";
 import UserRoutes from "./routes/UserRoutes";
@@ -34,7 +33,6 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/logout" element={<LogoutPage />} />
               <Route path="stripeOnboarding" element={<StripeSignupPage />} />
-              <Route path="/shippinginfo" element={<ShippingInfo />} />
               <Route
                 path="/paymentSuccess/:contractId"
                 element={<PaymentStatus success={true} />}
