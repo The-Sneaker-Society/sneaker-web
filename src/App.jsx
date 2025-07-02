@@ -14,7 +14,6 @@ import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
 import { LoginV2 } from "./pages/Login/LoginV2";
 import DashboardRouter from "./routes/DashboardRouter";
-
 import MemberRoutes from "./routes/MemberRoutes";
 import UserRoutes from "./routes/UserRoutes";
 
@@ -58,7 +57,7 @@ function App() {
               <Route
                 path="/member/*"
                 element={
-                  <ProtectedRoute requireRole="member" >
+                  <ProtectedRoute requireRole="member">
                     <MemberRoutes />
                   </ProtectedRoute>
                 }
