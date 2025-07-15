@@ -24,7 +24,8 @@ const SignUpMember = () => {
       await openSignUp({
         strategy: "oauth_google",
         unsafeMetadata: { role: "member" },
-        forceRedirectUrl: "member/signup-info",
+        publicMetadata: { role: "member" },
+        forceRedirectUrl: "member/generate",
         signInForceRedirectUrl: "/dashboard",
         signInUrl: "/login",
       });
@@ -58,7 +59,10 @@ const SignUpMember = () => {
           alt="Logo"
           sx={{ width: "80%", maxWidth: "300px", height: "auto", my: 4 }}
         />
-        <Typography variant="h6" sx={{ fontWeight: "bold", textAlign: "center" }}>
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: "bold", textAlign: "center" }}
+        >
           Member Site
         </Typography>
         <SignedOut>

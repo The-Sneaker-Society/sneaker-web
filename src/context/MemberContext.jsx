@@ -13,7 +13,7 @@ export const useSneakerMember = () => {
 };
 
 export const MemberProvider = ({ children }) => {
-  const { data, loading, error } = useQuery(CURRENT_MEMBER, {
+  const { data, loading, error, refetch } = useQuery(CURRENT_MEMBER, {
     fetchPolicy: "cache-first",
   });
 
@@ -23,7 +23,7 @@ export const MemberProvider = ({ children }) => {
   }, [data, loading, error]);
 
   return (
-    <MemberContext.Provider value={{ member, loading, error }}>
+    <MemberContext.Provider value={{ member, loading, error, refetch }}>
       {children}
     </MemberContext.Provider>
   );
