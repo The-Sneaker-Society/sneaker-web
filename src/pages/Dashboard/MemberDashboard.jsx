@@ -46,11 +46,11 @@ export const MemberDashboard = () => {
   return (
     <Box
       sx={{
-        height: "100%",
+        minHeight: "100vh",
         width: "100vw",
         display: "flex",
         flexDirection: "column",
-        overflow: { xs: "auto", md: "hidden" },
+        overflow: "auto",
       }}
     >
       <OnboardModal isOnboarded={isOnboarded} />
@@ -81,7 +81,6 @@ export const MemberDashboard = () => {
           flex: 1,
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          height: "100%",
         }}
       >
         {/* Left Side */}
