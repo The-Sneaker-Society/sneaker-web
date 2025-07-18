@@ -1,5 +1,3 @@
-import React from "react";
-import Grid from "@mui/material/Grid2";
 import { Box, Typography } from "@mui/material";
 import { useClerk } from "@clerk/clerk-react";
 import ContractStatusWidget from "../../components/ContractStatusWidget";
@@ -8,9 +6,10 @@ import { StripeWidget } from "../../components/StripeWidgets/StripeWidget";
 import StyledButton from "../HomePage/StyledButton";
 import { StripeSetUpWidget } from "../../components/StripeWidgets/StripeSetUpWidget";
 import { ContractListWidget } from "../ContractsPage/ContractListWidget";
-import SubscribeModal from "../../components/SubscribeModal";
+import OnboardModal from "../../components/OnboardModal";
 import { useSneakerMember } from "../../context/MemberContext";
 import { LoadingCircle } from "../../components/Loaing";
+import SubscribeModal from "../../components/SubscribeModal";
 
 export const MemberDashboard = () => {
   const { member, loading } = useSneakerMember();
@@ -41,18 +40,20 @@ export const MemberDashboard = () => {
     return <LoadingCircle />;
   }
 
-  const isSubscribed = member?.isSubscribed;
+  const isOnboarded = !member.isNewUser;
+  const isSubscribed = member.isSubscribed;
 
   return (
     <Box
       sx={{
-        height: "100%",
+        minHeight: "100vh",
         width: "100vw",
         display: "flex",
         flexDirection: "column",
-        overflow: { xs: "auto", md: "hidden" },
+        overflow: "auto",
       }}
     >
+      <OnboardModal isOnboarded={isOnboarded} />
       <SubscribeModal isSubscribed={isSubscribed} />
       <Box
         sx={{
@@ -80,7 +81,6 @@ export const MemberDashboard = () => {
           flex: 1,
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          height: "100%",
         }}
       >
         {/* Left Side */}
@@ -112,7 +112,7 @@ export const MemberDashboard = () => {
           </WidgetWrapper>
           <Box sx={{ height: "40px" }} />
           <WidgetWrapper>
-            {member?.stripeConnectAccountId ? (
+            {member?.isOnboardedWithStripe ? (
               <StripeWidget />
             ) : (
               <StripeSetUpWidget />

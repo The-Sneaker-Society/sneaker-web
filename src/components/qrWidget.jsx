@@ -5,7 +5,6 @@ import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
-// Define the query to get the current member's QR widget data
 const GET_MEMBER_QR_WIDGET_DATA = gql`
   query GetMemberQrWidgetData {
     currentMember {
@@ -54,7 +53,6 @@ export const QrWidget = () => {
   }
   if (error) return <p>Error: {error.message}</p>;
 
-  // Check if contracts are disabled
   if (data.currentMember.contractsDisabled) {
     return (
       <Box
@@ -91,60 +89,92 @@ export const QrWidget = () => {
       </Box>
     );
   }
-
-  // Extract QR data from the response
+  
   const { image, url } = data.currentMember.qrWidgetData;
+
   return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        height: "100%",
+        flexDirection: "column",
+        justifyContent: "space-around",
         width: "100%",
         borderRadius: 2,
         border: "4px solid white",
         padding: "20px",
+        gap: 4,
       }}
     >
-      <img src={image} alt="QR Code" style={{ maxWidth: "50%" }} />
+      <Box>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: "bold",
+            color: "white",
+            marginBottom: "8px",
+          }}
+        >
+          Custom Intake Link
+        </Typography>
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#aaa",
+          }}
+        >
+          Share you custom link to start getting intakes!
+        </Typography>
+      </Box>
+
       <Box
         sx={{
-          width: "50%",
           display: "flex",
-          flexDirection: "column",
+          justifyContent: "space-around",
           alignItems: "center",
-          justifyContent: "center",
-          gap: 1,
+          flexWrap: "wrap",
+          gap: 4,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography
-            component="a"
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{
-              textDecoration: "none",
-              color: "white",
-              fontWeight: "bold",
+        <Box>
+          <img
+            src={image}
+            alt="QR Code"
+            style={{
+              width: "120px",
+              height: "120px",
             }}
-          >
-            <Box
+          />
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+          }}
+        >
+          <Link href="/contract/:memberId" target="_blank">
+            <Typography
+              component="a"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
               sx={{
+                textDecoration: "none",
+                color: "white",
+                fontSize: "0.9rem",
                 display: "flex",
-                justifyContent: "center",
                 alignItems: "center",
               }}
             >
-              <Icon sx={{ paddingRight: "25px" }}>
+              <Icon sx={{ display: "flex", alignItems: "center" }}>
                 <FaLink />
               </Icon>
               Link
-            </Box>
-          </Typography>
+            </Typography>
+          </Link>
+          <ImageDownloadButton imageSrc={image} />
         </Box>
-        <ImageDownloadButton imageSrc={image} />
       </Box>
     </Box>
   );
