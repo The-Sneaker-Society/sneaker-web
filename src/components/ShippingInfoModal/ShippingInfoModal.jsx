@@ -1,13 +1,11 @@
 import { useState } from "react";
 import {
   TextField,
-  Grid2,
   CircularProgress,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Modal,
+  Box,
+  Typography,
 } from "@mui/material";
 import * as Yup from "yup";
 import StyledButton from "../../pages/HomePage/StyledButton";
@@ -91,27 +89,28 @@ const ShippingInfoModal = ({ open, onClose, onSuccess }) => {
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="sm"
-      sx={{
-        ".MuiPaper-root": {
+    <Modal open={open} onClose={onClose}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 500,
           bgcolor: "#000",
           color: "#fff",
-          padding: "40px 20px",
           borderRadius: "16px",
-        },
-      }}
-    >
-      <DialogTitle
-        variant="h3"
-        sx={{ textAlign: "center", fontWeight: "bold", color: "#fff" }}
+          p: 4,
+          boxShadow: 24,
+        }}
       >
-        Update Shipping Info
-      </DialogTitle>
-      <DialogContent>
+        <Typography
+          variant="h5"
+          align="center"
+          sx={{ mb: 2, fontWeight: "bold" }}
+        >
+          Update Shipping Info
+        </Typography>
         <Formik
           initialValues={{ carrier: "", trackingNumber: "" }}
           validationSchema={validationSchema}
@@ -119,41 +118,32 @@ const ShippingInfoModal = ({ open, onClose, onSuccess }) => {
         >
           {({ isSubmitting }) => (
             <Form>
-              <Grid2 container spacing={2} sx={{ mt: 1 }}>
-                {errorMessage && (
-                  <Grid2 item xs={12}>
-                    <Alert severity="error">{errorMessage}</Alert>
-                  </Grid2>
-                )}
-                {successMessage && (
-                  <Grid2>
-                    <Alert severity="success">{successMessage}</Alert>
-                  </Grid2>
-                )}
-                <Grid2 item xs={12}>
-                  <FormikTextField
-                    name="carrier"
-                    label="Shipping Carrier"
-                    autoFocus
-                  />
-                </Grid2>
-                <Grid2 item xs={12}>
-                  <FormikTextField
-                    name="trackingNumber"
-                    label="Tracking Number"
-                  />
-                </Grid2>
-              </Grid2>
-              <DialogActions>
+              {errorMessage && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {errorMessage}
+                </Alert>
+              )}
+              {successMessage && (
+                <Alert severity="success" sx={{ mb: 2 }}>
+                  {successMessage}
+                </Alert>
+              )}
+              <FormikTextField
+                name="carrier"
+                label="Shipping Carrier"
+                autoFocus
+              />
+              <FormikTextField name="trackingNumber" label="Tracking Number" />
+              <Box textAlign="center" mt={2}>
                 <StyledButton type="submit" disabled={isSubmitting}>
                   {isSubmitting ? <CircularProgress size={24} /> : "Confirm"}
                 </StyledButton>
-              </DialogActions>
+              </Box>
             </Form>
           )}
         </Formik>
-      </DialogContent>
-    </Dialog>
+      </Box>
+    </Modal>
   );
 };
 

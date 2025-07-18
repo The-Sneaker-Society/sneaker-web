@@ -20,6 +20,8 @@ export const ContractDetailsPage = () => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const [isModalOpen, setModalOpen] = React.useState(false);
+
   // Fetch contract data using GraphQL
   const { loading, error, data } = useQuery(GET_CONTRACT_BY_ID, {
     variables: { id },
@@ -30,7 +32,11 @@ export const ContractDetailsPage = () => {
 
   // Function to handle adding tracking information
   const handleAddTracking = () => {
-    <ShippingInfoModal />;
+    setModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
   };
 
   // Function to handle adding member notes
@@ -406,6 +412,11 @@ export const ContractDetailsPage = () => {
           <StyledButton onClick={handleSupportClick}>Support</StyledButton>
         </Box>
       </Box>
+      <ShippingInfoModal
+        open={isModalOpen}
+        onClose={handleModalClose}
+        onSuccess={handleShippingSuccess}
+      />
     </Box>
   );
 };
