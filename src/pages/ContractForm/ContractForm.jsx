@@ -9,7 +9,8 @@ import ConfirmationStep from "./ConfirmStep";
 import { useParams } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import NotAcceptingContracts from "../../components/NotAcceptingContracts";
-import LoadingCircle from "../../components/LoadingCircle";
+import { LoadingCircle } from "../../components/Loaing";
+
 
 const CREATE_CONTRACT = gql`
   mutation createContract($data: CreateContractInput!) {

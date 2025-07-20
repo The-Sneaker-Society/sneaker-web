@@ -4,6 +4,7 @@ import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { Link } from "react-router-dom";
 
 const GET_MEMBER_QR_WIDGET_DATA = gql`
   query GetMemberQrWidgetData {
@@ -11,8 +12,8 @@ const GET_MEMBER_QR_WIDGET_DATA = gql`
       qrWidgetData {
         image
         url
+        contractsDisabled
       }
-      contractsDisabled
     }
   }
 `;
