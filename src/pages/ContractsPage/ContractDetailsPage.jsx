@@ -12,7 +12,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { GET_CONTRACT_BY_ID } from "../../context/graphql/getContractDetails";
 import StyledButton from "../../pages/HomePage/StyledButton";
-import ShippingInfoModal from "../../components/ShippingInfoModal/ShippingInfoModal";
+import ShippingInfoModal from "../../components/ShippingInfoModal";
 
 export const ContractDetailsPage = () => {
   const { id } = useParams();
@@ -412,11 +412,7 @@ export const ContractDetailsPage = () => {
           <StyledButton onClick={handleSupportClick}>Support</StyledButton>
         </Box>
       </Box>
-      <ShippingInfoModal
-        open={isModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleShippingSuccess}
-      />
+      <ShippingInfoModal open={isModalOpen} onClose={handleModalClose} />
     </Box>
   );
 };

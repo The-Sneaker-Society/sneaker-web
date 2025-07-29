@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import * as Yup from "yup";
-import StyledButton from "../../pages/HomePage/StyledButton";
+import StyledButton from "../pages/HomePage/StyledButton";
 import { useMutation } from "@apollo/client";
 import { Formik, Form, useField } from "formik";
 import { gql } from "@apollo/client";
@@ -50,7 +50,7 @@ const FormikTextField = ({ name, ...props }) => {
 
 const ShippingInfoModal = ({ open, onClose, onSuccess }) => {
   const [updateShipping] = useMutation(UPDATE_SHIPPING_INFO, {
-    refetchQueries: [{ query: GET_CONTRACT_DETAILS }],
+    refetchQueries: [{ query: GET_CONTRACT_BY_ID }],
   });
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -75,10 +75,8 @@ const ShippingInfoModal = ({ open, onClose, onSuccess }) => {
         setSuccessMessage("Shipping updated successfully");
         setErrorMessage(null);
         resetForm();
-        setTimeout(() => {
-          onSuccess?.();
-          onClose();
-        }, 1500);
+        onSuccess?.();
+        onClose();
       }
     } catch (error) {
       setErrorMessage(error.message);
