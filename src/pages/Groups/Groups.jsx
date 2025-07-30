@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
+import CheckIcon from "@mui/icons-material/Check";
 
 const CreateGroupPage = () => {
   const mockUsers = [
@@ -37,6 +38,8 @@ const CreateGroupPage = () => {
       setSelectedUsers([...selectedUsers, user]);
     }
   };
+
+  const isUserSelected = (id) => selectedUsers.some((u) => u.id === id);
 
   // Filter users based on search input
   const filteredUsers = mockUsers.filter((user) =>
@@ -94,7 +97,7 @@ const CreateGroupPage = () => {
         }}
         InputProps={{ disableUnderline: true }}
       />
-      {/* Toggle view: Add button vs. Search + User List */}
+      {/* User Search / Add Section */}
       {!showUserSearch ? (
         <Box
           sx={{
@@ -108,7 +111,7 @@ const CreateGroupPage = () => {
           }}
           onClick={() => setShowUserSearch(true)}
         >
-          <Box textAlign="center" sx={{}}>
+          <Box textAlign="center">
             <Typography
               variant="body2"
               sx={{
@@ -127,15 +130,29 @@ const CreateGroupPage = () => {
         </Box>
       ) : (
         // After Add is clicked: Show search + list of users
-
-        <Box sx={{ bgcolor: "#fff", p: 2, mb: 2 }}>
+        <Box sx={{ p: 2, mb: 2 }}>
           {/* Search Input */}
           <TextField
             fullWidth
-            placeholder="Search"
+            variant="outlined"
+            label="Search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{
+              mb: 3,
+              backgroundColor: "white",
+              "& .MuiFilledInput-root": {
+                backgroundColor: "white",
+              },
+              "& .MuiInputLabel-root": {
+                color: "black",
+              },
+              "& .MuiFilledInput-input": {
+                color: "black",
+              },
+            }}
             InputProps={{
+              disableUnderline: true,
               endAdornment: (
                 <InputAdornment position="end">
                   <SearchIcon
@@ -146,7 +163,6 @@ const CreateGroupPage = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ mb: 2 }}
           />
           {/* Render filtered user list */}
           {filteredUsers.map((user) => (
@@ -161,22 +177,36 @@ const CreateGroupPage = () => {
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Avatar src={user.avatar} alt={user.name} />
-                <Typography>{user.name}</Typography>
+                <Typography
+                  sx={{
+                    color: "black",
+                  }}
+                >
+                  {user.name}
+                </Typography>
               </Box>
               <IconButton
+                onClick={() =>
+                  isUserSelected(user.id)
+                    ? setSelectedUsers(
+                        selectedUsers.filter((u) => u.id !== user.id)
+                      )
+                    : setSelectedUsers([...selectedUsers, user])
+                }
                 sx={{
-                  bgcolor: "#FFD700",
+                  bgcolor: isUserSelected(user.id) ? "#4CAF50" : "#FFD7000",
                   borderRadius: 1,
                   "&:hover": { bgcolor: "#e6c200" },
                 }}
               >
-                <AddIcon />
+                {isUserSelected(user.id) ? <CheckIcon /> : <AddIcon />}
               </IconButton>
             </Box>
           ))}
         </Box>
       )}
-      {/* Cancel & Create buttons */}
+
+      {/* Action Buttons */}
       <Box
         sx={{
           display: "flex",
@@ -187,11 +217,18 @@ const CreateGroupPage = () => {
         <Button
           variant="contained"
           sx={{ mr: 2, bgcolor: "white", color: "black", fontWeight: "bold" }}
+          onClick={() => {
+            setDescription("");
+            setSelectedUsers([]);
+            setSearchTerm("");
+            setShowUserSearch(false);
+          }}
         >
           Cancel
         </Button>
         <Button
           variant="contained"
+          onClick={handleCreate}
           sx={{
             bgcolor: "#FFD700",
             color: "black",
