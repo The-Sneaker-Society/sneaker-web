@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography } from "@mui/material";
-import MemberSignupPage from "../SignupPage/SignupPage"; // Assuming this path is correct
-import { StripeOnobarding } from "./StripeOnboarding"; // Assuming this path is correct
-import { Subscriptions } from "../PaymentStatus/Subscriptions"; // Assuming this path is correct
+import MemberSignupPage from "../SignupPage/SignupPage";
+import { StripeOnobarding } from "./StripeOnboarding";
+import { Subscriptions } from "../PaymentStatus/Subscriptions";
 import { useSneakerMember } from "../../context/MemberContext";
 import { useNavigate } from "react-router-dom";
-import { LoadingCircle } from "../../components/Loaing"; // Assuming this path is correct
-import WelcomePage from "./WelcomePage";
+import { LoadingCircle } from "../../components/LoadingCircle";
 
 export const OnboardMember = () => {
   const [activePage, setActivePage] = useState(0);
@@ -22,7 +21,7 @@ export const OnboardMember = () => {
 
   useEffect(() => {
     if (!memberLoading && member) {
-      console.log(member)
+      console.log(member);
       let determinedPage = 0;
       if (member.firstName) {
         determinedPage = 1;
@@ -34,7 +33,7 @@ export const OnboardMember = () => {
           determinedPage = 4; // All onboarding complete
         }
       }
-      console.log(determinedPage)
+      console.log(determinedPage);
 
       if (determinedPage === 4) {
         navigate("/member/dashboard", { replace: true });

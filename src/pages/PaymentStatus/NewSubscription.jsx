@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 import { useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 import { useSneakerUser } from "../../context/UserContext";
-import { LoadingCircle } from "../../components/Loaing";
+import { LoadingCircle } from "../../components/LoadingCircle";
 import SubscriptionCard from "../../components/SubscriptionCard";
 import { CREATE_MEMBER_SUBSCRIPTION } from "../../context/graphql/subscriptionQueries";
 import StyledButton from "../HomePage/StyledButton";
