@@ -2,6 +2,7 @@ import { useClerk, useUser } from "@clerk/clerk-react";
 import { Box, Typography } from "@mui/material";
 import StyledButton from "../HomePage/StyledButton";
 import GetStartedModal from "../../components/GetStartedModal";
+import ContractsDataTable from "../../components/ContractsDataTable";
 
 import { useState } from "react";
 
@@ -71,15 +72,15 @@ const UserDashboard = () => {
               height: '100%',
               border: '1px dashed #ccc',
               borderRadius: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               background: 'rgba(255,255,255,0.02)',
+              p: 2,
+              boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
             }}
           >
-            <Typography variant="body1" color="text.secondary">
-              [Table Placeholder]
-            </Typography>
+            <ContractsDataTable />
           </Box>
         </Box>
       </Box>
