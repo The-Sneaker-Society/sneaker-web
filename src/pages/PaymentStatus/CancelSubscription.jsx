@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Typography, Grid, useTheme, useMediaQuery } from "@mui/material";
 import { useMutation, useQuery } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
-import { LoadingCircle } from "../../components/Loaing";
+import { LoadingCircle } from "../../components/LoadingCircle";
 import InfoIcon from '@mui/icons-material/Info';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import CreditCardIcon from '@mui/icons-material/CreditCard';

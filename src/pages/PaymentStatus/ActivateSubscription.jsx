@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import InfoIcon from '@mui/icons-material/Info';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
-import { LoadingCircle } from "../../components/Loaing";
+import { LoadingCircle } from "../../components/LoadingCircle";
 import StyledButton from "../HomePage/StyledButton";
 import SubscriptionCard from "../../components/SubscriptionCard";
 import { GET_SUBSCRIPTION_DETAILS, REACTIVATE_SUBSCRIPTION } from "../../context/graphql/subscriptionQueries";

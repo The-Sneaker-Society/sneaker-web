@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-import { LoadingCircle } from "./Loaing";
+import { LoadingCircle } from "./LoadingCircle";
 import { Box } from "@mui/material";
 
 export const ProtectedRoute = ({

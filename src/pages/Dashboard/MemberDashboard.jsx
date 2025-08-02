@@ -8,7 +8,7 @@ import { StripeSetUpWidget } from "../../components/StripeWidgets/StripeSetUpWid
 import { ContractListWidget } from "../ContractsPage/ContractListWidget";
 import OnboardModal from "../../components/OnboardModal";
 import { useSneakerMember } from "../../context/MemberContext";
-import { LoadingCircle } from "../../components/Loaing";
+import { LoadingCircle } from "../../components/LoadingCircle";
 import SubscribeModal from "../../components/SubscribeModal";
 
 export const MemberDashboard = () => {

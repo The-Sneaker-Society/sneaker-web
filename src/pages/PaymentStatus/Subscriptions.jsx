@@ -4,7 +4,7 @@ import { useSneakerUser } from "../../context/UserContext";
 import { ActivateSubscription } from "./ActivateSubscription";
 import { CancelSubscription } from "./CancelSubscription";
 import { NewSubscription } from "./NewSubscription";
-import { LoadingCircle } from "../../components/Loaing";
+import { LoadingCircle } from "../../components/LoadingCircle";
 
 export const Subscriptions = () => {
   const { user, isSubscribed, loading } = useSneakerUser();

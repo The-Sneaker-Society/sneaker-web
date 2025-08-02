@@ -9,7 +9,7 @@ import ConfirmationStep from "./ConfirmStep";
 import { useParams } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import NotAcceptingContracts from "../../components/NotAcceptingContracts";
-import LoadingCircle from "../../components/LoadingCircle";
+import { LoadingCircle } from "../../components/LoadingCircle";
 
 const CREATE_CONTRACT = gql`
   mutation createContract($data: CreateContractInput!) {
@@ -65,7 +65,11 @@ export const ContractForm = () => {
   const { memberId } = useParams();
   const [createContract] = useMutation(CREATE_CONTRACT);
 
-  const { loading: statusLoading, error: statusError, data: statusData } = useQuery(GET_MEMBER_CONTRACT_STATUS, { variables: { memberId } });
+  const {
+    loading: statusLoading,
+    error: statusError,
+    data: statusData,
+  } = useQuery(GET_MEMBER_CONTRACT_STATUS, { variables: { memberId } });
 
   if (statusLoading) return <LoadingCircle />;
   if (statusError) return <div>Error: {statusError.message}</div>;
