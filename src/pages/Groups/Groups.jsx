@@ -7,6 +7,7 @@ import {
   Avatar,
   InputAdornment,
   IconButton,
+  Grid2,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
@@ -18,6 +19,10 @@ const CreateGroupPage = () => {
     { id: 2, name: "Jane Smith", avatar: "/avatar2.jpg" },
     { id: 3, name: "Alice Johnson", avatar: "/avatar3.jpg" },
     { id: 4, name: "Bob Lee", avatar: "/avatar4.jpg" },
+    { id: 5, name: "John Doe", avatar: "/avatar1.jpg" },
+    { id: 6, name: "Jane Smith", avatar: "/avatar2.jpg" },
+    { id: 7, name: "Alice Johnson", avatar: "/avatar3.jpg" },
+    { id: 8, name: "Bob Lee", avatar: "/avatar4.jpg" },
   ];
 
   // State to hold the group description
@@ -60,7 +65,6 @@ const CreateGroupPage = () => {
         margin: "40px auto",
         p: 4,
         bgcolor: "#f2f2f2",
-        borderRadius: "12px",
       }}
     >
       <Typography
@@ -101,8 +105,7 @@ const CreateGroupPage = () => {
       {!showUserSearch ? (
         <Box
           sx={{
-            height: 200,
-            border: "1px solid #999",
+            height: 300,
             display: "flex",
             justifyContent: "left",
             alignItems: "left",
@@ -111,7 +114,15 @@ const CreateGroupPage = () => {
           }}
           onClick={() => setShowUserSearch(true)}
         >
-          <Box textAlign="center">
+          <Box
+            sx={{
+              marginTop: "30px",
+              marginLeft: "30px",
+              border: "1px solid #999",
+              height: 100,
+              width: 100,
+            }}
+          >
             <Typography
               variant="body2"
               sx={{
@@ -164,45 +175,46 @@ const CreateGroupPage = () => {
               ),
             }}
           />
+
           {/* Render filtered user list */}
-          {filteredUsers.map((user) => (
-            <Box
-              key={user.id}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                mb: 1,
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Avatar src={user.avatar} alt={user.name} />
-                <Typography
-                  sx={{
-                    color: "black",
-                  }}
+
+          <Grid2 container spacing={2}>
+            {filteredUsers.map((user) => (
+              <Grid2 item xs={6} key={user.id}>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  p={1}
+                  mb={2}
                 >
-                  {user.name}
-                </Typography>
-              </Box>
-              <IconButton
-                onClick={() =>
-                  isUserSelected(user.id)
-                    ? setSelectedUsers(
-                        selectedUsers.filter((u) => u.id !== user.id)
-                      )
-                    : setSelectedUsers([...selectedUsers, user])
-                }
-                sx={{
-                  bgcolor: isUserSelected(user.id) ? "#4CAF50" : "#FFD7000",
-                  borderRadius: 1,
-                  "&:hover": { bgcolor: "#e6c200" },
-                }}
-              >
-                {isUserSelected(user.id) ? <CheckIcon /> : <AddIcon />}
-              </IconButton>
-            </Box>
-          ))}
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Avatar src={user.avatar} alt={user.name} />
+                    <Typography color="black">{user.name}</Typography>
+                  </Box>
+                  <IconButton
+                    onClick={() =>
+                      isUserSelected(user.id)
+                        ? setSelectedUsers(
+                            selectedUsers.filter((u) => u.id !== user.id)
+                          )
+                        : setSelectedUsers([...selectedUsers, user])
+                    }
+                    sx={{
+                      bgcolor: isUserSelected(user.id) ? "#4CAF50" : "#FFD100",
+                      "&:hover": {
+                        bgcolor: isUserSelected(user.id)
+                          ? "#45A049"
+                          : "#FFC300",
+                      },
+                    }}
+                  >
+                    {isUserSelected(user.id) ? <CheckIcon /> : <AddIcon />}
+                  </IconButton>
+                </Box>
+              </Grid2>
+            ))}
+          </Grid2>
         </Box>
       )}
 
@@ -230,7 +242,7 @@ const CreateGroupPage = () => {
           variant="contained"
           onClick={handleCreate}
           sx={{
-            bgcolor: "#FFD700",
+            bgcolor: "#FFD100",
             color: "black",
             fontWeight: "bold",
           }}
