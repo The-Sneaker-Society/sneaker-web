@@ -1,6 +1,5 @@
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { Box, Typography } from "@mui/material";
-import StyledButton from "../HomePage/StyledButton";
 import GetStartedModal from "../../components/GetStartedModal";
 import ContractsDataTable from "../../components/ContractsDataTable";
 
