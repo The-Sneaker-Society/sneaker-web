@@ -12,13 +12,11 @@ import StyledButton from "../pages/HomePage/StyledButton";
 import { useMutation } from "@apollo/client";
 import { Formik, Form, useField } from "formik";
 import { gql } from "@apollo/client";
+import { GET_CONTRACT_BY_ID } from "../context/graphql/getContractDetails";
 
 const UPDATE_SHIPPING_INFO = gql`
-  mutation UpdateShippingInfo($data: ShippingInput!) {
-    updateShippingInfo(data: $data) {
-      trackingNumber
-      carrier
-    }
+  mutation UpdateContract($id: ID!, $data: UpdateContractInput!) {
+    updateContract(id: $id, data: $data)
   }
 `;
 
@@ -48,9 +46,14 @@ const FormikTextField = ({ name, ...props }) => {
   );
 };
 
-const ShippingInfoModal = ({ open, onClose, onSuccess }) => {
+const ShippingInfoModal = ({ open, onClose, onSuccess, contractId }) => {
   const [updateShipping] = useMutation(UPDATE_SHIPPING_INFO, {
-    refetchQueries: [{ query: GET_CONTRACT_BY_ID }],
+    refetchQueries: [
+      {
+        query: GET_CONTRACT_BY_ID,
+        variables: { id: contractId },
+      },
+    ],
   });
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -64,14 +67,17 @@ const ShippingInfoModal = ({ open, onClose, onSuccess }) => {
     try {
       const { data } = await updateShipping({
         variables: {
+          id: contractId,
           data: {
-            carrier: values.carrier,
-            trackingNumber: values.trackingNumber,
+            trackingNumber: {
+              carrier: values.carrier,
+              trackingNumber: values.trackingNumber,
+            },
           },
         },
       });
 
-      if (data?.updateShippingInfo) {
+      if (data?.updateContract === true) {
         setSuccessMessage("Shipping updated successfully");
         setErrorMessage(null);
         resetForm();

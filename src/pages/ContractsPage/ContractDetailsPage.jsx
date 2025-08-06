@@ -412,7 +412,11 @@ export const ContractDetailsPage = () => {
           <StyledButton onClick={handleSupportClick}>Support</StyledButton>
         </Box>
       </Box>
-      <ShippingInfoModal open={isModalOpen} onClose={handleModalClose} />
+      <ShippingInfoModal
+        open={isModalOpen}
+        onClose={handleModalClose}
+        contractId={id}
+      />
     </Box>
   );
 };
