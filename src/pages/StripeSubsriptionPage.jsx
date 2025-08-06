@@ -3,7 +3,7 @@ import { Box, Typography } from "@mui/material";
 import { MdCurrencyExchange } from "react-icons/md";
 import StyledButton from "./HomePage/StyledButton";
 import { gql, useMutation } from "@apollo/client";
-import { LoadingCircle } from "../components/Loaing";
+import { LoadingCircle } from "../components/LoadingCircle";
 import { useNavigate } from "react-router-dom";
 import { useSneakerUser } from "../context/UserContext";
 

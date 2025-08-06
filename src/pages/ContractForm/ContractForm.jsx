@@ -7,12 +7,22 @@ import ShoeInfoStep from "./ShoeInfoStep";
 import ImageUploadStep from "./ImageUploadStep";
 import ConfirmationStep from "./ConfirmStep";
 import { useParams } from "react-router-dom";
-import { gql, useMutation } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
+import NotAcceptingContracts from "../../components/NotAcceptingContracts";
+import { LoadingCircle } from "../../components/LoadingCircle";
 
 const CREATE_CONTRACT = gql`
   mutation createContract($data: CreateContractInput!) {
     createContract(data: $data) {
       id
+    }
+  }
+`;
+
+const GET_MEMBER_CONTRACT_STATUS = gql`
+  query GetMemberContractStatus($memberId: ID!) {
+    member(id: $memberId) {
+      contractsDisabled
     }
   }
 `;
@@ -55,6 +65,16 @@ export const ContractForm = () => {
   const { memberId } = useParams();
   const [createContract] = useMutation(CREATE_CONTRACT);
 
+  const {
+    loading: statusLoading,
+    error: statusError,
+    data: statusData,
+  } = useQuery(GET_MEMBER_CONTRACT_STATUS, { variables: { memberId } });
+
+  if (statusLoading) return <LoadingCircle />;
+  if (statusError) return <div>Error: {statusError.message}</div>;
+  if (statusData?.member?.contractsDisabled) return <NotAcceptingContracts />;
+
   const steps = ["Shoe Information", "Image Upload", "Confirmation"];
 
   const validationSchemas = [ShoeInfoSchema];
@@ -62,7 +82,6 @@ export const ContractForm = () => {
   const handleNext = (values, { setTouched, setSubmitting }) => {
     setTouched({});
     setSubmitting(false);
-    console.log(`Step ${activeStep + 1} Values:`, values);
     setActiveStep((prevStep) => prevStep + 1);
   };
 

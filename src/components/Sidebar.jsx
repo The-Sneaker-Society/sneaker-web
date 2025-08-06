@@ -16,7 +16,6 @@ import {
 } from "@mui/icons-material";
 import SidebarItem from "./SidebarItem";
 import Logo from "../assets/ss-logo-black.svg";
-import StyledButton from "../pages/HomePage/StyledButton";
 import SettingsModal from "./SettingsModal";
 
 const Sidebar = () => {
@@ -51,7 +50,7 @@ const Sidebar = () => {
         color="inherit"
         aria-label="menu"
         onClick={toggleDrawer(true)}
-        sx={{ display: open ? "none" : "block", display: { xs: "block", sm: "none" }, position: "absolute", left: 0 }}
+        sx={{ display: open ? "none" : "block", position: "absolute", left: 0 }}
       >
         <Menu />
       </IconButton>

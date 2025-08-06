@@ -1,7 +1,9 @@
-import { Box, Icon, Typography, Skeleton, Link } from "@mui/material";
+import React from "react";
+import { Box, Icon, Typography, Skeleton, Alert } from "@mui/material";
 import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 const GET_MEMBER_QR_WIDGET_DATA = gql`
   query GetMemberQrWidgetData {
@@ -10,6 +12,7 @@ const GET_MEMBER_QR_WIDGET_DATA = gql`
         image
         url
       }
+      contractsDisabled
     }
   }
 `;
@@ -50,6 +53,43 @@ export const QrWidget = () => {
   }
   if (error) return <p>Error: {error.message}</p>;
 
+  if (data.currentMember.contractsDisabled) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          width: "100%",
+          borderRadius: 2,
+          border: "4px solid white",
+          padding: "20px",
+          backgroundColor: "#121212",
+        }}
+      >
+        <WarningAmberIcon
+          sx={{
+            fontSize: 60,
+            color: "#FFD700",
+            mb: 2
+          }}
+        />
+        <Typography
+          variant="h5"
+          sx={{
+            color: "white",
+            fontWeight: "bold",
+            textAlign: "center"
+          }}
+        >
+          New Contracts Disabled
+        </Typography>
+      </Box>
+    );
+  }
+  
   const { image, url } = data.currentMember.qrWidgetData;
 
   return (
@@ -138,4 +178,4 @@ export const QrWidget = () => {
       </Box>
     </Box>
   );
-};
+}; 
