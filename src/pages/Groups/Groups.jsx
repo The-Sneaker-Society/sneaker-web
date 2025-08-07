@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -7,248 +7,232 @@ import {
   Avatar,
   InputAdornment,
   IconButton,
-  Grid2,
+  Stack,
+  Divider,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 
 const CreateGroupPage = () => {
-  const mockUsers = [
-    { id: 1, name: "John Doe", avatar: "/avatar1.jpg" },
-    { id: 2, name: "Jane Smith", avatar: "/avatar2.jpg" },
-    { id: 3, name: "Alice Johnson", avatar: "/avatar3.jpg" },
-    { id: 4, name: "Bob Lee", avatar: "/avatar4.jpg" },
-    { id: 5, name: "John Doe", avatar: "/avatar1.jpg" },
-    { id: 6, name: "Jane Smith", avatar: "/avatar2.jpg" },
-    { id: 7, name: "Alice Johnson", avatar: "/avatar3.jpg" },
-    { id: 8, name: "Bob Lee", avatar: "/avatar4.jpg" },
+  const [groupName, setGroupName] = useState("");
+  const [groupDescription, setGroupDescription] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [groupAvatar, setGroupAvatar] = useState(null);
+
+  const users = [
+    { id: "1", name: "Alice" },
+    { id: "2", name: "Bob" },
+    { id: "3", name: "Charlie" },
+    { id: "4", name: "Diana" },
   ];
 
-  // State to hold the group description
-  const [description, setDescription] = useState("");
-
-  // State to show/hide the user search panel
-  const [showUserSearch, setShowUserSearch] = useState(false);
-
-  // State for search input (to filter users)
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // State for selected users
-  const [selectedUsers, setSelectedUsers] = useState([]);
-
-  // Handle adding a user to selected list
-  const handleAddUser = (user) => {
-    if (!selectedUsers.some((u) => u.id === user.id)) {
-      setSelectedUsers([...selectedUsers, user]);
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setGroupAvatar(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const isUserSelected = (id) => selectedUsers.some((u) => u.id === id);
+  const handleAddUser = (user) => {
+    if (selectedUsers.includes(user.id)) {
+      setSelectedUsers(selectedUsers.filter((id) => id !== user.id));
+    } else {
+      setSelectedUsers([...selectedUsers, user.id]);
+    }
+  };
 
-  // Filter users based on search input
-  const filteredUsers = mockUsers.filter((user) =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const isUserSelected = (id) => selectedUsers.includes(id);
 
-  // Handle create group (submit)
   const handleCreate = () => {
-    console.log("Group Description:", description);
-    console.log("Selected Users:", selectedUsers);
-    // Submit logic here
+    console.log("Creating group:", {
+      groupName,
+      groupDescription,
+      selectedUsers,
+      groupAvatar,
+    });
+    // submit logic here
+  };
+
+  const handleCancel = () => {
+    setGroupName("");
+    setGroupDescription("");
+    setSearchQuery("");
+    setSelectedUsers([]);
+    setGroupAvatar(null);
   };
 
   return (
     <Box
       sx={{
-        width: 500,
-        margin: "40px auto",
-        p: 4,
-        bgcolor: "#f2f2f2",
+        minHeight: "100vh",
+        py: 6,
       }}
     >
-      <Typography
-        variant="h2"
-        fontWeight="bold"
-        align="center"
-        mb={3}
-        sx={{
-          color: "black",
-        }}
-      >
-        New Group
-      </Typography>
-
-      {/* Description Input */}
-      <TextField
-        fullWidth
-        variant="filled"
-        label="Description..."
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        sx={{
-          mb: 3,
-          backgroundColor: "white",
-          "& .MuiFilledInput-root": {
-            backgroundColor: "white",
-          },
-          "& .MuiInputLabel-root": {
-            color: "black",
-          },
-          "& .MuiFilledInput-input": {
-            color: "black",
-          },
-        }}
-        InputProps={{ disableUnderline: true }}
-      />
-      {/* User Search / Add Section */}
-      {!showUserSearch ? (
-        <Box
-          sx={{
-            height: 300,
-            display: "flex",
-            justifyContent: "left",
-            alignItems: "left",
-            cursor: "pointer",
-            bgcolor: "#fff",
-          }}
-          onClick={() => setShowUserSearch(true)}
-        >
-          <Box
-            sx={{
-              marginTop: "30px",
-              marginLeft: "30px",
-              border: "1px solid #999",
-              height: 100,
-              width: 100,
-            }}
-          >
-            <Typography
-              variant="body2"
-              sx={{
-                color: "black",
-              }}
-            >
-              Add
-            </Typography>
-            <AddIcon
-              fontSize="large"
-              sx={{
-                color: "black",
-              }}
-            />
-          </Box>
-        </Box>
-      ) : (
-        // After Add is clicked: Show search + list of users
-        <Box sx={{ p: 2, mb: 2 }}>
-          {/* Search Input */}
-          <TextField
-            fullWidth
-            variant="outlined"
-            label="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{
-              mb: 3,
-              backgroundColor: "white",
-              "& .MuiFilledInput-root": {
-                backgroundColor: "white",
-              },
-              "& .MuiInputLabel-root": {
-                color: "black",
-              },
-              "& .MuiFilledInput-input": {
-                color: "black",
-              },
-            }}
-            InputProps={{
-              disableUnderline: true,
-              endAdornment: (
-                <InputAdornment position="end">
-                  <SearchIcon
-                    sx={{
-                      color: "black",
-                    }}
-                  />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          {/* Render filtered user list */}
-
-          <Grid2 container spacing={2}>
-            {filteredUsers.map((user) => (
-              <Grid2 item xs={6} key={user.id}>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  p={1}
-                  mb={2}
-                >
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Avatar src={user.avatar} alt={user.name} />
-                    <Typography color="black">{user.name}</Typography>
-                  </Box>
-                  <IconButton
-                    onClick={() =>
-                      isUserSelected(user.id)
-                        ? setSelectedUsers(
-                            selectedUsers.filter((u) => u.id !== user.id)
-                          )
-                        : setSelectedUsers([...selectedUsers, user])
-                    }
-                    sx={{
-                      bgcolor: isUserSelected(user.id) ? "#4CAF50" : "#FFD100",
-                      "&:hover": {
-                        bgcolor: isUserSelected(user.id)
-                          ? "#45A049"
-                          : "#FFC300",
-                      },
-                    }}
-                  >
-                    {isUserSelected(user.id) ? <CheckIcon /> : <AddIcon />}
-                  </IconButton>
-                </Box>
-              </Grid2>
-            ))}
-          </Grid2>
-        </Box>
-      )}
-
-      {/* Action Buttons */}
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          mt: 3,
+          width: 500,
+          mx: "auto",
+          p: 4,
+          bgcolor: "gray",
+          borderRadius: "20px",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <Button
-          variant="contained"
-          sx={{ mr: 2, bgcolor: "white", color: "black", fontWeight: "bold" }}
-          onClick={() => {
-            setDescription("");
-            setSelectedUsers([]);
-            setSearchTerm("");
-            setShowUserSearch(false);
-          }}
+        <Typography
+          variant="h2"
+          fontWeight="600"
+          align="center"
+          mb={3}
+          color="white"
         >
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleCreate}
-          sx={{
-            bgcolor: "#FFD100",
-            color: "black",
-            fontWeight: "bold",
+          Create a Group
+        </Typography>
+
+        {/* Avatar Upload */}
+        <Box textAlign="center" mb={3}>
+          <input
+            accept="image/*"
+            style={{ display: "none" }}
+            id="upload-avatar"
+            type="file"
+            onChange={handleAvatarUpload}
+          />
+          <label htmlFor="upload-avatar">
+            <IconButton component="span">
+              <Avatar
+                src={groupAvatar || ""}
+                sx={{ width: 80, height: 80, mx: "auto" }}
+              />
+            </IconButton>
+          </label>
+          <Typography variant="h5" color="textSecondary">
+            Upload Group Photo
+          </Typography>
+        </Box>
+
+        {/* Group Name Input */}
+        <TextField
+          fullWidth
+          variant="filled"
+          label="Name your group"
+          value={groupName}
+          onChange={(e) => setGroupName(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+
+        {/* Description Input */}
+        <TextField
+          fullWidth
+          variant="filled"
+          label="Describe your group"
+          value={groupDescription}
+          onChange={(e) => setGroupDescription(e.target.value)}
+          sx={{ mb: 3 }}
+          multiline
+          rows={3}
+        />
+
+        {/* Search Field */}
+        <TextField
+          fullWidth
+          variant="filled"
+          placeholder="Search users..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ mb: 2 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
           }}
-        >
-          Create
-        </Button>
+        />
+
+        {/* Filtered Users */}
+        <Box sx={{ maxHeight: 200, overflowY: "auto", mb: 3 }}>
+          {users
+            .filter((user) =>
+              user.name.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .map((user) => (
+              <Stack
+                key={user.id}
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{ py: 1 }}
+              >
+                <Typography>{user.name}</Typography>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => handleAddUser(user)}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 500,
+                    backgroundColor: isUserSelected(user.id)
+                      ? "#d0f0d0"
+                      : "#4a90e2",
+                    color: isUserSelected(user.id) ? "#333" : "#fff",
+                    "&:hover": {
+                      backgroundColor: isUserSelected(user.id)
+                        ? "#c8e6c9"
+                        : "#3f7ecb",
+                    },
+                  }}
+                >
+                  {isUserSelected(user.id) ? (
+                    <>
+                      <CheckIcon fontSize="small" sx={{ mr: 0.5 }} />
+                      Added
+                    </>
+                  ) : (
+                    <>
+                      <AddIcon fontSize="small" sx={{ mr: 0.5 }} />
+                      Add
+                    </>
+                  )}
+                </Button>
+              </Stack>
+            ))}
+        </Box>
+
+        <Divider sx={{ my: 3 }} />
+
+        {/* Action Buttons */}
+        <Box textAlign="right">
+          <Button
+            onClick={handleCancel}
+            variant="contained"
+            sx={{
+              mr: 2,
+              backgroundColor: "white",
+              color: "black",
+              fontWeight: 600,
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleCreate}
+            sx={{
+              backgroundColor: "#FFD100",
+              textTransform: "none",
+              fontWeight: 600,
+              color: "black",
+            }}
+          >
+            Create
+          </Button>
+        </Box>
       </Box>
     </Box>
   );
