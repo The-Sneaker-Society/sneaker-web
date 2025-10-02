@@ -14,7 +14,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
-import { gql } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 
 const CreateGroupModal = ({ isCreated }) => {
   const [groupName, setGroupName] = useState("");
@@ -34,7 +34,61 @@ const CreateGroupModal = ({ isCreated }) => {
     }
   };
 
-  // const CREATE_NEW_GROUP = gql``;
+  const CREATE_GROUP = gql`
+    mutation CreateGroup(
+      $name: String!
+      $description: String
+      $avatar: String
+      $memberIds: [ID!]
+    ) {
+      createGroup(
+        name: $name
+        description: $description
+        avatar: $avatar
+        memberIds: $memberIds
+      ) {
+        id
+        name
+        description
+        avatar
+        members {
+          id
+          name
+          email
+        }
+        createdAt
+      }
+    }
+  `;
+
+  const [createGroup, { data, loading, error }] = useMutation(CREATE_GROUP);
+
+  const handleCreate = () => {
+    createGroup({
+      variables: {
+        name: groupName,
+        description: groupDescription,
+        avatar: groupAvatar,
+        memberIds: selectedUsers,
+      },
+    })
+      .then((response) => {
+        console.log("Group created:", response.data.createGroup);
+        // handle post-success (e.g., close modal, reset form)
+      })
+      .catch((err) => {
+        console.error("Error creating group:", err);
+        // handle error UI feedback
+      });
+  };
+
+  const handleCancel = () => {
+    setGroupName("");
+    setGroupDescription("");
+    setSearchQuery("");
+    setSelectedUsers([]);
+    setGroupAvatar(null);
+  };
 
   const handleAddUser = (user) => {
     if (selectedUsers.includes(user.id)) {
@@ -45,24 +99,6 @@ const CreateGroupModal = ({ isCreated }) => {
   };
 
   const isUserSelected = (id) => selectedUsers.includes(id);
-
-  const handleCreate = () => {
-    console.log("Creating group:", {
-      groupName,
-      groupDescription,
-      selectedUsers,
-      groupAvatar,
-    });
-    // submit logic here
-  };
-
-  const handleCancel = () => {
-    setGroupName("");
-    setGroupDescription("");
-    setSearchQuery("");
-    setSelectedUsers([]);
-    setGroupAvatar(null);
-  };
 
   const user = [];
 
