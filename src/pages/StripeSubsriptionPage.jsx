@@ -5,7 +5,7 @@ import StyledButton from "./HomePage/StyledButton";
 import { gql, useMutation } from "@apollo/client";
 import { LoadingCircle } from "../components/LoadingCircle";
 import { useNavigate } from "react-router-dom";
-import { useSneakerUser } from "../context/UserContext";
+import { useSneakerMember } from "../context/MemberContext";
 
 const CREATE_MEMBER_SUBSCRIPTION = gql`
   mutation CreateMemberSubsctiprion {
@@ -15,7 +15,8 @@ const CREATE_MEMBER_SUBSCRIPTION = gql`
 
 const StripeSubsriptionPage = () => {
   const navigate = useNavigate();
-  const { user, isSubscribed } = useSneakerUser();
+  const { member } = useSneakerMember();
+  const isSubscribed = member?.isSubscribed;
 
   const [createSubscription, { loading }] = useMutation(
     CREATE_MEMBER_SUBSCRIPTION
@@ -23,21 +24,35 @@ const StripeSubsriptionPage = () => {
 
   useEffect(() => {
     // Member that once was a customer and not subscribed.
-    if (user.stripeCustomerId && !isSubscribed) {
+    if (member?.stripeCustomerId && !isSubscribed) {
       navigate("/member/subscriptions");
     }
 
-    if (user.stripeCustomerId && isSubscribed) {
+    if (member?.stripeCustomerId && isSubscribed) {
       navigate("/dashboard");
     }
-  }, [user, navigate]);
+  }, [member, isSubscribed, navigate]);
 
   const handleSubscriptionClick = async () => {
-    await createSubscription({
-      onCompleted: (data) => {
-        window.location.href = data.createMemberSubsctiprion;
-      },
-    });
+    try {
+      await createSubscription({
+        onCompleted: (data) => {
+          if (data && data.createMemberSubsctiprion) {
+            window.location.href = data.createMemberSubsctiprion;
+          } else {
+            console.error("Error: createMemberSubsctiprion is missing in the response.", data);
+            alert("Failed to create subscription. Please try again.");
+          }
+        },
+        onError: (error) => {
+          console.error("Error creating subscription:", error);
+          alert("Failed to create subscription. Please try again.");
+        }
+      });
+    } catch (err) {
+      console.error("Error creating subscription:", err);
+      alert("Failed to create subscription. Please try again.");
+    }
   };
 
   return (
@@ -99,7 +114,7 @@ const StripeSubsriptionPage = () => {
           },
         }}
       >
-        {loading ? <LoadingCircle /> : "Start Subsctiption"}
+        {loading ? <LoadingCircle /> : "Start Subscription"}
       </StyledButton>
     </Box>
   );
