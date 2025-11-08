@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 
-// Dummy group data
+// Dummy group data (unchanged)
 const dummyGroup = {
   name: "Sneakerheads United",
   description: "A group for sneaker customizers and collectors.",
@@ -33,28 +33,46 @@ const dummyGroup = {
   ],
 };
 
-// Dummy posts data
-const mockPosts = [
+// Posts from MySociety for consistency
+const mysocietyPosts = [
   {
     id: 1,
-    user: { avatar: "", name: "Username" },
-    content:
-      "Just got some new kicks to customize! Can’t wait to show the after!",
-    images: ["https://img1.jpg", "https://img2.jpg"],
+    username: "Username",
+    caption:
+      "Just got some new kicks to customize! Can't wait to show the after!",
+    images: [
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=300&h=300&fit=crop",
+    ],
     likes: 20,
     comments: 10,
     shares: 11,
   },
   {
     id: 2,
-    user: { avatar: "", name: "Username" },
-    content: "Lorem ipsum dolor sit amet, consectetur...",
-    images: [],
+    username: "Username",
+    caption:
+      "Just got some new kicks to customize! Can't wait to show the after!",
+    images: [
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=300&h=300&fit=crop",
+    ],
     likes: 20,
     comments: 10,
     shares: 11,
   },
 ];
+
+// Mapped to match the NewGroupPage post data shape
+const mockPosts = mysocietyPosts.map((post) => ({
+  id: post.id,
+  user: { avatar: "", name: post.username },
+  content: post.caption,
+  images: post.images,
+  likes: post.likes,
+  comments: post.comments,
+  shares: post.shares,
+}));
 
 const NewGroupPage = () => {
   const [isJoined, setIsJoined] = useState(true);
@@ -107,7 +125,6 @@ const NewGroupPage = () => {
         {/* Avatars of members */}
         <Stack direction="row" spacing={-1} sx={{ mt: 1 }}>
           <AvatarGroup max={5}>
-            {" "}
             {dummyGroup.members.map((member) => (
               <Avatar
                 key={member.id}
@@ -223,6 +240,26 @@ const NewGroupPage = () => {
         </Box>
       )}
 
+      {/* Add image preview right here: */}
+      {imageSrcs.length > 0 && (
+        <Stack direction="row" spacing={2} mb={2}>
+          {imageSrcs.map((src, i) => (
+            <Box
+              component="img"
+              key={i}
+              src={src}
+              alt={`preview-${i}`}
+              sx={{
+                width: 90,
+                height: 90,
+                borderRadius: 1,
+                objectFit: "cover",
+              }}
+            />
+          ))}
+        </Stack>
+      )}
+
       {/* Posts */}
       <Box>
         {mockPosts.length === 0 ? (
@@ -240,14 +277,19 @@ const NewGroupPage = () => {
                 <Typography fontWeight={600}>{post.user.name}</Typography>
               </Stack>
               <Typography mt={1}>{post.content}</Typography>
-              {post.images.length > 0 && (
+              {post.images && post.images.length > 0 && (
                 <Stack direction="row" spacing={2} mt={2}>
                   {post.images.map((img, i) => (
                     <Box
                       component="img"
                       key={i}
                       src={img}
-                      sx={{ width: 90, borderRadius: 1 }}
+                      sx={{
+                        width: 90,
+                        height: 90,
+                        borderRadius: 1,
+                        objectFit: "cover",
+                      }}
                     />
                   ))}
                 </Stack>
