@@ -1,69 +1,109 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
   Typography,
   TextField,
   Avatar,
-  InputAdornment,
   IconButton,
   Stack,
   Modal,
-  Divider,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
-import { gql, useMutation } from "@apollo/client";
+import { gql, useMutation, useLazyQuery } from "@apollo/client";
 
-const CreateGroupModal = ({ isCreated }) => {
+const CREATE_GROUP = gql`
+  mutation CreateGroup(
+    $name: String!
+    $description: String
+    $avatar: String
+    $memberIds: [ID!]
+  ) {
+    createGroup(
+      name: $name
+      description: $description
+      avatar: $avatar
+      memberIds: $memberIds
+    ) {
+      id
+      name
+      description
+      avatar
+      members {
+        id
+        firstName
+        lastName
+        email
+      }
+      createdAt
+    }
+  }
+`;
+
+const GET_MEMBERS = gql`
+  query Members($searchTerm: String) {
+    members(searchTerm: $searchTerm) {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+`;
+
+const GroupCreationModal = ({ open, onClose }) => {
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState([]);
   const [groupAvatar, setGroupAvatar] = useState(null);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const handleAvatarUpload = (e) => {
-    const file = e.target.files?.[0];
+  const [createGroup, { loading: creating, error: createError }] = useMutation(
+    CREATE_GROUP,
+    {
+      onCompleted: () => {
+        setGroupName("");
+        setGroupDescription("");
+        setGroupAvatar(null);
+        setSelectedUsers([]);
+        setSearchTerm("");
+        onClose();
+      },
+    }
+  );
+
+  const [fetchMembers, { data, loading: membersLoading }] =
+    useLazyQuery(GET_MEMBERS);
+
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      fetchMembers({ variables: { searchTerm } });
+    }
+  }, [searchTerm, fetchMembers]);
+
+  const toggleUserSelection = (id) => {
+    if (selectedUsers.includes(id)) {
+      setSelectedUsers(selectedUsers.filter((uid) => uid !== id));
+    } else {
+      setSelectedUsers([...selectedUsers, id]);
+    }
+  };
+
+  const handleAvatarUpload = (event) => {
+    const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setGroupAvatar(reader.result);
-      };
+      reader.onloadend = () => setGroupAvatar(reader.result);
       reader.readAsDataURL(file);
     }
   };
 
-  const CREATE_GROUP = gql`
-    mutation CreateGroup(
-      $name: String!
-      $description: String
-      $avatar: String
-      $memberIds: [ID!]
-    ) {
-      createGroup(
-        name: $name
-        description: $description
-        avatar: $avatar
-        memberIds: $memberIds
-      ) {
-        id
-        name
-        description
-        avatar
-        members {
-          id
-          name
-          email
-        }
-        createdAt
-      }
-    }
-  `;
-
-  const [createGroup, { data, loading, error }] = useMutation(CREATE_GROUP);
-
   const handleCreate = () => {
+    if (!groupName || selectedUsers.length === 0) {
+      alert("Please enter a group name and select at least one member.");
+      return;
+    }
     createGroup({
       variables: {
         name: groupName,
@@ -71,205 +111,139 @@ const CreateGroupModal = ({ isCreated }) => {
         avatar: groupAvatar,
         memberIds: selectedUsers,
       },
-    })
-      .then((response) => {
-        console.log("Group created:", response.data.createGroup);
-        // handle post-success (e.g., close modal, reset form)
-      })
-      .catch((err) => {
-        console.error("Error creating group:", err);
-        // handle error UI feedback
-      });
+    });
   };
 
-  const handleCancel = () => {
-    setGroupName("");
-    setGroupDescription("");
-    setSearchQuery("");
-    setSelectedUsers([]);
-    setGroupAvatar(null);
-  };
-
-  const handleAddUser = (user) => {
-    if (selectedUsers.includes(user.id)) {
-      setSelectedUsers(selectedUsers.filter((id) => id !== user.id));
-    } else {
-      setSelectedUsers([...selectedUsers, user.id]);
-    }
-  };
-
-  const isUserSelected = (id) => selectedUsers.includes(id);
-
-  const user = [];
+  const users = data?.members || [];
 
   return (
-    <Modal open={!isCreated}>
+    <Modal open={open} onClose={onClose}>
       <Box
         sx={{
-          minHeight: "100vh",
-          py: 3,
-          alignContent: "center",
-          justifyItems: "center",
+          maxWidth: 400,
+          p: 3,
+          bgcolor: "background.paper",
+          mx: "auto",
+          mt: "10vh",
+          borderRadius: 2,
+          maxHeight: "80vh",
+          overflowY: "auto",
         }}
       >
-        <Box
-          sx={{
-            width: "90vw",
-            maxWidth: 400,
-            p: 3,
-            bgcolor: "background.paper",
-            borderRadius: "20px",
-            border: "2px solid #000",
-            boxShadow: 24,
-          }}
-        >
-          <Typography
-            variant="h2"
-            fontWeight="600"
-            align="center"
-            mb={3}
-            color="#FFD100"
-          >
-            Create a Group
+        <Typography variant="h4" mb={2} align="center">
+          Create a Group
+        </Typography>
+
+        <Box textAlign="center" mb={2}>
+          <input
+            accept="image/*"
+            style={{ display: "none" }}
+            id="upload-avatar"
+            type="file"
+            onChange={handleAvatarUpload}
+          />
+          <label htmlFor="upload-avatar">
+            <IconButton component="span">
+              <Avatar
+                src={groupAvatar || ""}
+                sx={{ width: 80, height: 80, mx: "auto" }}
+              />
+            </IconButton>
+          </label>
+          <Typography variant="caption" display="block">
+            Upload Group Photo
           </Typography>
-
-          {/* Avatar Upload */}
-          <Box textAlign="center" mb={3}>
-            <input
-              accept="image/*"
-              style={{ display: "none" }}
-              id="upload-avatar"
-              type="file"
-              onChange={handleAvatarUpload}
-            />
-            <label htmlFor="upload-avatar">
-              <IconButton component="span">
-                <Avatar
-                  src={groupAvatar || ""}
-                  sx={{ width: 80, height: 80, mx: "auto" }}
-                />
-              </IconButton>
-            </label>
-            <Typography variant="h5" color="textSecondary">
-              Upload Group Photo
-            </Typography>
-          </Box>
-
-          {/* Group Name Input */}
-          <TextField
-            fullWidth
-            variant="filled"
-            label="Name your group"
-            value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-
-          {/* Description Input */}
-          <TextField
-            fullWidth
-            variant="filled"
-            label="Describe your group"
-            value={groupDescription}
-            onChange={(e) => setGroupDescription(e.target.value)}
-            sx={{ mb: 3 }}
-            multiline
-            rows={3}
-          />
-
-          {/* Search Field */}
-          <TextField
-            fullWidth
-            variant="filled"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ mb: 2 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          {/* Filtered Users */}
-          <Box sx={{ maxHeight: 200, overflowY: "auto", mb: 3 }}>
-            <Stack
-              key={user.id}
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{ py: 1 }}
-            >
-              <Typography>{user.name}</Typography>
-              <Button
-                variant="contained"
-                size="small"
-                onClick={() => handleAddUser(user)}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 500,
-                  backgroundColor: isUserSelected(user.id)
-                    ? "#d0f0d0"
-                    : "#4a90e2",
-                  color: isUserSelected(user.id) ? "#333" : "#fff",
-                  "&:hover": {
-                    backgroundColor: isUserSelected(user.id)
-                      ? "#c8e6c9"
-                      : "#3f7ecb",
-                  },
-                }}
-              >
-                {isUserSelected(user.id) ? (
-                  <>
-                    <CheckIcon fontSize="small" sx={{ mr: 0.5 }} />
-                    Added
-                  </>
-                ) : (
-                  <>
-                    <AddIcon fontSize="small" sx={{ mr: 0.5 }} />
-                    Add
-                  </>
-                )}
-              </Button>
-            </Stack>
-          </Box>
-
-          <Divider sx={{ my: 3 }} />
-
-          {/* Action Buttons */}
-          <Box textAlign="right">
-            <Button
-              onClick={handleCancel}
-              variant="contained"
-              sx={{
-                mr: 2,
-                backgroundColor: "white",
-                color: "black",
-                fontWeight: 600,
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleCreate}
-              sx={{
-                backgroundColor: "#FFD100",
-                textTransform: "none",
-                fontWeight: 600,
-                color: "black",
-              }}
-            >
-              Create
-            </Button>
-          </Box>
         </Box>
+
+        <TextField
+          fullWidth
+          label="Group Name"
+          variant="outlined"
+          value={groupName}
+          onChange={(e) => setGroupName(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+
+        <TextField
+          fullWidth
+          label="Description"
+          variant="outlined"
+          multiline
+          rows={3}
+          value={groupDescription}
+          onChange={(e) => setGroupDescription(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+
+        <TextField
+          fullWidth
+          label="Search Members"
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ mb: 1 }}
+        />
+
+        <Stack sx={{ maxHeight: 150, overflowY: "auto", mb: 2 }}>
+          {membersLoading && <Typography>Loading members...</Typography>}
+          {!membersLoading && users.length === 0 && searchTerm !== "" && (
+            <Typography>No members found</Typography>
+          )}
+          {!membersLoading &&
+            users.map((user) => {
+              const fullName = `${user.firstName} ${user.lastName}`;
+              return (
+                <Box
+                  key={user.id}
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  py={1}
+                >
+                  <Typography>{fullName}</Typography>
+                  <Button
+                    size="small"
+                    variant={
+                      selectedUsers.includes(user.id) ? "outlined" : "contained"
+                    }
+                    onClick={() => toggleUserSelection(user.id)}
+                  >
+                    {selectedUsers.includes(user.id) ? (
+                      <>
+                        <CheckIcon fontSize="small" /> Added
+                      </>
+                    ) : (
+                      <>
+                        <AddIcon fontSize="small" /> Add
+                      </>
+                    )}
+                  </Button>
+                </Box>
+              );
+            })}
+        </Stack>
+
+        <Box textAlign="right">
+          <Button onClick={onClose} sx={{ mr: 2 }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreate}
+            variant="contained"
+            disabled={creating}
+          >
+            {creating ? "Creating..." : "Create Group"}
+          </Button>
+        </Box>
+
+        {createError && (
+          <Typography color="error" mt={2}>
+            {createError.message}
+          </Typography>
+        )}
       </Box>
     </Modal>
   );
 };
 
-export default CreateGroupModal;
+export default GroupCreationModal;
