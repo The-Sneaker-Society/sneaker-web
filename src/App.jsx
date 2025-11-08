@@ -16,6 +16,9 @@ import { LoginV2 } from "./pages/Login/LoginV2";
 import DashboardRouter from "./routes/DashboardRouter";
 import MemberRoutes from "./routes/MemberRoutes";
 import UserRoutes from "./routes/UserRoutes";
+import NewGroupPage from "./pages/GroupsPage/NewGroupPage";
+import Groups from "./pages/Dashboard/Groups";
+import MySociety from "./pages/Dashboard/Discover";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -43,6 +46,9 @@ function App() {
               />
               <Route path="member/signup" element={<SignupMember />} />
               <Route path="user/signup" element={<SignUpUser />} />
+              <Route path="/newgrouppage" element={<NewGroupPage />} />
+              <Route path="/groups" element={<Groups />} />
+              <Route path="/mysociety" element={<MySociety />} />
 
               <Route
                 path="/dashboard"
