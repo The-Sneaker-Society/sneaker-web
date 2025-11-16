@@ -56,8 +56,15 @@ const GroupCreationModal = ({ open, onClose }) => {
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
   const [groupAvatar, setGroupAvatar] = useState(null);
+
+  // Store only IDs of selected users
   const [selectedUsers, setSelectedUsers] = useState([]);
+
+  // Cache full user info for stable display
+  const [selectedUsersMap, setSelectedUsersMap] = useState({});
+
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
   const [createGroup, { loading: creating, error: createError }] = useMutation(
     CREATE_GROUP,
@@ -67,6 +74,7 @@ const GroupCreationModal = ({ open, onClose }) => {
         setGroupDescription("");
         setGroupAvatar(null);
         setSelectedUsers([]);
+        setSelectedUsersMap({});
         setSearchTerm("");
         onClose();
       },
@@ -77,16 +85,31 @@ const GroupCreationModal = ({ open, onClose }) => {
     useLazyQuery(GET_MEMBERS);
 
   useEffect(() => {
-    if (searchTerm.length > 0) {
-      fetchMembers({ variables: { searchTerm } });
-    }
-  }, [searchTerm, fetchMembers]);
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
-  const toggleUserSelection = (id) => {
-    if (selectedUsers.includes(id)) {
-      setSelectedUsers(selectedUsers.filter((uid) => uid !== id));
+  useEffect(() => {
+    if (debouncedSearchTerm.length > 0) {
+      fetchMembers({ variables: { searchTerm: debouncedSearchTerm } });
+    }
+  }, [debouncedSearchTerm, fetchMembers]);
+
+  const toggleUserSelection = (user) => {
+    if (selectedUsers.includes(user.id)) {
+      // Remove user
+      setSelectedUsers((prev) => prev.filter((id) => id !== user.id));
+      setSelectedUsersMap((prev) => {
+        const newMap = { ...prev };
+        delete newMap[user.id];
+        return newMap;
+      });
     } else {
-      setSelectedUsers([...selectedUsers, id]);
+      // Add user
+      setSelectedUsers((prev) => [...prev, user.id]);
+      setSelectedUsersMap((prev) => ({ ...prev, [user.id]: user }));
     }
   };
 
@@ -186,9 +209,16 @@ const GroupCreationModal = ({ open, onClose }) => {
 
         <Stack sx={{ maxHeight: 150, overflowY: "auto", mb: 2 }}>
           {membersLoading && <Typography>Loading members...</Typography>}
-          {!membersLoading && users.length === 0 && searchTerm !== "" && (
-            <Typography>No members found</Typography>
+          {createError && (
+            <Typography color="error">{createError.message}</Typography>
           )}
+          {!membersLoading &&
+            users.length === 0 &&
+            debouncedSearchTerm !== "" && (
+              <Typography>No members found</Typography>
+            )}
+
+          {/* User list */}
           {!membersLoading &&
             users.map((user) => {
               const fullName = `${user.firstName} ${user.lastName}`;
@@ -206,7 +236,7 @@ const GroupCreationModal = ({ open, onClose }) => {
                     variant={
                       selectedUsers.includes(user.id) ? "outlined" : "contained"
                     }
-                    onClick={() => toggleUserSelection(user.id)}
+                    onClick={() => toggleUserSelection(user)}
                   >
                     {selectedUsers.includes(user.id) ? (
                       <>
@@ -221,6 +251,32 @@ const GroupCreationModal = ({ open, onClose }) => {
                 </Box>
               );
             })}
+
+          {/* Selected users section */}
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1">Selected Members</Typography>
+            {selectedUsers.length === 0 ? (
+              <Typography>No members selected yet</Typography>
+            ) : (
+              selectedUsers.map((id) => {
+                const user = selectedUsersMap[id];
+                if (!user) return null;
+                return (
+                  <Box key={id} display="flex" alignItems="center">
+                    <Typography>
+                      {user.firstName} {user.lastName}
+                    </Typography>
+                    <Button
+                      size="small"
+                      onClick={() => toggleUserSelection(user)}
+                    >
+                      ×
+                    </Button>
+                  </Box>
+                );
+              })
+            )}
+          </Box>
         </Stack>
 
         <Box textAlign="right">
@@ -230,7 +286,7 @@ const GroupCreationModal = ({ open, onClose }) => {
           <Button
             onClick={handleCreate}
             variant="contained"
-            disabled={creating}
+            disabled={creating || selectedUsers.length === 0}
           >
             {creating ? "Creating..." : "Create Group"}
           </Button>
