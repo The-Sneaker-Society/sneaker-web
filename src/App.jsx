@@ -49,6 +49,7 @@ function App() {
               <Route path="/newgrouppage" element={<NewGroupPage />} />
               <Route path="/groups" element={<Groups />} />
               <Route path="/mysociety" element={<MySociety />} />
+              <Route path="/grouppage" element={<NewGroupPage />} />
 
               <Route
                 path="/dashboard"

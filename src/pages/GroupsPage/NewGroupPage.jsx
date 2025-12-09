@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -11,73 +11,59 @@ import {
   AvatarGroup,
 } from "@mui/material";
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
+import { gql, useQuery } from "@apollo/client";
+import { useParams } from "react-router-dom";
 
-// Dummy group data (unchanged)
-const dummyGroup = {
-  name: "Sneakerheads United",
-  description: "A group for sneaker customizers and collectors.",
-  avatar: "",
-  members: [
-    { id: 1, name: "Jane" },
-    { id: 2, name: "John" },
-    { id: 3, name: "Jane" },
-    { id: 4, name: "John" },
-    { id: 5, name: "Jane" },
-    { id: 6, name: "John" },
-    { id: 7, name: "Jane" },
-    { id: 8, name: "John" },
-    { id: 9, name: "Jane" },
-    { id: 10, name: "John" },
-    { id: 11, name: "Jane" },
-    { id: 12, name: "John" },
-  ],
-};
-
-// Posts from MySociety for consistency
-const mysocietyPosts = [
-  {
-    id: 1,
-    username: "Username",
-    caption:
-      "Just got some new kicks to customize! Can't wait to show the after!",
-    images: [
-      "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=300&fit=crop",
-      "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=300&h=300&fit=crop",
-    ],
-    likes: 20,
-    comments: 10,
-    shares: 11,
-  },
-  {
-    id: 2,
-    username: "Username",
-    caption:
-      "Just got some new kicks to customize! Can't wait to show the after!",
-    images: [
-      "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=300&fit=crop",
-      "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=300&h=300&fit=crop",
-    ],
-    likes: 20,
-    comments: 10,
-    shares: 11,
-  },
-];
-
-// Mapped to match the NewGroupPage post data shape
-const mockPosts = mysocietyPosts.map((post) => ({
-  id: post.id,
-  user: { avatar: "", name: post.username },
-  content: post.caption,
-  images: post.images,
-  likes: post.likes,
-  comments: post.comments,
-  shares: post.shares,
-}));
+const GET_GROUP = gql`
+  query GetGroup($id: ID!) {
+    groupById(id: $id) {
+      id
+      name
+      description
+      avatar
+      members {
+        id
+        firstName
+        lastName
+        email
+      }
+      createdAt
+    }
+  }
+`;
 
 const NewGroupPage = () => {
+  const { id } = useParams();
+  const skip = !id;
+
+  const { data, loading, error } = useQuery(GET_GROUP, {
+    variables: { id },
+    skip,
+  });
+
+  const group = data?.groupById;
+
   const [isJoined, setIsJoined] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+
+  if (loading) {
+    return (
+      <Box sx={{ bgcolor: "#e4e4e4", minHeight: "100vh", p: 3 }}>
+        <Typography>Loading group...</Typography>
+      </Box>
+    );
+  }
+
+  if (error || !group) {
+    return (
+      <Box sx={{ bgcolor: "#e4e4e4", minHeight: "100vh", p: 3 }}>
+        <Typography color="error">Unable to load group.</Typography>
+      </Box>
+    );
+  }
+
+  const memberCount = group.members?.length || 0;
 
   const handleLeaveGroup = () => {
     setModalOpen(false);
@@ -116,22 +102,21 @@ const NewGroupPage = () => {
         sx={{ bgcolor: "#000", color: "#fff", borderRadius: 2, p: 3, mb: 2 }}
       >
         <Typography variant="h4" fontWeight={600}>
-          {dummyGroup.name}
+          {group.name}
         </Typography>
-        <Typography fontWeight={600}>
-          {dummyGroup.members.length} members
-        </Typography>
+        <Typography fontWeight={600}>{memberCount} members</Typography>
 
         {/* Avatars of members */}
         <Stack direction="row" spacing={-1} sx={{ mt: 1 }}>
           <AvatarGroup max={5}>
-            {dummyGroup.members.map((member) => (
+            {group.members.map((member) => (
               <Avatar
                 key={member.id}
-                src={member.avatar}
-                alt={member.name}
+                alt={`${member.firstName} ${member.lastName}`}
                 sx={{ border: "2px solid #fff", width: 32, height: 32 }}
-              />
+              >
+                {member.firstName?.[0]}
+              </Avatar>
             ))}
           </AvatarGroup>
         </Stack>
