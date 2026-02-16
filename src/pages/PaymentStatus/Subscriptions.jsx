@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography } from "@mui/material";
-import { useSneakerUser } from "../../context/UserContext";
+import { useSneakerMember } from "../../context/MemberContext";
 import { ActivateSubscription } from "./ActivateSubscription";
 import { CancelSubscription } from "./CancelSubscription";
 import { NewSubscription } from "./NewSubscription";
 import { LoadingCircle } from "../../components/LoadingCircle";
 
 export const Subscriptions = () => {
-  const { user, isSubscribed, loading } = useSneakerUser();
+  const { member, loading } = useSneakerMember();
+  const isSubscribed = member?.isSubscribed;
   const [subscriptionState, setSubscriptionState] = useState("loading");
 
   // Determine subscription state
   useEffect(() => {
-    if (user) {
-      if (isSubscribed && user.stripeCustomerId) {
+    if (member) {
+      if (isSubscribed && member.stripeCustomerId) {
         setSubscriptionState("active");
-      } else if (!isSubscribed && user.stripeCustomerId) {
+      } else if (!isSubscribed && member.stripeCustomerId) {
         setSubscriptionState("previously_active");
       } else {
         setSubscriptionState("none");
@@ -23,7 +24,7 @@ export const Subscriptions = () => {
     } else {
       setSubscriptionState("none");
     }
-  }, [user, isSubscribed]);
+  }, [member, isSubscribed]);
 
   const renderSubscriptionContent = (state) => {
     switch (state) {
