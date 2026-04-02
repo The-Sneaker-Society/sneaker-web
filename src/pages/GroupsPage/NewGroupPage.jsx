@@ -16,7 +16,7 @@ import { useParams } from "react-router-dom";
 
 const GET_GROUP = gql`
   query GetGroup($id: ID!) {
-    groupById(id: $id) {
+    getGroup(id: $id) {
       id
       name
       description
@@ -35,13 +35,14 @@ const GET_GROUP = gql`
 const NewGroupPage = () => {
   const { id } = useParams();
   const skip = !id;
+  const mockPosts = [];
 
   const { data, loading, error } = useQuery(GET_GROUP, {
     variables: { id },
     skip,
   });
 
-  const group = data?.groupById;
+  const group = data?.getGroup;
 
   const [isJoined, setIsJoined] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -63,7 +64,7 @@ const NewGroupPage = () => {
     );
   }
 
-  const memberCount = group.members?.length || 0;
+  const memberCount = group?.members?.length || 0;
 
   const handleLeaveGroup = () => {
     setModalOpen(false);
@@ -76,10 +77,12 @@ const NewGroupPage = () => {
 
   const handleFileInputChange = (event) => {
     const files = event.target.files;
-    if (files.length) {
-      const urls = Array.from(files).map((file) => URL.createObjectURL(file));
-      setImageSrcs(urls);
-    }
+    if (!files?.length) return;
+
+    imageSrcs.forEach((url) => URL.revokeObjectURL(url));
+
+    const urls = Array.from(files).map((file) => URL.createObjectURL(file));
+    setImageSrcs(urls);
   };
 
   const handleIconClick = () => {
@@ -109,13 +112,13 @@ const NewGroupPage = () => {
         {/* Avatars of members */}
         <Stack direction="row" spacing={-1} sx={{ mt: 1 }}>
           <AvatarGroup max={5}>
-            {group.members.map((member) => (
+            {(group.members || []).map((member) => (
               <Avatar
                 key={member.id}
                 alt={`${member.firstName} ${member.lastName}`}
                 sx={{ border: "2px solid #fff", width: 32, height: 32 }}
               >
-                {member.firstName?.[0]}
+                {member.firstName?.[0] ?? member.email?.[0] ?? "?"}
               </Avatar>
             ))}
           </AvatarGroup>
