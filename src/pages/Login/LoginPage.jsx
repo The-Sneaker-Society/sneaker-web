@@ -9,29 +9,30 @@ import { SignedOut, useClerk, useUser } from "@clerk/clerk-react";
 export default function LoginPage() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const { openSignIn } = useClerk();
 
   useEffect(() => {
-    if (isSignedIn) {
-      navigate("/dashboard");
-    }
-  }, [isSignedIn, navigate]);
+    if (!isLoaded || !isSignedIn) return;
 
-  const handleLogin = async (type, values) => {
+    const role = user?.unsafeMetadata?.role;
+    if (role) {
+      navigate("/dashboard");
+    } else {
+      setError(
+        "No account found for this email. Please sign up from the home page instead."
+      );
+    }
+  }, [isSignedIn, isLoaded, user, navigate]);
+
+  const handleLogin = async () => {
     try {
       setError("");
-
       await openSignIn({
         strategy: "oauth_google",
-        forceRedirectUrl: "/dashboard",
       });
-
-      if (!createdUserId) {
-        throw new Error("Signup failed, no user ID returned.");
-      }
     } catch (err) {
-      setError(error.message);
+      setError(err.message);
     }
   };
 
@@ -70,19 +71,19 @@ export default function LoginPage() {
         <SignedOut>
           <Button
             variant="contained"
-            aria-label="Sign Up With Google"
+            aria-label="Sign In With Google"
             startIcon={<GoogleIcon />}
             sx={{ mt: 2, color: "black", backgroundColor: "gold" }}
             onClick={handleLogin}
           >
             Sign In
           </Button>
-          {error && (
-            <Alert severity="error" color="error">
-              {error}
-            </Alert>
-          )}
         </SignedOut>
+        {error && (
+          <Alert severity="error" color="error">
+            {error}
+          </Alert>
+        )}
       </Stack>
     </Box>
   );
