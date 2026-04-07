@@ -1,43 +1,31 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Box, Button, TextField, Typography, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client";
-import { GET_GROUPS } from "./groups.gql";
+import { GET_GROUPS } from "../../context/graphql/getGroups";
+import GroupCreationForm from "./GroupCreationForm";
 
-export const GET_GROUPS = gql`
-  query GetGroups {
-    groups {
-      id
-      name
-      description
-      avatar
-      members {
-        id
-      }
-      createdAt
-    }
-  }
-`;
-
-const GroupDisplay = () => {
+const GroupDisplay = ({ currentUserId }) => {
   const [tab, setTab] = useState("trending");
   const [search, setSearch] = useState("");
   const [openCreate, setOpenCreate] = useState(false);
   const navigate = useNavigate();
 
   const { data, loading, error } = useQuery(GET_GROUPS);
-
-  const allGroups = data?.groups || [];
+  const allGroups = data?.getGroups || [];
 
   const filtered = useMemo(() => {
-    const list = tab === "trending" ? allGroups : allGroups;
-    return list.filter((g) =>
-      g.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [tab, allGroups, search]);
+    const baseList =
+      tab === "my"
+        ? allGroups.filter((group) =>
+            (group.members || []).some((member) => member.id === currentUserId),
+          )
+        : allGroups;
 
-  const displayedGroups = filtered;
+    return baseList.filter((group) =>
+      group.name.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [tab, allGroups, search, currentUserId]);
 
   const handleGroupClick = (group) => {
     navigate(`/groups/${group.id}`);
@@ -64,7 +52,6 @@ const GroupDisplay = () => {
           flexDirection: "column",
         }}
       >
-        {/* Tabs */}
         <Box sx={{ bgcolor: "gray", p: 1 }}>
           <Box
             sx={{
@@ -91,6 +78,7 @@ const GroupDisplay = () => {
             >
               Trending Groups
             </Button>
+
             <Button
               onClick={() => setTab("my")}
               sx={{
@@ -111,7 +99,6 @@ const GroupDisplay = () => {
           </Box>
         </Box>
 
-        {/* Search */}
         <Box sx={{ px: 2, pt: 1.5, pb: 1 }}>
           <TextField
             fullWidth
@@ -133,18 +120,18 @@ const GroupDisplay = () => {
           />
         </Box>
 
-        {/* tabs + search stay the same */}
-
         <Box sx={{ bgcolor: "gray", flex: 1 }}>
           {loading && (
             <Typography sx={{ px: 2, py: 2 }}>Loading groups...</Typography>
           )}
+
           {error && (
             <Typography sx={{ px: 2, py: 2 }} color="error">
               Failed to load groups
             </Typography>
           )}
-          {!loading && !error && displayedGroups.length === 0 && (
+
+          {!loading && !error && filtered.length === 0 && (
             <Typography sx={{ px: 2, py: 2 }} color="text.secondary">
               No groups found
             </Typography>
@@ -152,7 +139,7 @@ const GroupDisplay = () => {
 
           {!loading &&
             !error &&
-            displayedGroups.map((group) => (
+            filtered.map((group) => (
               <Box
                 key={group.id}
                 onClick={() => handleGroupClick(group)}
@@ -190,7 +177,6 @@ const GroupDisplay = () => {
             ))}
         </Box>
 
-        {/* Bottom create button */}
         <Box
           sx={{
             bgcolor: "#000",
@@ -202,7 +188,7 @@ const GroupDisplay = () => {
           <Button
             onClick={() => setOpenCreate(true)}
             sx={{
-              minWidth: 80,
+              minWidth: 100,
               height: 40,
               borderRadius: 2,
               bgcolor: "#FFD100",
@@ -216,6 +202,25 @@ const GroupDisplay = () => {
           </Button>
         </Box>
       </Box>
+
+      {openCreate && (
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            bgcolor: "rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 2,
+            zIndex: 1300,
+          }}
+        >
+          <Box sx={{ width: "100%", maxWidth: 520 }}>
+            <GroupCreationForm onClose={() => setOpenCreate(false)} />
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 };

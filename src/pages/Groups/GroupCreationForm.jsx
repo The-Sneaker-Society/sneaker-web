@@ -11,6 +11,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import { gql, useMutation, useLazyQuery } from "@apollo/client";
+import { GET_GROUPS } from "../../context/graphql/getGroups";
 
 const CREATE_GROUP = gql`
   mutation CreateGroup(
@@ -51,7 +52,7 @@ const GET_MEMBERS = gql`
   }
 `;
 
-const GroupCreationForm = () => {
+const GroupCreationForm = ({ onClose }) => {
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
   const [groupAvatar, setGroupAvatar] = useState(null);
@@ -63,6 +64,8 @@ const GroupCreationForm = () => {
   const [createGroup, { loading: creating, error: createError }] = useMutation(
     CREATE_GROUP,
     {
+      refetchQueries: [{ query: GET_GROUPS }],
+      awaitRefetchQueries: true,
       onCompleted: () => {
         setGroupName("");
         setGroupDescription("");
@@ -70,6 +73,8 @@ const GroupCreationForm = () => {
         setSelectedUsers([]);
         setSelectedUsersMap({});
         setSearchTerm("");
+        setDebouncedSearchTerm("");
+        onClose?.();
       },
     },
   );
@@ -81,11 +86,12 @@ const GroupCreationForm = () => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
     }, 500);
+
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
   useEffect(() => {
-    if (debouncedSearchTerm.length > 0) {
+    if (debouncedSearchTerm.trim().length > 0) {
       fetchMembers({ variables: { searchTerm: debouncedSearchTerm } });
     }
   }, [debouncedSearchTerm, fetchMembers]);
@@ -94,9 +100,9 @@ const GroupCreationForm = () => {
     if (selectedUsers.includes(user.id)) {
       setSelectedUsers((prev) => prev.filter((id) => id !== user.id));
       setSelectedUsersMap((prev) => {
-        const newMap = { ...prev };
-        delete newMap[user.id];
-        return newMap;
+        const next = { ...prev };
+        delete next[user.id];
+        return next;
       });
     } else {
       setSelectedUsers((prev) => [...prev, user.id]);
@@ -114,21 +120,17 @@ const GroupCreationForm = () => {
   };
 
   const handleCreate = () => {
-    if (!groupName) {
+    if (!groupName.trim()) {
       alert("Please enter a group name.");
       return;
     }
 
     const variables = {
-      name: groupName,
-      description: groupDescription,
-      // avatar: groupAvatar,
-      avatar: "https://via.placeholder.com/150", // TEMP: mock URL
+      name: groupName.trim(),
+      description: groupDescription.trim(),
+      avatar: groupAvatar || "https://via.placeholder.com/150",
+      memberIds: selectedUsers,
     };
-
-    if (selectedUsers.length > 0) {
-      variables.memberIds = selectedUsers;
-    }
 
     createGroup({ variables });
   };
@@ -148,9 +150,7 @@ const GroupCreationForm = () => {
         variant="h4"
         mb={2}
         align="center"
-        sx={{
-          color: "#FFD100",
-        }}
+        sx={{ color: "#FFD100" }}
       >
         Create a Group
       </Typography>
@@ -207,19 +207,16 @@ const GroupCreationForm = () => {
 
       <Stack sx={{ maxHeight: 150, overflowY: "auto", mb: 2 }}>
         {membersLoading && <Typography>Loading members...</Typography>}
-        {createError && (
-          <Typography color="error">{createError.message}</Typography>
-        )}
+
         {!membersLoading &&
           users.length === 0 &&
-          debouncedSearchTerm !== "" && (
-            <Typography>No members found</Typography>
-          )}
+          debouncedSearchTerm !== "" && <Typography>No members found</Typography>}
 
-        {/* User list */}
         {!membersLoading &&
           users.map((user) => {
             const fullName = `${user.firstName} ${user.lastName}`;
+            const isSelected = selectedUsers.includes(user.id);
+
             return (
               <Box
                 key={user.id}
@@ -229,14 +226,13 @@ const GroupCreationForm = () => {
                 py={1}
               >
                 <Typography>{fullName}</Typography>
+
                 <Button
                   size="small"
-                  variant={
-                    selectedUsers.includes(user.id) ? "outlined" : "contained"
-                  }
+                  variant={isSelected ? "outlined" : "contained"}
                   onClick={() => toggleUserSelection(user)}
                 >
-                  {selectedUsers.includes(user.id) ? (
+                  {isSelected ? (
                     <>
                       <CheckIcon fontSize="small" /> Added
                     </>
@@ -249,42 +245,43 @@ const GroupCreationForm = () => {
               </Box>
             );
           })}
-
-        {/* Selected users section */}
-        <Box sx={{ mb: 2 }}>
-          {selectedUsers.length > 0 && (
-            <>
-              <Typography variant="subtitle1" gutterBottom>
-                Selected Members
-              </Typography>
-              {selectedUsers.map((id) => {
-                const user = selectedUsersMap[id];
-                if (!user) return null;
-                return (
-                  <Box key={id} display="flex" alignItems="center">
-                    <Typography>
-                      {user.firstName} {user.lastName}
-                    </Typography>
-                    <Button
-                      size="small"
-                      onClick={() => toggleUserSelection(user)}
-                    >
-                      ×
-                    </Button>
-                  </Box>
-                );
-              })}
-            </>
-          )}
-        </Box>
       </Stack>
 
+      <Box sx={{ mb: 2 }}>
+        {selectedUsers.length > 0 && (
+          <>
+            <Typography variant="subtitle1" gutterBottom>
+              Selected Members
+            </Typography>
+
+            {selectedUsers.map((id) => {
+              const user = selectedUsersMap[id];
+              if (!user) return null;
+
+              return (
+                <Box key={id} display="flex" alignItems="center" gap={1}>
+                  <Typography>
+                    {user.firstName} {user.lastName}
+                  </Typography>
+                  <Button size="small" onClick={() => toggleUserSelection(user)}>
+                    ×
+                  </Button>
+                </Box>
+              );
+            })}
+          </>
+        )}
+      </Box>
+
       <Box textAlign="right">
-        <Button sx={{ mr: 2 }}>Cancel</Button>
+        <Button sx={{ mr: 2 }} onClick={onClose}>
+          Cancel
+        </Button>
+
         <Button
           onClick={handleCreate}
           variant="contained"
-          disabled={creating || !groupName}
+          disabled={creating || !groupName.trim()}
         >
           {creating ? "Creating..." : "Create Group"}
         </Button>

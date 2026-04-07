@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import GroupCreationForm from "./GroupCreationForm";
+import GroupDisplay from "./GroupDisplay";
 
 const GroupsPage = () => {
   return (
@@ -19,6 +20,9 @@ const GroupsPage = () => {
       >
         <Box sx={{ maxWidth: 700, width: "100%" }}>
           <GroupCreationForm />
+        </Box>
+           <Box sx={{ maxWidth: 700, width: "100%" }}>
+          <GroupDisplay />
         </Box>
       </Box>
     </Box>
