@@ -66,12 +66,18 @@ export const MemberDashboard = () => {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            flexWrap: "wrap",
+            gap: 1,
           }}
         >
-          <Typography variant="h1" fontWeight="bold">
+          <Typography
+            variant="h1"
+            fontWeight="bold"
+            sx={{ fontSize: { xs: "1.6rem", sm: "2rem", md: "2.5rem" }, minWidth: 0 }}
+          >
             Welcome, {member?.firstName || "member"}
           </Typography>
-          <StyledButton onClick={handleLogout} style={{ marginTop: "10px" }}>
+          <StyledButton onClick={handleLogout}>
             Log Out
           </StyledButton>
         </Box>

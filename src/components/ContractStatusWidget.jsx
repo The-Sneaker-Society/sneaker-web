@@ -16,9 +16,13 @@ export default function ContractStatusWidget() {
   const { data, loading, error } = useQuery(GET_MEMBER_CONTRACT_STATUS);
 
   const ContractStatueAmount = ({ name, amount }) => (
-    <Box sx={{ textAlign: "center", margin: "10px" }}>
-      <Typography variant="h2">{amount}</Typography>
-      <Typography variant="h4">{name}</Typography>
+    <Box sx={{ textAlign: "center", margin: "10px", flex: 1, minWidth: 0 }}>
+      <Typography sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.5rem" }, fontWeight: "bold" }}>
+        {amount}
+      </Typography>
+      <Typography sx={{ fontSize: { xs: "0.85rem", sm: "1rem", md: "1.25rem" } }}>
+        {name}
+      </Typography>
     </Box>
   );
 
@@ -41,13 +45,9 @@ export default function ContractStatusWidget() {
         }}
       >
         {[...Array(3)].map((_, index) => (
-          <Box key={index} sx={{ textAlign: "center", margin: "10px" }}>
-            <Typography variant="h2">
-              <Skeleton variant="text" width={50} />
-            </Typography>
-            <Typography variant="h4">
-              <Skeleton variant="text" width={100} />
-            </Typography>
+          <Box key={index} sx={{ textAlign: "center", margin: "10px", flex: 1, minWidth: 0 }}>
+            <Skeleton variant="text" width={50} sx={{ mx: "auto", fontSize: { xs: "1.5rem", md: "2.5rem" } }} />
+            <Skeleton variant="text" width={100} sx={{ mx: "auto", fontSize: { xs: "0.85rem", md: "1.25rem" } }} />
           </Box>
         ))}
       </Box>
