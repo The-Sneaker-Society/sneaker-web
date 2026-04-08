@@ -18,32 +18,48 @@ const SettingsModal = ({ open, onClose }) => {
           left: "50%",
           transform: "translate(-50%, -50%)",
           width: 400,
-          bgcolor: "background.paper",
+          bgcolor: "#1a1a1a",
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
+          border: "1px solid #333",
         }}
       >
-        <Typography variant="h6" component="h2">
+        <Typography 
+          variant="h6" 
+          component="h2"
+          sx={{ color: "#ffffff", mb: 3 }}
+        >
           Settings
         </Typography>
 
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2, mr: 2 }}
-          onClick={onClose}
-        >
-          Close
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          sx={{ mt: 2 }}
-          onClick={handleLogout}
-        >
-          Logout
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            variant="contained"
+            sx={{ 
+              mt: 2, 
+              backgroundColor: "#2a2a2a", 
+              color: "#ffffff",
+              border: "1px solid #444",
+              "&:hover": { backgroundColor: "#333" }
+            }}
+            onClick={onClose}
+          >
+            Close
+          </Button>
+          <Button
+            variant="contained"
+            sx={{ 
+              mt: 2, 
+              backgroundColor: "#d4af37", 
+              color: "#000000",
+              "&:hover": { backgroundColor: "#c5a032" }
+            }}
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
+        </Box>
       </Box>
     </Modal>
   );
