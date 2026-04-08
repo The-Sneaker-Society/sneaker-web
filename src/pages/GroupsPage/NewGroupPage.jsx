@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -44,10 +44,6 @@ const NewGroupPage = () => {
 
   const group = data?.getGroup;
 
-  const [isJoined, setIsJoined] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-
   if (loading) {
     return (
       <Box sx={{ bgcolor: "#e4e4e4", minHeight: "100vh", p: 3 }}>
@@ -63,6 +59,10 @@ const NewGroupPage = () => {
       </Box>
     );
   }
+
+  const [isJoined, setIsJoined] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
   const memberCount = group?.members?.length || 0;
 
@@ -90,17 +90,15 @@ const NewGroupPage = () => {
   };
 
   const handlePostSubmit = () => {
-    // Here you'd send postContent and imageSrcs to backend
     console.log("Post content:", postContent);
     console.log("Images:", imageSrcs);
-    // Clear after posting
+
     setPostContent("");
     setImageSrcs([]);
   };
 
   return (
     <Box sx={{ bgcolor: "#e4e4e4", minHeight: "100vh", p: 3 }}>
-      {/* Header */}
       <Box
         sx={{ bgcolor: "#000", color: "#fff", borderRadius: 2, p: 3, mb: 2 }}
       >
@@ -109,7 +107,6 @@ const NewGroupPage = () => {
         </Typography>
         <Typography fontWeight={600}>{memberCount} members</Typography>
 
-        {/* Avatars of members */}
         <Stack direction="row" spacing={-1} sx={{ mt: 1 }}>
           <AvatarGroup max={5}>
             {(group.members || []).map((member) => (
@@ -150,7 +147,6 @@ const NewGroupPage = () => {
         )}
       </Box>
 
-      {/* Leave Group Modal */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box
           sx={{
@@ -183,7 +179,6 @@ const NewGroupPage = () => {
         </Box>
       </Modal>
 
-      {/* Write a post */}
       {isJoined && (
         <Box
           sx={{
@@ -228,7 +223,6 @@ const NewGroupPage = () => {
         </Box>
       )}
 
-      {/* Add image preview right here: */}
       {imageSrcs.length > 0 && (
         <Stack direction="row" spacing={2} mb={2}>
           {imageSrcs.map((src, i) => (
@@ -248,7 +242,6 @@ const NewGroupPage = () => {
         </Stack>
       )}
 
-      {/* Posts */}
       <Box>
         {mockPosts.length === 0 ? (
           <Typography textAlign="center" color="textSecondary">
