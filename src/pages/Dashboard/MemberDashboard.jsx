@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import { useClerk } from "@clerk/clerk-react";
 import ContractStatusWidget from "../../components/ContractStatusWidget";
 import { QrWidget } from "../../components/qrWidget";
@@ -38,6 +38,14 @@ export const MemberDashboard = () => {
 
   if (loading) {
     return <LoadingCircle />;
+  }
+
+  if (!member) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "white" }}>
+        <Typography>Error loading member data. Please refresh or sign out and try again.</Typography>
+      </Box>
+    );
   }
 
   const isOnboarded = !member.isNewUser;

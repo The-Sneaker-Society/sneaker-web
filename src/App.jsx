@@ -15,6 +15,7 @@ import SignUpUser from "./pages/Signup User/SignupUser";
 import { LoginV2 } from "./pages/Login/LoginV2";
 import UserSignupCallback from "./pages/UserSignupCallback/UserSignupCallback";
 import SignUpCallback from "./pages/SignUpCallback/SignUpCallback";
+import LoginSSOCallback from "./pages/LoginSSOCallback/LoginSSOCallback";
 import DashboardRouter from "./routes/DashboardRouter";
 import MemberRoutes from "./routes/MemberRoutes";
 import UserRoutes from "./routes/UserRoutes";
@@ -36,6 +37,7 @@ function App() {
               <Route path="/test" element={<LoginV2 />} />
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/login/sso-callback" element={<LoginSSOCallback />} />
               <Route path="/logout" element={<LogoutPage />} />
               <Route path="stripeOnboarding" element={<StripeSignupPage />} />
               <Route
