@@ -3,12 +3,10 @@ import { Box, Button, TextField, Typography, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { GET_GROUPS } from "../../context/graphql/getGroups";
-import GroupCreationForm from "./GroupCreationForm";
 
 const GroupDisplay = ({ currentUserId }) => {
   const [tab, setTab] = useState("trending");
   const [search, setSearch] = useState("");
-  const [openCreate, setOpenCreate] = useState(false);
   const navigate = useNavigate();
 
   const { data, loading, error } = useQuery(GET_GROUPS);
@@ -28,7 +26,7 @@ const GroupDisplay = ({ currentUserId }) => {
   }, [tab, allGroups, search, currentUserId]);
 
   const handleGroupClick = (group) => {
-    navigate(`/groups/${group.id}`);
+    navigate(`/member/groups/${group.id}`);
   };
 
   return (
@@ -139,88 +137,50 @@ const GroupDisplay = ({ currentUserId }) => {
 
           {!loading &&
             !error &&
-            filtered.map((group) => (
-              <Box
-                key={group.id}
-                onClick={() => handleGroupClick(group)}
-                sx={{
-                  px: 2,
-                  py: 1.5,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  borderBottom: "1px solid #d0d0d0",
-                  cursor: "pointer",
-                }}
-              >
-                <Stack spacing={0.3}>
-                  <Typography fontWeight={700} fontSize={14}>
-                    {group.name}
-                  </Typography>
-                  <Typography fontSize={12} color="text.secondary">
-                    {(group.members || []).length} members
-                  </Typography>
-                </Stack>
+            filtered.map((group) => {
+              const memberCount = (group.members || []).length;
 
+              return (
                 <Box
+                  key={group.id}
+                  onClick={() => handleGroupClick(group)}
                   sx={{
-                    width: 70,
-                    height: 40,
-                    bgcolor: "#c4c4c4",
-                    borderRadius: 1,
-                    backgroundImage: group.avatar ? `url(${group.avatar})` : "",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
+                    px: 2,
+                    py: 1.5,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderBottom: "1px solid #d0d0d0",
+                    cursor: "pointer",
                   }}
-                />
-              </Box>
-            ))}
-        </Box>
+                >
+                  <Stack spacing={0.3}>
+                    <Typography fontWeight={700} fontSize={14}>
+                      {group.name}
+                    </Typography>
+                    <Typography fontSize={12} color="text.secondary">
+                      {memberCount} {memberCount === 1 ? "member" : "members"}
+                    </Typography>
+                  </Stack>
 
-        <Box
-          sx={{
-            bgcolor: "#000",
-            p: 1,
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Button
-            onClick={() => setOpenCreate(true)}
-            sx={{
-              minWidth: 100,
-              height: 40,
-              borderRadius: 2,
-              bgcolor: "#FFD100",
-              color: "#000",
-              fontWeight: 700,
-              textTransform: "none",
-              "&:hover": { bgcolor: "#ffde33" },
-            }}
-          >
-            + New Group
-          </Button>
+                  <Box
+                    sx={{
+                      width: 70,
+                      height: 40,
+                      bgcolor: "#c4c4c4",
+                      borderRadius: 1,
+                      backgroundImage: group.avatar
+                        ? `url(${group.avatar})`
+                        : "",
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  />
+                </Box>
+              );
+            })}
         </Box>
       </Box>
-
-      {openCreate && (
-        <Box
-          sx={{
-            position: "fixed",
-            inset: 0,
-            bgcolor: "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            p: 2,
-            zIndex: 1300,
-          }}
-        >
-          <Box sx={{ width: "100%", maxWidth: 520 }}>
-            <GroupCreationForm onClose={() => setOpenCreate(false)} />
-          </Box>
-        </Box>
-      )}
     </Box>
   );
 };

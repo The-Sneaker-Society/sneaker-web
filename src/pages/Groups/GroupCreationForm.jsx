@@ -146,12 +146,7 @@ const GroupCreationForm = ({ onClose }) => {
         borderRadius: 2,
       }}
     >
-      <Typography
-        variant="h4"
-        mb={2}
-        align="center"
-        sx={{ color: "#FFD100" }}
-      >
+      <Typography variant="h4" mb={2} align="center" sx={{ color: "#FFD100" }}>
         Create a Group
       </Typography>
 
@@ -210,7 +205,9 @@ const GroupCreationForm = ({ onClose }) => {
 
         {!membersLoading &&
           users.length === 0 &&
-          debouncedSearchTerm !== "" && <Typography>No members found</Typography>}
+          debouncedSearchTerm !== "" && (
+            <Typography>No members found</Typography>
+          )}
 
         {!membersLoading &&
           users.map((user) => {
@@ -263,7 +260,10 @@ const GroupCreationForm = ({ onClose }) => {
                   <Typography>
                     {user.firstName} {user.lastName}
                   </Typography>
-                  <Button size="small" onClick={() => toggleUserSelection(user)}>
+                  <Button
+                    size="small"
+                    onClick={() => toggleUserSelection(user)}
+                  >
                     ×
                   </Button>
                 </Box>

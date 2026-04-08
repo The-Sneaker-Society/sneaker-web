@@ -1,13 +1,21 @@
 import { Box, Typography } from "@mui/material";
 import GroupCreationForm from "./GroupCreationForm";
 import GroupDisplay from "./GroupDisplay";
+import { useSneakerMember } from "../../context/MemberContext";
 
 const GroupsPage = () => {
+  const { member, loading, error } = useSneakerMember();
+
   return (
-    <Box sx={{  pt: 4 }}>
+    <Box sx={{ pt: 4 }}>
       <Typography
         variant="h1"
-        sx={{ color: "#FFD100", fontWeight: "bold", mb: 4, textAlign: "center" }}
+        sx={{
+          color: "#FFD100",
+          fontWeight: "bold",
+          mb: 4,
+          textAlign: "center",
+        }}
       >
         Groups
       </Typography>
@@ -21,8 +29,9 @@ const GroupsPage = () => {
         <Box sx={{ maxWidth: 700, width: "100%" }}>
           <GroupCreationForm />
         </Box>
-           <Box sx={{ maxWidth: 700, width: "100%" }}>
-          <GroupDisplay />
+
+        <Box sx={{ maxWidth: 700, width: "100%" }}>
+          <GroupDisplay currentUserId={member?.id} />
         </Box>
       </Box>
     </Box>
