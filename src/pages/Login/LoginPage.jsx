@@ -1,43 +1,9 @@
-import { Button, Stack, Box, Alert, CircularProgress } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Box, Link } from "@mui/material";
+import React from "react";
 import Logo from "../../assets/ss-logo.svg";
-import GoogleIcon from "@mui/icons-material/Google";
-
-import { useNavigate } from "react-router-dom";
-import { SignedOut, useClerk, useUser } from "@clerk/clerk-react";
+import { SignIn } from "@clerk/clerk-react";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
-  const [error, setError] = useState("");
-  const { isSignedIn, isLoaded, user } = useUser();
-  const { openSignIn } = useClerk();
-
-  useEffect(() => {
-    if (!isLoaded || !isSignedIn) return;
-
-    const role = user?.unsafeMetadata?.role;
-    if (role) {
-      navigate("/dashboard");
-    } else {
-      setError(
-        "No account found for this email. Please sign up from the home page instead."
-      );
-    }
-  }, [isSignedIn, isLoaded, user, navigate]);
-
-  const handleLogin = async () => {
-    try {
-      setError("");
-      await openSignIn({
-        strategy: "oauth_google",
-      });
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  if (!isLoaded) return <CircularProgress />;
-
   return (
     <Box
       sx={{
@@ -49,42 +15,112 @@ export default function LoginPage() {
         padding: "20px",
       }}
     >
-      <Stack
-        alignItems="center"
-        spacing={2}
-        sx={{ width: "100%", maxWidth: "360px", px: 2 }}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+          maxWidth: "500px",
+        }}
       >
-        <Box
-          component="img"
-          src={Logo}
-          alt="Logo"
-          sx={{
-            width: "80%",
-            maxWidth: "300px",
-            height: "auto",
-            my: 4,
-            "@media (min-width:600px)": {
-              maxWidth: "80%",
+        <Link href="/" underline="none" sx={{ textAlign: "center", width: "100%" }}>
+          <Box
+            component="img"
+            src={Logo}
+            alt="Logo"
+            sx={{
+              width: "80%",
+              maxWidth: "300px",
+              height: "auto",
+              my: 4,
+              cursor: "pointer",
+            }}
+          />
+        </Link>
+        <SignIn
+          routing="path"
+          path="/login"
+          signUpUrl="/sign-up"
+          afterSignInUrl="/dashboard"
+          appearance={{
+            layout: {
+              logoPlacement: "none",
+              showOptionalFields: false,
+            },
+            variables: {
+              colorBackground: "#1a1a1a",
+              colorInputBackground: "#2a2a2a",
+              colorInputText: "#ffffff",
+              colorText: "#ffffff",
+              colorTextSecondary: "#888888",
+              colorPrimary: "#d4af37",
+              borderRadius: "8px",
+              fontFamily: "inherit",
+            },
+            elements: {
+              card: {
+                backgroundColor: "#1a1a1a",
+                boxShadow: "none",
+                border: "1px solid #333",
+              },
+              headerTitle: {
+                color: "#ffffff",
+                fontWeight: "600",
+              },
+              headerSubtitle: {
+                color: "#888888",
+              },
+              formButtonPrimary: {
+                backgroundColor: "#d4af37",
+                color: "#000000",
+                width: "100%",
+                "&:hover": {
+                  backgroundColor: "#c5a032",
+                },
+              },
+              socialButtonsBlockButton: {
+                width: "100%",
+                backgroundColor: "#2a2a2a",
+                color: "#ffffff",
+                border: "1px solid #444",
+                "&:hover": {
+                  backgroundColor: "#333",
+                },
+              },
+              dividerLine: {
+                backgroundColor: "#444",
+              },
+              dividerText: {
+                color: "#888888",
+              },
+              formFieldInput: {
+                backgroundColor: "#2a2a2a",
+                color: "#ffffff",
+                border: "1px solid #444",
+              },
+              formFieldLabel: {
+                color: "#888888",
+              },
+              footerActionText: {
+                color: "#888888",
+              },
+              footerActionLink: {
+                color: "#d4af37",
+                "&:hover": {
+                  color: "#c5a032",
+                },
+              },
+              identityPreviewText: {
+                color: "#888888",
+              },
+              identityPreviewEditButton: {
+                color: "#d4af37",
+              },
             },
           }}
         />
-        <SignedOut>
-          <Button
-            variant="contained"
-            aria-label="Sign In With Google"
-            startIcon={<GoogleIcon />}
-            sx={{ mt: 2, color: "black", backgroundColor: "gold" }}
-            onClick={handleLogin}
-          >
-            Sign In
-          </Button>
-        </SignedOut>
-        {error && (
-          <Alert severity="error" color="error">
-            {error}
-          </Alert>
-        )}
-      </Stack>
+      </Box>
     </Box>
   );
 }
