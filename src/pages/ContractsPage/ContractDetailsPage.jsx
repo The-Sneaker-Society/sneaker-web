@@ -13,6 +13,7 @@ import { useQuery } from "@apollo/client";
 import { GET_CONTRACT_BY_ID } from "../../context/graphql/getContractDetails";
 import StyledButton from "../../pages/HomePage/StyledButton";
 import ShippingInfoModal from "../../components/ShippingInfoModal";
+import MemberNotesModal from "../../components/MemberNotesModal";
 
 export const ContractDetailsPage = () => {
   const { id } = useParams();
@@ -21,6 +22,7 @@ export const ContractDetailsPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [isModalOpen, setModalOpen] = React.useState(false);
+  const [isNotesModalOpen, setNotesModalOpen] = React.useState(false);
 
   // Fetch contract data using GraphQL
   const { loading, error, data } = useQuery(GET_CONTRACT_BY_ID, {
@@ -39,10 +41,12 @@ export const ContractDetailsPage = () => {
     setModalOpen(false);
   };
 
-  // Function to handle adding member notes
   const handleAddMemberNotes = () => {
-    console.log("Add member note");
-    // Future implementation will open a modal or form to add member notes
+    setNotesModalOpen(true);
+  };
+
+  const handleNotesModalClose = () => {
+    setNotesModalOpen(false);
   };
 
   // Function to handle message button click
@@ -372,9 +376,27 @@ export const ContractDetailsPage = () => {
             Member Notes
           </Typography>
           {contract.repairDetails?.memberNotes ? (
-            <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-              {contract.repairDetails.memberNotes}
-            </Typography>
+            <Box>
+              <Typography variant="body1" sx={{ fontSize: "1.1rem", mb: 2 }}>
+                {contract.repairDetails.memberNotes}
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={handleAddMemberNotes}
+                sx={{
+                  color: "white",
+                  borderColor: "white",
+                  borderRadius: "4px",
+                  textTransform: "none",
+                  fontSize: "1rem",
+                  px: 3,
+                  py: 1,
+                  "&:hover": { borderColor: "grey.400" },
+                }}
+              >
+                Edit Notes
+              </Button>
+            </Box>
           ) : (
             <Button
               variant="outlined"
@@ -387,9 +409,7 @@ export const ContractDetailsPage = () => {
                 fontSize: "1rem",
                 px: 3,
                 py: 1,
-                "&:hover": {
-                  borderColor: "grey.400",
-                },
+                "&:hover": { borderColor: "grey.400" },
               }}
             >
               Add Notes
@@ -416,6 +436,12 @@ export const ContractDetailsPage = () => {
         open={isModalOpen}
         onClose={handleModalClose}
         contractId={id}
+      />
+      <MemberNotesModal
+        open={isNotesModalOpen}
+        onClose={handleNotesModalClose}
+        contractId={id}
+        existingNotes={contract?.repairDetails?.memberNotes}
       />
     </Box>
   );
