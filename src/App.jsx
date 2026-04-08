@@ -13,8 +13,6 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
 import { LoginV2 } from "./pages/Login/LoginV2";
-import UserSignupCallback from "./pages/UserSignupCallback/UserSignupCallback";
-import SignUpCallback from "./pages/SignUpCallback/SignUpCallback";
 import DashboardRouter from "./routes/DashboardRouter";
 import MemberRoutes from "./routes/MemberRoutes";
 import UserRoutes from "./routes/UserRoutes";
@@ -47,9 +45,7 @@ function App() {
                 element={<PaymentStatus success={false} />}
               />
               <Route path="member/signup" element={<SignupMember />} />
-              <Route path="member/signup/callback" element={<SignUpCallback />} />
               <Route path="user/signup" element={<SignUpUser />} />
-              <Route path="user/signup/callback" element={<UserSignupCallback />} />
               <Route path="/newgrouppage" element={<NewGroupPage />} />
               <Route path="/groups" element={<Groups />} />
               <Route path="/mysociety" element={<MySociety />} />
