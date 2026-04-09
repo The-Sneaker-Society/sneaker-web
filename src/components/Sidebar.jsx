@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   List,
@@ -20,6 +21,7 @@ import SettingsModal from "./SettingsModal";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleDrawer = (isOpen) => (event) => {
     if (
@@ -106,7 +108,7 @@ const Sidebar = () => {
             <SidebarItem
               text="Settings"
               icon={<SettingsOutlined />}
-              onClick={handleSettingsClick}
+              onClick={() => navigate("/member/settings")}
             />
           </Box>
         </Box>
@@ -160,7 +162,7 @@ const Sidebar = () => {
             <SidebarItem
               text="Settings"
               icon={<SettingsOutlined />}
-              onClick={handleSettingsClick}
+              onClick={() => navigate("/member/settings")}
             />
           </Box>
         </Box>

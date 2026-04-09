@@ -11,6 +11,7 @@ import { ChatDashboardMember } from "../pages/Chats/ChatDashboardMember";
 import { GenerateMember } from "../pages/GenerateMember/GenerateMember";
 import { OnboardMember } from "../pages/OnboardMember/OnboardMember";
 import GroupsPage from "../pages/Groups/Groups";
+import MemberSettings from "../pages/membersettings";
 
 const MemberRoutes = () => {
   return (
@@ -66,10 +67,18 @@ const MemberRoutes = () => {
             </Layout>
           }
         />
-        <Route path="groups" 
+        <Route path="groups"
           element={
             <Layout>
               <GroupsPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <Layout>
+              <MemberSettings />
             </Layout>
           }
         />
