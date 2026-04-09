@@ -11,6 +11,7 @@ import { ChatDashboardMember } from "../pages/Chats/ChatDashboardMember";
 import { GenerateMember } from "../pages/GenerateMember/GenerateMember";
 import { OnboardMember } from "../pages/OnboardMember/OnboardMember";
 import GroupsPage from "../pages/Groups/Groups";
+import SubscriptionRoute from "../components/SubscriptionRoute";
 
 const MemberRoutes = () => {
   return (
@@ -22,7 +23,9 @@ const MemberRoutes = () => {
           path="dashboard"
           element={
             <Layout>
-              <MemberDashboard />
+              <SubscriptionRoute>
+                <MemberDashboard />
+              </SubscriptionRoute>
             </Layout>
           }
         />
@@ -30,7 +33,9 @@ const MemberRoutes = () => {
           path="chats/:id"
           element={
             <Layout>
-              <ChatDashboardMember />
+              <SubscriptionRoute>
+                <ChatDashboardMember />
+              </SubscriptionRoute>
             </Layout>
           }
         />
@@ -38,7 +43,9 @@ const MemberRoutes = () => {
           path="contract/:id"
           element={
             <Layout>
-              <ContractReviewPage />
+              <SubscriptionRoute>
+                <ContractReviewPage />
+              </SubscriptionRoute>
             </Layout>
           }
         />
@@ -46,10 +53,13 @@ const MemberRoutes = () => {
           path="contracts"
           element={
             <Layout>
-              <ContractPage />
+              <SubscriptionRoute>
+                <ContractPage />
+              </SubscriptionRoute>
             </Layout>
           }
         />
+        {/* Excluded from guard — unsubscribed members need access to these */}
         <Route
           path="subscriptions"
           element={
@@ -66,10 +76,12 @@ const MemberRoutes = () => {
             </Layout>
           }
         />
-        <Route path="groups" 
+        <Route path="groups"
           element={
             <Layout>
-              <GroupsPage />
+              <SubscriptionRoute>
+                <GroupsPage />
+              </SubscriptionRoute>
             </Layout>
           }
         />
