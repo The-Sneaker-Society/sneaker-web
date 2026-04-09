@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   List,
@@ -20,6 +21,7 @@ import SettingsModal from "./SettingsModal";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleDrawer = (isOpen) => (event) => {
     if (
@@ -98,7 +100,8 @@ const Sidebar = () => {
             <SidebarItem
               text="Messages"
               icon={<ChatBubbleOutline />}
-              notification={5} // Adding a notification badge with count 5
+              notification={5}
+              onClick={() => navigate("/member/messages")}
             />
           </List>
 
