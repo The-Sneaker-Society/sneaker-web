@@ -9,7 +9,6 @@ import { ContractListWidget } from "../ContractsPage/ContractListWidget";
 import OnboardModal from "../../components/OnboardModal";
 import { useSneakerMember } from "../../context/MemberContext";
 import { LoadingCircle } from "../../components/LoadingCircle";
-import SubscribeModal from "../../components/SubscribeModal";
 
 export const MemberDashboard = () => {
   const { member, loading } = useSneakerMember();
@@ -49,7 +48,6 @@ export const MemberDashboard = () => {
   }
 
   const isOnboarded = !member.isNewUser;
-  const isSubscribed = member.isSubscribed;
 
   return (
     <Box
@@ -62,7 +60,6 @@ export const MemberDashboard = () => {
       }}
     >
       <OnboardModal isOnboarded={isOnboarded} />
-      <SubscribeModal isSubscribed={isSubscribed} />
       <Box
         sx={{
           flexShrink: 0,
