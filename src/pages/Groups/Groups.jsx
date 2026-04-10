@@ -7,9 +7,16 @@ const GroupsPage = () => {
   const { member, loading } = useSneakerMember();
 
   return (
-    <Box sx={{ pt: 4 }}>
+    <Box
+      sx={{
+        px: { xs: 2, md: 4 },
+        py: 4,
+        bgcolor: "#000",
+        minHeight: "100vh",
+      }}
+    >
       <Typography
-        variant="h1"
+        variant="h3"
         sx={{
           color: "#FFD100",
           fontWeight: "bold",
@@ -22,20 +29,17 @@ const GroupsPage = () => {
 
       <Box
         sx={{
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "1.2fr 1fr" },
+          gap: 4,
           alignItems: "flex-start",
+          maxWidth: 1400,
+          mx: "auto",
         }}
       >
-        <Box sx={{ maxWidth: 700, width: "100%" }}>
-          <GroupCreationForm />
-        </Box>
+        <GroupCreationForm />
 
-        <Box sx={{ maxWidth: 700, width: "100%" }}>
-          <GroupDisplay
-            currentUserId={member?.id}
-            currentUserLoading={loading}
-          />
-        </Box>
+        <GroupDisplay currentUserId={member?.id} currentUserLoading={loading} />
       </Box>
     </Box>
   );
