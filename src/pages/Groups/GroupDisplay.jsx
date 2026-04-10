@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { GET_GROUPS } from "../../context/graphql/getGroups";
 
-const GroupDisplay = ({ currentUserId }) => {
+const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
   const [tab, setTab] = useState("trending");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
@@ -12,18 +12,25 @@ const GroupDisplay = ({ currentUserId }) => {
   const { data, loading, error } = useQuery(GET_GROUPS);
   const allGroups = data?.getGroups || [];
 
-  const filtered = useMemo(() => {
-    const baseList =
-      tab === "my"
-        ? allGroups.filter((group) =>
-            (group.members || []).some((member) => member.id === currentUserId),
-          )
-        : allGroups;
+  const baseGroups = useMemo(() => {
+    if (tab === "my") {
+      if (currentUserLoading) return null;
 
-    return baseList.filter((group) =>
+      return allGroups.filter((group) =>
+        (group.members || []).some((member) => member.id === currentUserId),
+      );
+    }
+
+    return allGroups;
+  }, [tab, allGroups, currentUserId, currentUserLoading]);
+
+  const filteredGroups = useMemo(() => {
+    if (baseGroups === null) return null;
+
+    return baseGroups.filter((group) =>
       group.name.toLowerCase().includes(search.toLowerCase()),
     );
-  }, [tab, allGroups, search, currentUserId]);
+  }, [baseGroups, search]);
 
   const handleGroupClick = (group) => {
     navigate(`/member/groups/${group.id}`);
@@ -123,21 +130,52 @@ const GroupDisplay = ({ currentUserId }) => {
             <Typography sx={{ px: 2, py: 2 }}>Loading groups...</Typography>
           )}
 
+          {!loading && tab === "my" && currentUserLoading && (
+            <Typography sx={{ px: 2, py: 2 }}>
+              Loading your groups...
+            </Typography>
+          )}
+
           {error && (
             <Typography sx={{ px: 2, py: 2 }} color="error">
               Failed to load groups
             </Typography>
           )}
 
-          {!loading && !error && filtered.length === 0 && (
-            <Typography sx={{ px: 2, py: 2 }} color="text.secondary">
-              No groups found
-            </Typography>
-          )}
+          {!loading &&
+            !error &&
+            baseGroups !== null &&
+            tab === "trending" &&
+            allGroups.length === 0 && (
+              <Typography sx={{ px: 2, py: 2 }} color="text.secondary">
+                No groups have been created yet.
+              </Typography>
+            )}
 
           {!loading &&
             !error &&
-            filtered.map((group) => {
+            baseGroups !== null &&
+            tab === "my" &&
+            baseGroups.length === 0 && (
+              <Typography sx={{ px: 2, py: 2 }} color="text.secondary">
+                You haven't joined any groups yet.
+              </Typography>
+            )}
+
+          {!loading &&
+            !error &&
+            baseGroups !== null &&
+            baseGroups.length > 0 &&
+            filteredGroups.length === 0 && (
+              <Typography sx={{ px: 2, py: 2 }} color="text.secondary">
+                No groups match your search.
+              </Typography>
+            )}
+
+          {!loading &&
+            !error &&
+            filteredGroups &&
+            filteredGroups.map((group) => {
               const memberCount = (group.members || []).length;
 
               return (
@@ -167,15 +205,25 @@ const GroupDisplay = ({ currentUserId }) => {
                     sx={{
                       width: 70,
                       height: 40,
-                      bgcolor: "#c4c4c4",
                       borderRadius: 1,
+                      overflow: "hidden",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: group.avatar ? "transparent" : "#2b2b2b",
+                      color: group.avatar ? "inherit" : "#FFD100",
+                      fontWeight: 700,
+                      fontSize: 18,
+                      textTransform: "uppercase",
                       backgroundImage: group.avatar
                         ? `url(${group.avatar})`
-                        : "",
+                        : "none",
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                     }}
-                  />
+                  >
+                    {!group.avatar && (group.name?.trim()?.[0] || "G")}
+                  </Box>
                 </Box>
               );
             })}

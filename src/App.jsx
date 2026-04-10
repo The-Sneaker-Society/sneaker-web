@@ -48,8 +48,6 @@ function App() {
               <Route path="member/signup/callback" element={<SignUpCallback />} />
               <Route path="user/signup" element={<SignUpUser />} />
               <Route path="user/signup/callback" element={<UserSignupCallback />} />
-              <Route path="/newgrouppage" element={<NewGroupPage />} />
-              <Route path="/groups" element={<Groups />} />
               <Route path="/mysociety" element={<MySociety />} />
 
               <Route

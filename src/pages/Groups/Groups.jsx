@@ -4,7 +4,7 @@ import GroupDisplay from "./GroupDisplay";
 import { useSneakerMember } from "../../context/MemberContext";
 
 const GroupsPage = () => {
-  const { member, loading, error } = useSneakerMember();
+  const { member, loading } = useSneakerMember();
 
   return (
     <Box sx={{ pt: 4 }}>
@@ -31,7 +31,10 @@ const GroupsPage = () => {
         </Box>
 
         <Box sx={{ maxWidth: 700, width: "100%" }}>
-          <GroupDisplay currentUserId={member?.id} />
+          <GroupDisplay
+            currentUserId={member?.id}
+            currentUserLoading={loading}
+          />
         </Box>
       </Box>
     </Box>
