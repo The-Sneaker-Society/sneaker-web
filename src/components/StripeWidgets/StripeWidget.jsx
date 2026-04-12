@@ -3,6 +3,7 @@ import { Box, Typography, Button, Stack, Skeleton } from "@mui/material";
 import { gql, useQuery } from "@apollo/client";
 import { GoAlertFill } from "react-icons/go";
 import { format } from "date-fns";
+import { useColors } from "../../theme/colors";
 
 const GET_STRIPE_WIDGET_DATA = gql`
   query GetStripeWidgetData {
@@ -17,12 +18,13 @@ const GET_STRIPE_WIDGET_DATA = gql`
 
 export const StripeWidget = () => {
   const { data, loading, error } = useQuery(GET_STRIPE_WIDGET_DATA);
+  const colors = useColors();
 
   if (loading) {
     return (
       <Box
         sx={{
-          border: "3px solid #FFF",
+          border: `3px solid ${colors.border}`,
           borderRadius: 2,
           height: "100%",
           width: "100%",
@@ -31,8 +33,8 @@ export const StripeWidget = () => {
           alignItems: "center",
           boxShadow: "0px 0px 10px #000",
           padding: "20px",
-          bgcolor: "black",
-          color: "white",
+          bgcolor: colors.widgetBg,
+          color: colors.textPrimary,
         }}
       >
         <Stack spacing={2} sx={{ width: "100%" }}>
@@ -60,7 +62,7 @@ export const StripeWidget = () => {
   return (
     <Box
       sx={{
-        border: "3px solid #FFF",
+        border: `3px solid ${colors.border}`,
         borderRadius: 2,
         height: "100%",
         width: "100%",
@@ -69,19 +71,20 @@ export const StripeWidget = () => {
         alignItems: "center",
         boxShadow: "0px 0px 10px #000",
         padding: "20px",
-        bgcolor: "black",
-        color: "white",
+        bgcolor: colors.widgetBg,
+        color: colors.textPrimary,
       }}
     >
       <Stack spacing={2}>
         <Box
           sx={{
             display: "flex",
-            bgcolor: "green",
+            bgcolor: colors.status.completed,
             borderRadius: "50px",
             justifyContent: "center",
             width: "150px",
             margin: "10px",
+            color: '#fff',
           }}
         >
           <Typography
@@ -122,7 +125,8 @@ export const StripeWidget = () => {
           variant="outlined"
           size="large"
           sx={{
-            color: "white",
+            color: colors.textPrimary,
+            borderColor: colors.border,
             textAlign: "center",
           }}
           onClick={() => console.log("Navigate to statements")}
@@ -133,7 +137,8 @@ export const StripeWidget = () => {
           variant="outlined"
           sx={{
             width: "129px",
-            color: "white",
+            color: colors.textPrimary,
+            borderColor: colors.border,
             display: "flex",
             alignItems: "center",
           }}
