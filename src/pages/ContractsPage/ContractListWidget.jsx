@@ -5,6 +5,7 @@ import { Box, Skeleton, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useQuery, gql } from "@apollo/client";
 import { PostAddOutlined } from "@mui/icons-material";
+import { useColors } from "../../theme/colors";
 
 const GET_CONTRACT_LIST = gql`
   query GetContractList {
@@ -17,16 +18,17 @@ const GET_CONTRACT_LIST = gql`
   }
 `;
 
-const stageTypeColors = {
-  NOT_STARTED: { name: "Not Started", color: "#E67E22" }, // Orange
-  PENDING_REVIEW: { name: "Pending Review", color: "#2ECC71" }, // Green
-  STARTED: { name: "Started", color: "#D4AC0D" }, // Golden yellow
-  FINISHED: { name: "Finished", color: "#3498DB" }, // Blue
-};
-
 export const ContractListWidget = () => {
   const navigate = useNavigate();
   const { data, loading, error } = useQuery(GET_CONTRACT_LIST);
+  const colors = useColors();
+
+  const stageTypeColors = {
+    NOT_STARTED: { name: "Not Started", color: colors.status.notStarted },
+    PENDING_REVIEW: { name: "Pending Review", color: colors.status.pending },
+    STARTED: { name: "Started", color: colors.status.inProgress },
+    FINISHED: { name: "Finished", color: colors.status.completed },
+  };
 
   const contractWidgetStyle = {
     minHeight: 400,
@@ -36,8 +38,10 @@ export const ContractListWidget = () => {
     borderRadius: 2,
     boxShadow: 3,
     overflowX: "auto",
-    border: "4px solid white",
-    borderColor: "white",
+    border: `4px solid ${colors.border}`,
+    borderColor: colors.border,
+    bgcolor: colors.widgetBg,
+    color: colors.textPrimary,
   };
 
   if (loading) {
@@ -77,8 +81,8 @@ export const ContractListWidget = () => {
       renderCell: (params) => {
         const stage = stageTypeColors[params.value] || {
           name: params.value,
-          color: "#E0E0E0",
-        }; // Default to light gray for unknown statuses
+          color: colors.textSecondary,
+        };
 
         return (
           <div

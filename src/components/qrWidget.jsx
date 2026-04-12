@@ -1,10 +1,11 @@
 import React from "react";
-import { Box, Icon, Typography, Skeleton, Alert } from "@mui/material";
+import { Box, Icon, Typography, Skeleton } from "@mui/material";
 import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { Link } from "react-router-dom"
+import { useColors } from "../theme/colors";
 
 const GET_MEMBER_QR_WIDGET_DATA = gql`
   query GetMemberQrWidgetData {
@@ -20,6 +21,7 @@ const GET_MEMBER_QR_WIDGET_DATA = gql`
 
 export const QrWidget = () => {
   const { loading, error, data } = useQuery(GET_MEMBER_QR_WIDGET_DATA);
+  const colors = useColors();
 
   if (loading) {
     return (
@@ -31,7 +33,9 @@ export const QrWidget = () => {
           height: "100%",
           width: "100%",
           borderRadius: 2,
-          border: "4px solid white",
+          border: `4px solid ${colors.border}`,
+          bgcolor: colors.widgetBg,
+          color: colors.textPrimary,
           padding: "20px",
         }}
       >
@@ -65,22 +69,23 @@ export const QrWidget = () => {
           height: "100%",
           width: "100%",
           borderRadius: 2,
-          border: "4px solid white",
+          border: `4px solid ${colors.border}`,
           padding: "20px",
-          backgroundColor: "#121212",
+          bgcolor: colors.widgetBg,
+          color: colors.textPrimary,
         }}
       >
         <WarningAmberIcon
           sx={{
             fontSize: 60,
-            color: "#FFD700",
+            color: colors.textPrimary,
             mb: 2
           }}
         />
         <Typography
           variant="h5"
           sx={{
-            color: "white",
+            color: colors.textPrimary,
             fontWeight: "bold",
             textAlign: "center"
           }}
@@ -101,9 +106,11 @@ export const QrWidget = () => {
         justifyContent: "space-around",
         width: "100%",
         borderRadius: 2,
-        border: "4px solid white",
+        border: `4px solid ${colors.border}`,
         padding: "20px",
         gap: 4,
+        bgcolor: colors.widgetBg,
+        color: colors.textPrimary,
       }}
     >
       <Box>
@@ -111,7 +118,7 @@ export const QrWidget = () => {
           variant="h3"
           sx={{
             fontWeight: "bold",
-            color: "white",
+            color: colors.textPrimary,
             marginBottom: "8px",
           }}
         >
@@ -120,7 +127,7 @@ export const QrWidget = () => {
         <Typography
           variant="h6"
           sx={{
-            color: "#aaa",
+            color: colors.textSecondary,
           }}
         >
           Share you custom link to start getting intakes!
@@ -151,7 +158,7 @@ export const QrWidget = () => {
           sx={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "flex-start",
+            alignItems: "center",
           }}
         >
           <Link href="/contract/:memberId" target="_blank">
@@ -162,7 +169,7 @@ export const QrWidget = () => {
               rel="noopener noreferrer"
               sx={{
                 textDecoration: "none",
-                color: "white",
+                color: colors.textPrimary,
                 fontSize: "0.9rem",
                 display: "flex",
                 alignItems: "center",

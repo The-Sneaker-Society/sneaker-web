@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography, Skeleton } from "@mui/material";
 import { gql, useQuery } from "@apollo/client";
+import { useColors } from "../theme/colors";
 
 const GET_MEMBER_CONTRACT_STATUS = gql`
   query GetMemberContractStatus {
@@ -14,6 +15,7 @@ const GET_MEMBER_CONTRACT_STATUS = gql`
 
 export default function ContractStatusWidget() {
   const { data, loading, error } = useQuery(GET_MEMBER_CONTRACT_STATUS);
+  const colors = useColors();
 
   const ContractStatueAmount = ({ name, amount }) => (
     <Box sx={{ textAlign: "center", margin: "10px" }}>
@@ -33,10 +35,10 @@ export default function ContractStatusWidget() {
           alignItems: "center",
           width: "100%",
           height: "100%",
-          bgcolor: "black",
-          color: "white",
+          bgcolor: colors.widgetBg,
+          color: colors.textPrimary,
           borderRadius: 2,
-          border: "4px solid white",
+          border: `4px solid ${colors.border}`,
           padding: "20px",
         }}
       >
@@ -65,10 +67,10 @@ export default function ContractStatusWidget() {
         alignItems: "center",
         width: "100%",
         height: "100%",
-        bgcolor: "black",
-        color: "white",
+        bgcolor: colors.widgetBg,
+        color: colors.textPrimary,
         borderRadius: 2,
-        border: "4px solid white",
+        border: `4px solid ${colors.border}`,
         padding: "20px",
       }}
     >
