@@ -14,16 +14,17 @@ import {
   DirectionsRunOutlined,
   Menu,
 } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import { useColors } from "../theme/colors";
 import SidebarItem from "./SidebarItem";
 import ThemeToggle from "./ThemeToggle";
 import LogoBlack from "../assets/ss-logo-black.svg";
 import LogoWhite from "../assets/ss-logo.svg";
-import SettingsModal from "./SettingsModal";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
   const colors = useColors();
+  const navigate = useNavigate();
 
   const toggleDrawer = (isOpen) => (event) => {
     if (
@@ -34,16 +35,6 @@ const Sidebar = () => {
     }
 
     setOpen(isOpen);
-  };
-
-  const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
-
-  const handleSettingsClick = () => {
-    setSettingsModalOpen(true);
-  };
-
-  const handleCloseSettingsModal = () => {
-    setSettingsModalOpen(false);
   };
 
   return (
@@ -103,6 +94,7 @@ const Sidebar = () => {
               text="Messages"
               icon={<ChatBubbleOutline />}
               notification={5}
+              onClick={() => navigate("/member/messages")}
             />
           </List>
 
@@ -111,7 +103,7 @@ const Sidebar = () => {
               <SidebarItem
                 text="Settings"
                 icon={<SettingsOutlined />}
-                onClick={handleSettingsClick}
+                onClick={() => navigate("/member/settings")}
               />
               <ThemeToggle />
             </Box>
@@ -160,6 +152,7 @@ const Sidebar = () => {
               text="Messages"
               icon={<ChatBubbleOutline />}
               notification={5}
+              onClick={() => navigate("/member/messages")}
             />
           </List>
 
@@ -168,7 +161,7 @@ const Sidebar = () => {
               <SidebarItem
                 text="Settings"
                 icon={<SettingsOutlined />}
-                onClick={handleSettingsClick}
+                onClick={() => navigate("/member/settings")}
               />
               <ThemeToggle />
             </Box>
@@ -176,11 +169,6 @@ const Sidebar = () => {
         </Box>
       </Box>
 
-      {/* Settings Modal */}
-      <SettingsModal
-        open={isSettingsModalOpen}
-        onClose={handleCloseSettingsModal}
-      />
     </Box>
   );
 };
