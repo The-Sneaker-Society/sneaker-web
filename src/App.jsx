@@ -19,8 +19,6 @@ import LoginSSOCallback from "./pages/LoginSSOCallback/LoginSSOCallback";
 import DashboardRouter from "./routes/DashboardRouter";
 import MemberRoutes from "./routes/MemberRoutes";
 import UserRoutes from "./routes/UserRoutes";
-import NewGroupPage from "./pages/GroupsPage/NewGroupPage";
-import Groups from "./pages/Dashboard/Groups";
 import MySociety from "./pages/Dashboard/Discover";
 
 function App() {
@@ -57,10 +55,7 @@ function App() {
               <Route path="member/signup/callback" element={<SignUpCallback />} />
               <Route path="user/signup" element={<SignUpUser />} />
               <Route path="user/signup/callback" element={<UserSignupCallback />} />
-              <Route path="/newgrouppage" element={<NewGroupPage />} />
-              <Route path="/groups" element={<Groups />} />
               <Route path="/mysociety" element={<MySociety />} />
-              <Route path="/grouppage" element={<NewGroupPage />} />
 
               <Route
                 path="/dashboard"

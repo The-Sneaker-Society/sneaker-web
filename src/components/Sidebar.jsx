@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Box,
-  List,
-  IconButton,
-  Drawer,
-} from "@mui/material";
+import { Box, List, IconButton, Drawer } from "@mui/material";
 import {
   ExploreOutlined,
   GroupsOutlined,
@@ -20,6 +15,7 @@ import ThemeToggle from "./ThemeToggle";
 import LogoBlack from "../assets/ss-logo-black.svg";
 import LogoWhite from "../assets/ss-logo.svg";
 import SettingsModal from "./SettingsModal";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
@@ -35,7 +31,7 @@ const Sidebar = () => {
 
     setOpen(isOpen);
   };
-
+  const navigate = useNavigate();
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const handleSettingsClick = () => {
@@ -75,7 +71,7 @@ const Sidebar = () => {
         >
           {/* Sidebar Content */}
           <Box sx={{ padding: 2, textAlign: "center" }}>
-          <Box
+            <Box
               component="img"
               src={colors.isDark ? LogoBlack : LogoWhite}
               alt="Logo"
@@ -86,7 +82,7 @@ const Sidebar = () => {
                 my: 4,
                 cursor: "pointer",
               }}
-              onClick={() => window.location.href = "/dashboard"}
+              onClick={() => (window.location.href = "/dashboard")}
             />
           </Box>
 
@@ -97,7 +93,11 @@ const Sidebar = () => {
           >
             <SidebarItem text="My Society" icon={<DirectionsRunOutlined />} />
             <SidebarItem text="Discover" icon={<ExploreOutlined />} />
-            <SidebarItem text="Groups" icon={<GroupsOutlined />} />
+            <SidebarItem
+              text="Groups"
+              icon={<GroupsOutlined />}
+              onClick={() => navigate("/member/groups")}
+            />{" "}
             <SidebarItem text="The Vault" icon={<Inventory2Outlined />} />
             <SidebarItem
               text="Messages"
@@ -143,7 +143,7 @@ const Sidebar = () => {
                 my: 4,
                 cursor: "pointer",
               }}
-              onClick={() => window.location.href = "/dashboard"}
+              onClick={() => (window.location.href = "/dashboard")}
             />
           </Box>
 
@@ -154,7 +154,11 @@ const Sidebar = () => {
           >
             <SidebarItem text="My Society" icon={<DirectionsRunOutlined />} />
             <SidebarItem text="Discover" icon={<ExploreOutlined />} />
-            <SidebarItem text="Groups" icon={<GroupsOutlined />} />
+            <SidebarItem
+              text="Groups"
+              icon={<GroupsOutlined />}
+              onClick={() => navigate("/member/groups")}
+            />{" "}
             <SidebarItem text="The Vault" icon={<Inventory2Outlined />} />
             <SidebarItem
               text="Messages"
