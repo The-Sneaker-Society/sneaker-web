@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Box,
-  List,
-  IconButton,
-  Drawer,
-} from "@mui/material";
+import { Box, List, IconButton, Drawer } from "@mui/material";
 import {
   ExploreOutlined,
   GroupsOutlined,
@@ -14,12 +9,17 @@ import {
   DirectionsRunOutlined,
   Menu,
 } from "@mui/icons-material";
+import { useColors } from "../theme/colors";
 import SidebarItem from "./SidebarItem";
-import Logo from "../assets/ss-logo-black.svg";
+import ThemeToggle from "./ThemeToggle";
+import LogoBlack from "../assets/ss-logo-black.svg";
+import LogoWhite from "../assets/ss-logo.svg";
 import SettingsModal from "./SettingsModal";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
+  const colors = useColors();
 
   const toggleDrawer = (isOpen) => (event) => {
     if (
@@ -31,7 +31,7 @@ const Sidebar = () => {
 
     setOpen(isOpen);
   };
-
+  const navigate = useNavigate();
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const handleSettingsClick = () => {
@@ -61,7 +61,7 @@ const Sidebar = () => {
           sx={{
             width: 250,
             height: "100vh",
-            backgroundColor: "white",
+            backgroundColor: colors.sidebarBg,
             display: "flex",
             flexDirection: "column",
           }}
@@ -71,9 +71,9 @@ const Sidebar = () => {
         >
           {/* Sidebar Content */}
           <Box sx={{ padding: 2, textAlign: "center" }}>
-          <Box
+            <Box
               component="img"
-              src={Logo}
+              src={colors.isDark ? LogoBlack : LogoWhite}
               alt="Logo"
               sx={{
                 width: "80%",
@@ -82,7 +82,7 @@ const Sidebar = () => {
                 my: 4,
                 cursor: "pointer",
               }}
-              onClick={() => window.location.href = "/dashboard"}
+              onClick={() => (window.location.href = "/dashboard")}
             />
           </Box>
 
@@ -93,21 +93,28 @@ const Sidebar = () => {
           >
             <SidebarItem text="My Society" icon={<DirectionsRunOutlined />} />
             <SidebarItem text="Discover" icon={<ExploreOutlined />} />
-            <SidebarItem text="Groups" icon={<GroupsOutlined />} />
+            <SidebarItem
+              text="Groups"
+              icon={<GroupsOutlined />}
+              onClick={() => navigate("/member/groups")}
+            />{" "}
             <SidebarItem text="The Vault" icon={<Inventory2Outlined />} />
             <SidebarItem
               text="Messages"
               icon={<ChatBubbleOutline />}
-              notification={5} // Adding a notification badge with count 5
+              notification={5}
             />
           </List>
 
-          <Box sx={{ padding: 2, borderTop: "1px solid #eee" }}>
-            <SidebarItem
-              text="Settings"
-              icon={<SettingsOutlined />}
-              onClick={handleSettingsClick}
-            />
+          <Box sx={{ padding: 2, borderTop: `1px solid ${colors.border}` }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <SidebarItem
+                text="Settings"
+                icon={<SettingsOutlined />}
+                onClick={handleSettingsClick}
+              />
+              <ThemeToggle />
+            </Box>
           </Box>
         </Box>
       </Drawer>
@@ -118,7 +125,7 @@ const Sidebar = () => {
           sx={{
             width: 250,
             height: "100vh",
-            backgroundColor: "white",
+            backgroundColor: colors.sidebarBg,
             display: "flex",
             flexDirection: "column",
           }}
@@ -127,7 +134,7 @@ const Sidebar = () => {
           <Box sx={{ padding: 2, textAlign: "center" }}>
             <Box
               component="img"
-              src={Logo}
+              src={colors.isDark ? LogoBlack : LogoWhite}
               alt="Logo"
               sx={{
                 width: "80%",
@@ -136,7 +143,7 @@ const Sidebar = () => {
                 my: 4,
                 cursor: "pointer",
               }}
-              onClick={() => window.location.href = "/dashboard"}
+              onClick={() => (window.location.href = "/dashboard")}
             />
           </Box>
 
@@ -147,21 +154,28 @@ const Sidebar = () => {
           >
             <SidebarItem text="My Society" icon={<DirectionsRunOutlined />} />
             <SidebarItem text="Discover" icon={<ExploreOutlined />} />
-            <SidebarItem text="Groups" icon={<GroupsOutlined />} />
+            <SidebarItem
+              text="Groups"
+              icon={<GroupsOutlined />}
+              onClick={() => navigate("/member/groups")}
+            />{" "}
             <SidebarItem text="The Vault" icon={<Inventory2Outlined />} />
             <SidebarItem
               text="Messages"
               icon={<ChatBubbleOutline />}
-              notification={5} // test
+              notification={5}
             />
           </List>
 
-          <Box sx={{ padding: 2, borderTop: "1px solid #eee" }}>
-            <SidebarItem
-              text="Settings"
-              icon={<SettingsOutlined />}
-              onClick={handleSettingsClick}
-            />
+          <Box sx={{ padding: 2, borderTop: `1px solid ${colors.border}` }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <SidebarItem
+                text="Settings"
+                icon={<SettingsOutlined />}
+                onClick={handleSettingsClick}
+              />
+              <ThemeToggle />
+            </Box>
           </Box>
         </Box>
       </Box>

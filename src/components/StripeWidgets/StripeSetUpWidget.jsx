@@ -3,6 +3,8 @@ import { Box, Typography, Button, Stack, Skeleton } from "@mui/material";
 import { gql, useMutation } from "@apollo/client";
 import { GoAlertFill } from "react-icons/go";
 import { useSneakerMember } from "../../context/MemberContext";
+import { useColors } from "../../theme/colors";
+
 const ONBOARD_MEMBER_TO_STRIPE_MUTATION = gql`
   mutation OnboardMemberToStripe {
     onboardMemberToStripe
@@ -22,16 +24,15 @@ export const StripeSetUpWidget = () => {
   );
   const [resumeAccountOnboarding, { loading: resumeOnboardLoading }] =
     useMutation(RESUME_ONBOARDING);
+  const colors = useColors();
 
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleStripeAccountClick = async () => {
-    // Guard clause: ensure member exists before trying to access its properties
     if (!member) {
       console.error(
         "Stripe action cannot be performed: member data is not available."
       );
-      // Optionally, provide user feedback here (e.g., set an error message state)
       return;
     }
 
@@ -42,7 +43,6 @@ export const StripeSetUpWidget = () => {
         if (data && data.onboardMemberToStripe) {
           window.location.href = data.onboardMemberToStripe;
         } else {
-          // Handle case where redirect URL might not be returned
           console.error("Onboarding did not return a redirect URL.");
           setIsRedirecting(false);
         }
@@ -51,7 +51,6 @@ export const StripeSetUpWidget = () => {
         if (data && data.resumeAccountOnboarding) {
           window.location.href = data.resumeAccountOnboarding;
         } else {
-          // Handle case where redirect URL might not be returned
           console.error("Resume onboarding did not return a redirect URL.");
           setIsRedirecting(false);
         }
@@ -72,10 +71,10 @@ export const StripeSetUpWidget = () => {
           alignItems: "center",
           height: "100%",
           width: "100%",
-          bgcolor: "black",
-          color: "white",
+          bgcolor: colors.widgetBg,
+          color: colors.textPrimary,
           borderRadius: 2,
-          border: "4px solid white",
+          border: `4px solid ${colors.border}`,
           padding: "50px",
         }}
       >
@@ -90,16 +89,12 @@ export const StripeSetUpWidget = () => {
 
   if (member.stripeConnectAccountId) {
     if (member.isOnboardedWithStripe === true) {
-      // Explicitly check for true
       alertMessage = "Your Stripe account is connected.";
-      buttonText = "Manage Stripe Account"; // Or similar if you want to allow managing after onboarding
-      // Or you might hide the button/show different info if fully onboarded
+      buttonText = "Manage Stripe Account";
     } else if (member.isOnboardedWithStripe === false) {
-      // Explicitly check for false
       alertMessage = "Your Stripe onboarding is incomplete.";
       buttonText = "Resume Onboarding";
     } else {
-      // Fallback if isOnboardedWithStripe is undefined (but it shouldn't be if query is correct)
       alertMessage = "Stripe status is unclear. Attempt to resume or setup.";
       buttonText = "Configure Stripe";
     }
@@ -115,10 +110,10 @@ export const StripeSetUpWidget = () => {
         alignItems: "center",
         height: "100%",
         width: "100%",
-        bgcolor: "black",
-        color: "white",
+        bgcolor: colors.widgetBg,
+        color: colors.textPrimary,
         borderRadius: 2,
-        border: "4px solid white",
+        border: `4px solid ${colors.border}`,
         padding: "50px",
         textAlign: "center",
       }}
@@ -131,12 +126,11 @@ export const StripeSetUpWidget = () => {
           marginBottom: "16px",
         }}
       >
-        <GoAlertFill style={{ color: "red", fontSize: "24px" }} />
+        <GoAlertFill style={{ color: colors.textPrimary, fontSize: "24px" }} />
         <Typography variant="body1" sx={{ fontSize: "24px" }}>
           {alertMessage}
         </Typography>
       </Box>
-      {/* Conditionally render the button if an action is needed */}
       {!(
         member.stripeConnectAccountId && member.isOnboardedWithStripe === true
       ) && (
@@ -145,8 +139,8 @@ export const StripeSetUpWidget = () => {
           size="small"
           disabled={onboardLoading || resumeOnboardLoading || isRedirecting}
           sx={{
-            color: "white",
-            borderColor: "white",
+            color: colors.textPrimary,
+            borderColor: colors.border,
             textTransform: "none",
             fontSize: "20px",
             padding: "5px 15px",
@@ -157,29 +151,24 @@ export const StripeSetUpWidget = () => {
           {buttonText}
         </Button>
       )}
-      {/* If you want a button to always show for managing a connected account, add it here: */}
       {member.stripeConnectAccountId &&
         member.isOnboardedWithStripe === true && (
           <Button
             variant="outlined"
             size="small"
             sx={{
-              color: "white",
-              borderColor: "white",
+              color: colors.textPrimary,
+              borderColor: colors.border,
               textTransform: "none",
               fontSize: "20px",
               padding: "5px 15px",
               mt: 1,
             }}
             onClick={() => {
-              // Logic to redirect to Stripe dashboard or manage settings
-              // For example, you might need another mutation/query to get a dashboard link
               if (member.stripeDashboardLink) {
-                // Assuming you fetch/have a dashboard link
                 window.location.href = member.stripeDashboardLink;
               } else {
                 console.log("Stripe dashboard link not available.");
-                // Potentially call resumeAccountOnboarding if that provides a general link
                 handleStripeAccountClick();
               }
             }}

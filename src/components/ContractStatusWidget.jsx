@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography, Skeleton } from "@mui/material";
 import { gql, useQuery } from "@apollo/client";
+import { useColors } from "../theme/colors";
 
 const GET_MEMBER_CONTRACT_STATUS = gql`
   query GetMemberContractStatus {
@@ -14,11 +15,16 @@ const GET_MEMBER_CONTRACT_STATUS = gql`
 
 export default function ContractStatusWidget() {
   const { data, loading, error } = useQuery(GET_MEMBER_CONTRACT_STATUS);
+  const colors = useColors();
 
   const ContractStatueAmount = ({ name, amount }) => (
-    <Box sx={{ textAlign: "center", margin: "10px" }}>
-      <Typography variant="h2">{amount}</Typography>
-      <Typography variant="h4">{name}</Typography>
+    <Box sx={{ textAlign: "center", margin: "10px", flex: 1, minWidth: 0 }}>
+      <Typography sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.5rem" }, fontWeight: "bold" }}>
+        {amount}
+      </Typography>
+      <Typography sx={{ fontSize: { xs: "0.85rem", sm: "1rem", md: "1.25rem" } }}>
+        {name}
+      </Typography>
     </Box>
   );
 
@@ -33,21 +39,17 @@ export default function ContractStatusWidget() {
           alignItems: "center",
           width: "100%",
           height: "100%",
-          bgcolor: "black",
-          color: "white",
+          bgcolor: colors.widgetBg,
+          color: colors.textPrimary,
           borderRadius: 2,
-          border: "4px solid white",
+          border: `4px solid ${colors.border}`,
           padding: "20px",
         }}
       >
         {[...Array(3)].map((_, index) => (
-          <Box key={index} sx={{ textAlign: "center", margin: "10px" }}>
-            <Typography variant="h2">
-              <Skeleton variant="text" width={50} />
-            </Typography>
-            <Typography variant="h4">
-              <Skeleton variant="text" width={100} />
-            </Typography>
+          <Box key={index} sx={{ textAlign: "center", margin: "10px", flex: 1, minWidth: 0 }}>
+            <Skeleton variant="text" width={50} sx={{ mx: "auto", fontSize: { xs: "1.5rem", md: "2.5rem" } }} />
+            <Skeleton variant="text" width={100} sx={{ mx: "auto", fontSize: { xs: "0.85rem", md: "1.25rem" } }} />
           </Box>
         ))}
       </Box>
@@ -65,10 +67,10 @@ export default function ContractStatusWidget() {
         alignItems: "center",
         width: "100%",
         height: "100%",
-        bgcolor: "black",
-        color: "white",
+        bgcolor: colors.widgetBg,
+        color: colors.textPrimary,
         borderRadius: 2,
-        border: "4px solid white",
+        border: `4px solid ${colors.border}`,
         padding: "20px",
       }}
     >

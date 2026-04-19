@@ -217,13 +217,25 @@ export const ColorModeContext = createContext({
   toggleColorMode: () => {},
 });
 
+const getInitialMode = () => {
+  const savedMode = localStorage.getItem('theme-mode');
+  if (savedMode) {
+    return savedMode;
+  }
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
 export const useMode = () => {
-  const [mode, setMode] = useState('dark');
+  const [mode, setMode] = useState(getInitialMode);
 
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () =>
-        setMode((prev) => (prev === 'light' ? 'dark' : 'light')),
+        setMode((prev) => {
+          const newMode = prev === 'light' ? 'dark' : 'light';
+          localStorage.setItem('theme-mode', newMode);
+          return newMode;
+        }),
     }),
     []
   );
@@ -231,3 +243,5 @@ export const useMode = () => {
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
   return [theme, colorMode];
 };
+
+export const getDarkTheme = () => createTheme(themeSettings('dark'));

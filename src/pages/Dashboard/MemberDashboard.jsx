@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import { useClerk } from "@clerk/clerk-react";
 import ContractStatusWidget from "../../components/ContractStatusWidget";
 import { QrWidget } from "../../components/qrWidget";
@@ -40,6 +40,14 @@ export const MemberDashboard = () => {
     return <LoadingCircle />;
   }
 
+  if (!member) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "white" }}>
+        <Typography>Error loading member data. Please refresh or sign out and try again.</Typography>
+      </Box>
+    );
+  }
+
   const isOnboarded = !member.isNewUser;
   const isSubscribed = member.isSubscribed;
 
@@ -66,12 +74,18 @@ export const MemberDashboard = () => {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            flexWrap: "wrap",
+            gap: 1,
           }}
         >
-          <Typography variant="h1" fontWeight="bold">
+          <Typography
+            variant="h1"
+            fontWeight="bold"
+            sx={{ fontSize: { xs: "1.6rem", sm: "2rem", md: "2.5rem" }, minWidth: 0 }}
+          >
             Welcome, {member?.firstName || "member"}
           </Typography>
-          <StyledButton onClick={handleLogout} style={{ marginTop: "10px" }}>
+          <StyledButton onClick={handleLogout}>
             Log Out
           </StyledButton>
         </Box>
