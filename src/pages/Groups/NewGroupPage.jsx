@@ -1,4 +1,3 @@
-import { useState, useRef, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -12,392 +11,61 @@ import {
   CircularProgress,
 } from "@mui/material";
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { gql, useQuery, useMutation } from "@apollo/client";
-import { useParams } from "react-router-dom";
-import { useSneakerMember } from "../../context/MemberContext";
-
-const GET_GROUP = gql`
-  query GetGroup($id: ID!) {
-    getGroup(id: $id) {
-      id
-      name
-      description
-      avatar
-      members {
-        id
-        firstName
-        lastName
-        email
-      }
-      createdBy {
-        id
-      }
-      admins {
-        id
-      }
-      createdAt
-    }
-  }
-`;
-
-const GET_POSTS_BY_GROUP = gql`
-  query GetPostsByGroup($groupId: ID!) {
-    getPostsByGroup(groupId: $groupId) {
-      id
-      content
-      images
-      shares
-      createdAt
-      author {
-        id
-        firstName
-        lastName
-        email
-      }
-      likes {
-        id
-      }
-      comments {
-        id
-        content
-        createdAt
-        author {
-          id
-          firstName
-          lastName
-          email
-        }
-      }
-    }
-  }
-`;
-
-const JOIN_GROUP = gql`
-  mutation JoinGroup($groupId: ID!) {
-    joinGroup(groupId: $groupId) {
-      id
-      members {
-        id
-        firstName
-        lastName
-        email
-      }
-    }
-  }
-`;
-
-const LEAVE_GROUP = gql`
-  mutation LeaveGroup($groupId: ID!) {
-    leaveGroup(groupId: $groupId) {
-      id
-      members {
-        id
-        firstName
-        lastName
-        email
-      }
-    }
-  }
-`;
-
-const CREATE_POST = gql`
-  mutation CreatePost($groupId: ID!, $content: String!, $images: [String!]) {
-    createPost(groupId: $groupId, content: $content, images: $images) {
-      id
-      content
-      images
-      shares
-      createdAt
-      author {
-        id
-        firstName
-        lastName
-        email
-      }
-      likes {
-        id
-      }
-      comments {
-        id
-        content
-        createdAt
-        author {
-          id
-          firstName
-          lastName
-          email
-        }
-      }
-    }
-  }
-`;
-
-const LIKE_POST = gql`
-  mutation LikePost($postId: ID!) {
-    likePost(postId: $postId) {
-      id
-      likes {
-        id
-      }
-    }
-  }
-`;
-
-const ADD_COMMENT = gql`
-  mutation AddComment($postId: ID!, $content: String!) {
-    addComment(postId: ID!, content: $content) {
-      id
-      content
-      createdAt
-      author {
-        id
-        firstName
-        lastName
-        email
-      }
-    }
-  }
-`;
-
-const DELETE_POST = gql`
-  mutation DeletePost($postId: ID!) {
-    deletePost(postId: $postId)
-  }
-`;
+import { useNewGroupPage } from "./useNewGroupPage";
+import PostCard from "./PostCard";
+import DeletePostModal from "./DeletePostModal";
 
 const NewGroupPage = () => {
-  const { id } = useParams();
-  const groupId = id;
-  const skip = !groupId;
-
-  const { member: currentUser, loading: currentUserLoading } =
-    useSneakerMember();
-
-  const { data, loading, error } = useQuery(GET_GROUP, {
-    variables: { id: groupId },
-    skip,
-  });
-
   const {
-    data: postsData,
-    loading: postsLoading,
-    error: postsError,
-  } = useQuery(GET_POSTS_BY_GROUP, {
-    variables: { groupId },
-    skip,
-  });
+    loading,
+    error,
+    group,
+    posts,
+    postsLoading,
+    postsError,
+    currentUserLoading,
+    currentUser,
+    isJoined,
+    isCreator,
+    memberCount,
 
-  const group = data?.getGroup;
-  const posts = postsData?.getPostsByGroup || [];
+    modalOpen,
+    setModalOpen,
+    isHovering,
+    setIsHovering,
 
-  const isJoined = useMemo(() => {
-    if (!currentUser?.id || !group?.members) return false;
-    return group.members.some((m) => m.id === currentUser.id);
-  }, [group, currentUser]);
+    joinLeaveError,
+    deleteModalOpen,
+    setDeleteModalOpen,
+    deleteError,
+    postToDelete,
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
+    postContent,
+    setPostContent,
+    imageSrcs,
+    postError,
+    commentInputs,
+    commentErrors,
+    fileInputRef,
 
-  const [joinLeaveError, setJoinLeaveError] = useState("");
-  const [likeError, setLikeError] = useState("");
+    joining,
+    leaving,
+    posting,
 
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [postToDelete, setPostToDelete] = useState(null);
-  const [deleteError, setDeleteError] = useState("");
+    likingPostId,
+    commentLoadingByPost,
+    deletingPostId,
 
-  const [postContent, setPostContent] = useState("");
-  const [imageSrcs, setImageSrcs] = useState([]);
-  const [imageFiles, setImageFiles] = useState([]);
-  const [postError, setPostError] = useState("");
-
-  const [commentInputs, setCommentInputs] = useState({});
-  const [commentErrors, setCommentErrors] = useState({});
-
-  const fileInputRef = useRef(null);
-
-  const refetchPostQueries = [
-    { query: GET_POSTS_BY_GROUP, variables: { groupId } },
-  ];
-
-  const [joinGroup, { loading: joining }] = useMutation(JOIN_GROUP, {
-    refetchQueries: [{ query: GET_GROUP, variables: { id: groupId } }],
-    awaitRefetchQueries: true,
-    onCompleted: () => setJoinLeaveError(""),
-    onError: (err) => setJoinLeaveError(err.message),
-  });
-
-  const [leaveGroup, { loading: leaving }] = useMutation(LEAVE_GROUP, {
-    refetchQueries: [{ query: GET_GROUP, variables: { id: groupId } }],
-    awaitRefetchQueries: true,
-    onCompleted: () => setJoinLeaveError(""),
-    onError: (err) => setJoinLeaveError(err.message),
-  });
-
-  const [createPost, { loading: posting }] = useMutation(CREATE_POST, {
-    refetchQueries: refetchPostQueries,
-    awaitRefetchQueries: true,
-    onCompleted: () => {
-      imageSrcs.forEach((url) => URL.revokeObjectURL(url));
-      setPostContent("");
-      setImageSrcs([]);
-      setImageFiles([]);
-      setPostError("");
-    },
-    onError: (err) => setPostError(err.message),
-  });
-
-  const [likePost, { loading: likingPost }] = useMutation(LIKE_POST, {
-    refetchQueries: refetchPostQueries,
-    awaitRefetchQueries: true,
-    onCompleted: () => setLikeError(""),
-    onError: (err) => setLikeError(err.message),
-  });
-
-  const [addComment, { loading: addingComment }] = useMutation(ADD_COMMENT, {
-    refetchQueries: refetchPostQueries,
-    awaitRefetchQueries: true,
-    onError: (err) => {
-      if (pendingCommentPostIdRef.current) {
-        setCommentErrors((prev) => ({
-          ...prev,
-          [pendingCommentPostIdRef.current]: err.message,
-        }));
-      }
-    },
-  });
-
-  const [deletePost, { loading: deletingPost }] = useMutation(DELETE_POST, {
-    refetchQueries: refetchPostQueries,
-    awaitRefetchQueries: true,
-    onCompleted: () => {
-      setDeleteModalOpen(false);
-      setPostToDelete(null);
-      setDeleteError("");
-    },
-    onError: (err) => setDeleteError(err.message),
-  });
-
-  const handleJoinGroup = () => {
-    if (!groupId) return;
-    setJoinLeaveError("");
-    joinGroup({ variables: { groupId } });
-  };
-
-  const handleLeaveGroup = () => {
-    if (!groupId) return;
-    setJoinLeaveError("");
-    setModalOpen(false);
-    leaveGroup({ variables: { groupId } });
-  };
-
-  const openDeletePostModal = (post) => {
-    setPostToDelete(post);
-    setDeleteError("");
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeletePost = () => {
-    if (!postToDelete?.id) return;
-    setDeleteError("");
-    deletePost({ variables: { postId: postToDelete.id } });
-  };
-
-  const handleFileInputChange = (event) => {
-    const files = Array.from(event.target.files || []);
-    if (!files.length) return;
-
-    imageSrcs.forEach((url) => URL.revokeObjectURL(url));
-
-    const urls = files.map((file) => URL.createObjectURL(file));
-    setImageSrcs(urls);
-    setImageFiles(files);
-  };
-
-  const handlePostSubmit = () => {
-    if (!postContent.trim()) {
-      setPostError("Post content cannot be empty.");
-      return;
-    }
-
-    if (!groupId) return;
-
-    const toBase64 = (file) =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-    Promise.all(imageFiles.map(toBase64)).then((base64Images) => {
-      createPost({
-        variables: {
-          groupId,
-          content: postContent.trim(),
-          images: base64Images,
-        },
-      });
-    });
-  };
-
-  const handleLikePost = (postId) => {
-    if (!isJoined) return;
-    setLikeError("");
-    likePost({ variables: { postId } });
-  };
-
-  const handleCommentChange = (postId, value) => {
-    setCommentInputs((prev) => ({
-      ...prev,
-      [postId]: value,
-    }));
-
-    setCommentErrors((prev) => ({
-      ...prev,
-      [postId]: "",
-    }));
-  };
-
-  const handleAddComment = async (postId) => {
-    if (!isJoined) return;
-
-    const content = commentInputs[postId]?.trim();
-
-    if (!content) {
-      setCommentErrors((prev) => ({
-        ...prev,
-        [postId]: "Comment cannot be empty.",
-      }));
-      return;
-    }
-
-    pendingCommentPostIdRef.current = postId;
-
-    try {
-      await addComment({
-        variables: {
-          postId,
-          content,
-        },
-      });
-
-      setCommentInputs((prev) => ({
-        ...prev,
-        [postId]: "",
-      }));
-
-      setCommentErrors((prev) => ({
-        ...prev,
-        [postId]: "",
-      }));
-    } finally {
-      pendingCommentPostIdRef.current = null;
-    }
-  };
+    handleJoinGroup,
+    handleLeaveGroup,
+    handleDeletePost,
+    handleFileInputChange,
+    handlePostSubmit,
+    handleLikePost,
+    handleCommentChange,
+    handleAddComment,
+    openDeletePostModal,
+  } = useNewGroupPage();
 
   if (loading || currentUserLoading) {
     return (
@@ -414,14 +82,6 @@ const NewGroupPage = () => {
       </Box>
     );
   }
-
-  const memberCount = group.members?.length || 0;
-  const isCreator =
-    currentUser?.id && group.createdBy
-      ? group.createdBy.id === currentUser.id
-      : false;
-
-  const pendingCommentPostIdRef = useRef(null);
 
   return (
     <Box sx={{ maxWidth: 680, mx: "auto", px: 2, py: 4 }}>
@@ -559,63 +219,13 @@ const NewGroupPage = () => {
         </Box>
       </Modal>
 
-      <Modal open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "#1a1a1a",
-            borderRadius: 2,
-            p: 4,
-            width: 340,
-          }}
-        >
-          <Typography sx={{ color: "#fff", mb: 2, fontWeight: 700 }}>
-            Delete post?
-          </Typography>
-
-          <Typography sx={{ color: "#aaa", mb: 2, fontSize: 14 }}>
-            This action cannot be undone.
-          </Typography>
-
-          {deleteError && (
-            <Typography
-              variant="caption"
-              sx={{ color: "#ff6b6b", display: "block", mb: 1.5 }}
-            >
-              {deleteError}
-            </Typography>
-          )}
-
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={handleDeletePost}
-            disabled={deletingPost}
-            sx={{
-              bgcolor: "#ff6b6b",
-              color: "#fff",
-              mb: 1,
-              "&:hover": { bgcolor: "#e05555" },
-              "&:disabled": { bgcolor: "#555", color: "#999" },
-            }}
-          >
-            {deletingPost ? "Deleting..." : "Delete Post"}
-          </Button>
-
-          <Button
-            fullWidth
-            variant="outlined"
-            color="inherit"
-            onClick={() => setDeleteModalOpen(false)}
-            sx={{ color: "#aaa", borderColor: "#444" }}
-          >
-            Cancel
-          </Button>
-        </Box>
-      </Modal>
+      <DeletePostModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeletePost}
+        loading={postToDelete?.id && deletingPostId === postToDelete.id}
+        error={deleteError}
+      />
 
       <Divider sx={{ borderColor: "#333", mb: 3 }} />
 
@@ -625,10 +235,7 @@ const NewGroupPage = () => {
             fullWidth
             placeholder="Write something to the group..."
             value={postContent}
-            onChange={(e) => {
-              setPostContent(e.target.value);
-              setPostError("");
-            }}
+            onChange={(e) => setPostContent(e.target.value)}
             multiline
             minRows={2}
             sx={{
@@ -652,7 +259,11 @@ const NewGroupPage = () => {
           )}
 
           {imageSrcs.length > 0 && (
-            <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: "wrap" }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ mb: 1, flexWrap: "wrap" }}
+            >
               {imageSrcs.map((src, i) => (
                 <Box
                   key={i}
@@ -734,256 +345,25 @@ const NewGroupPage = () => {
           No posts yet
         </Typography>
       ) : (
-        posts.map((post) => {
-          const authorName =
-            `${post.author?.firstName || ""} ${
-              post.author?.lastName || ""
-            }`.trim() ||
-            post.author?.email ||
-            "Unknown user";
-
-          const likeCount = post.likes?.length || 0;
-          const commentCount = post.comments?.length || 0;
-          const shareCount = post.shares || 0;
-          const hasLiked = !!post.likes?.some(
-            (like) => like.id === currentUser?.id,
-          );
-
-          const isPostAuthor = post.author?.id === currentUser?.id;
-          const isGroupCreator = group.createdBy?.id === currentUser?.id;
-          const isGroupAdmin = !!group.admins?.some(
-            (admin) => admin.id === currentUser?.id,
-          );
-          const canDeletePost = isPostAuthor || isGroupCreator || isGroupAdmin;
-
-          return (
-            <Box
-              key={post.id}
-              sx={{
-                mt: 2,
-                p: 2,
-                borderRadius: 2,
-                bgcolor: "#111",
-                border: "1px solid #2a2a2a",
-              }}
-            >
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{ mb: 1 }}
-              >
-                <Typography sx={{ color: "#fff", fontWeight: 700 }}>
-                  {authorName}
-                </Typography>
-
-                {canDeletePost && (
-                  <Button
-                    size="small"
-                    onClick={() => openDeletePostModal(post)}
-                    startIcon={<DeleteOutlineIcon sx={{ fontSize: 16 }} />}
-                    sx={{
-                      textTransform: "none",
-                      minWidth: "auto",
-                      p: 0,
-                      color: "#ff6b6b",
-                      "&:hover": {
-                        backgroundColor: "transparent",
-                        color: "#ff8a8a",
-                      },
-                    }}
-                  >
-                    Delete
-                  </Button>
-                )}
-              </Stack>
-
-              <Typography
-                sx={{ color: "#ddd", mb: post.images?.length ? 2 : 0 }}
-              >
-                {post.content}
-              </Typography>
-
-              {post.images && post.images.length > 0 && (
-                <Stack direction="row" spacing={1} flexWrap="wrap">
-                  {post.images.map((img, i) => (
-                    <Box
-                      key={i}
-                      component="img"
-                      src={img}
-                      alt={`post-${post.id}-image-${i + 1}`}
-                      sx={{
-                        width: 110,
-                        height: 110,
-                        objectFit: "cover",
-                        borderRadius: 1,
-                        mt: 1,
-                      }}
-                    />
-                  ))}
-                  {likeError && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "#ff6b6b",
-                        display: "block",
-                        mb: 2,
-                        textAlign: "center",
-                      }}
-                    >
-                      {likeError}
-                    </Typography>
-                  )}
-                </Stack>
-              )}
-
-              <Typography sx={{ color: "#777", fontSize: 12, mt: 1.5 }}>
-                {post.createdAt
-                  ? new Date(post.createdAt).toLocaleString()
-                  : ""}
-              </Typography>
-
-              <Stack direction="row" spacing={2} sx={{ mt: 1.5, mb: 1 }}>
-                <Button
-                  size="small"
-                  onClick={() => handleLikePost(post.id)}
-                  disabled={!isJoined || likingPost}
-                  startIcon={
-                    hasLiked ? (
-                      <FavoriteIcon sx={{ fontSize: 18 }} />
-                    ) : (
-                      <FavoriteBorderIcon sx={{ fontSize: 18 }} />
-                    )
-                  }
-                  sx={{
-                    textTransform: "none",
-                    color: !isJoined ? "#666" : hasLiked ? "#FFD100" : "#aaa",
-                    minWidth: "auto",
-                    p: 0,
-                    "&.Mui-disabled": {
-                      color: "#666",
-                    },
-                  }}
-                >
-                  {hasLiked ? "Liked" : "Like"} · {likeCount}
-                </Button>
-
-                <Typography
-                  sx={{
-                    color: "#aaa",
-                    fontSize: 14,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                  }}
-                >
-                  <ChatBubbleOutlineIcon sx={{ fontSize: 16 }} />
-                  {commentCount}
-                </Typography>
-
-                <Typography sx={{ color: "#aaa", fontSize: 14 }}>
-                  Shares · {shareCount}
-                </Typography>
-              </Stack>
-
-              {post.comments?.length > 0 && (
-                <Stack spacing={1} sx={{ mt: 1 }}>
-                  {post.comments.map((comment) => {
-                    const commentAuthor =
-                      `${comment.author?.firstName || ""} ${
-                        comment.author?.lastName || ""
-                      }`.trim() ||
-                      comment.author?.email ||
-                      "Unknown user";
-
-                    return (
-                      <Box
-                        key={comment.id}
-                        sx={{
-                          bgcolor: "#1a1a1a",
-                          borderRadius: 1,
-                          px: 1.5,
-                          py: 1,
-                        }}
-                      >
-                        <Typography
-                          sx={{ color: "#fff", fontSize: 13, fontWeight: 700 }}
-                        >
-                          {commentAuthor}
-                        </Typography>
-                        <Typography sx={{ color: "#ccc", fontSize: 13 }}>
-                          {comment.content}
-                        </Typography>
-                      </Box>
-                    );
-                  })}
-                </Stack>
-              )}
-
-              {isJoined ? (
-                <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    placeholder="Write a comment..."
-                    value={commentInputs[post.id] || ""}
-                    onChange={(e) =>
-                      handleCommentChange(post.id, e.target.value)
-                    }
-                    sx={{
-                      "& .MuiInputBase-root": {
-                        bgcolor: "#000",
-                        color: "#fff",
-                      },
-                      "& fieldset": { borderColor: "#333" },
-                    }}
-                  />
-                  <Button
-                    variant="contained"
-                    onClick={() => handleAddComment(post.id)}
-                    disabled={
-                      addingComment || !(commentInputs[post.id] || "").trim()
-                    }
-                    sx={{
-                      textTransform: "none",
-                      bgcolor: "#FFD100",
-                      color: "#000",
-                      "&:hover": { bgcolor: "#ffde33" },
-                      "&:disabled": { bgcolor: "#555", color: "#888" },
-                    }}
-                  >
-                    Comment
-                  </Button>
-                </Stack>
-              ) : (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    display: "block",
-                    mt: 1.5,
-                    color: "#888",
-                    fontStyle: "italic",
-                  }}
-                >
-                  Join to interact
-                </Typography>
-              )}
-            </Box>
-          );
-        })
-      )}
-
-      {commentErrors[post.id] && (
-        <Typography
-          variant="caption"
-          sx={{
-            color: "#ff6b6b",
-            display: "block",
-            mt: 1,
-          }}
-        >
-          {commentErrors[post.id]}
-        </Typography>
+        posts.map((post) => (
+          <PostCard
+            key={post.id}
+            post={post}
+            currentUser={currentUser}
+            group={group}
+            isJoined={isJoined}
+            liking={likingPostId === post.id}
+            deleting={deletingPostId === post.id}
+            commentLoading={!!commentLoadingByPost[post.id]}
+            commentValue={commentInputs[post.id] || ""}
+            commentError={commentErrors[post.id]}
+            likeError={likeError}
+            onLike={() => handleLikePost(post.id)}
+            onCommentChange={(value) => handleCommentChange(post.id, value)}
+            onAddComment={() => handleAddComment(post.id)}
+            onDelete={() => openDeletePostModal(post)}
+          />
+        ))
       )}
     </Box>
   );
