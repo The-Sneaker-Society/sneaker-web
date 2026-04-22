@@ -202,6 +202,9 @@ const NewGroupPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
+  const [joinLeaveError, setJoinLeaveError] = useState("");
+  const [likeError, setLikeError] = useState("");
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
   const [deleteError, setDeleteError] = useState("");
@@ -212,7 +215,7 @@ const NewGroupPage = () => {
   const [postError, setPostError] = useState("");
 
   const [commentInputs, setCommentInputs] = useState({});
-  const [commentError, setCommentError] = useState("");
+  const [commentErrors, setCommentErrors] = useState({});
 
   const fileInputRef = useRef(null);
 
@@ -223,13 +226,15 @@ const NewGroupPage = () => {
   const [joinGroup, { loading: joining }] = useMutation(JOIN_GROUP, {
     refetchQueries: [{ query: GET_GROUP, variables: { id: groupId } }],
     awaitRefetchQueries: true,
-    onError: (err) => console.error("Join error:", err.message),
+    onCompleted: () => setJoinLeaveError(""),
+    onError: (err) => setJoinLeaveError(err.message),
   });
 
   const [leaveGroup, { loading: leaving }] = useMutation(LEAVE_GROUP, {
     refetchQueries: [{ query: GET_GROUP, variables: { id: groupId } }],
     awaitRefetchQueries: true,
-    onError: (err) => console.error("Leave error:", err.message),
+    onCompleted: () => setJoinLeaveError(""),
+    onError: (err) => setJoinLeaveError(err.message),
   });
 
   const [createPost, { loading: posting }] = useMutation(CREATE_POST, {
@@ -248,13 +253,21 @@ const NewGroupPage = () => {
   const [likePost, { loading: likingPost }] = useMutation(LIKE_POST, {
     refetchQueries: refetchPostQueries,
     awaitRefetchQueries: true,
-    onError: (err) => console.error("Like error:", err.message),
+    onCompleted: () => setLikeError(""),
+    onError: (err) => setLikeError(err.message),
   });
 
   const [addComment, { loading: addingComment }] = useMutation(ADD_COMMENT, {
     refetchQueries: refetchPostQueries,
     awaitRefetchQueries: true,
-    onError: (err) => setCommentError(err.message),
+    onError: (err) => {
+      if (pendingCommentPostIdRef.current) {
+        setCommentErrors((prev) => ({
+          ...prev,
+          [pendingCommentPostIdRef.current]: err.message,
+        }));
+      }
+    },
   });
 
   const [deletePost, { loading: deletingPost }] = useMutation(DELETE_POST, {
@@ -270,11 +283,13 @@ const NewGroupPage = () => {
 
   const handleJoinGroup = () => {
     if (!groupId) return;
+    setJoinLeaveError("");
     joinGroup({ variables: { groupId } });
   };
 
   const handleLeaveGroup = () => {
     if (!groupId) return;
+    setJoinLeaveError("");
     setModalOpen(false);
     leaveGroup({ variables: { groupId } });
   };
@@ -287,6 +302,7 @@ const NewGroupPage = () => {
 
   const handleDeletePost = () => {
     if (!postToDelete?.id) return;
+    setDeleteError("");
     deletePost({ variables: { postId: postToDelete.id } });
   };
 
@@ -329,6 +345,8 @@ const NewGroupPage = () => {
   };
 
   const handleLikePost = (postId) => {
+    if (!isJoined) return;
+    setLikeError("");
     likePost({ variables: { postId } });
   };
 
@@ -337,28 +355,48 @@ const NewGroupPage = () => {
       ...prev,
       [postId]: value,
     }));
-    setCommentError("");
-  };
 
-  const handleAddComment = async (postId) => {
-    const content = commentInputs[postId]?.trim();
-
-    if (!content) {
-      setCommentError("Comment cannot be empty.");
-      return;
-    }
-
-    await addComment({
-      variables: {
-        postId,
-        content,
-      },
-    });
-
-    setCommentInputs((prev) => ({
+    setCommentErrors((prev) => ({
       ...prev,
       [postId]: "",
     }));
+  };
+
+  const handleAddComment = async (postId) => {
+    if (!isJoined) return;
+
+    const content = commentInputs[postId]?.trim();
+
+    if (!content) {
+      setCommentErrors((prev) => ({
+        ...prev,
+        [postId]: "Comment cannot be empty.",
+      }));
+      return;
+    }
+
+    pendingCommentPostIdRef.current = postId;
+
+    try {
+      await addComment({
+        variables: {
+          postId,
+          content,
+        },
+      });
+
+      setCommentInputs((prev) => ({
+        ...prev,
+        [postId]: "",
+      }));
+
+      setCommentErrors((prev) => ({
+        ...prev,
+        [postId]: "",
+      }));
+    } finally {
+      pendingCommentPostIdRef.current = null;
+    }
   };
 
   if (loading || currentUserLoading) {
@@ -382,6 +420,8 @@ const NewGroupPage = () => {
     currentUser?.id && group.createdBy
       ? group.createdBy.id === currentUser.id
       : false;
+
+  const pendingCommentPostIdRef = useRef(null);
 
   return (
     <Box sx={{ maxWidth: 680, mx: "auto", px: 2, py: 4 }}>
@@ -465,6 +505,15 @@ const NewGroupPage = () => {
                 "Join Group"
               )}
             </Button>
+          )}
+
+          {joinLeaveError && (
+            <Typography
+              variant="caption"
+              sx={{ color: "#ff6b6b", display: "block", mb: 2 }}
+            >
+              {joinLeaveError}
+            </Typography>
           )}
         </>
       )}
@@ -603,11 +652,7 @@ const NewGroupPage = () => {
           )}
 
           {imageSrcs.length > 0 && (
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ mb: 1, flexWrap: "wrap" }}
-            >
+            <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: "wrap" }}>
               {imageSrcs.map((src, i) => (
                 <Box
                   key={i}
@@ -709,8 +754,7 @@ const NewGroupPage = () => {
           const isGroupAdmin = !!group.admins?.some(
             (admin) => admin.id === currentUser?.id,
           );
-          const canDeletePost =
-            isPostAuthor || isGroupCreator || isGroupAdmin;
+          const canDeletePost = isPostAuthor || isGroupCreator || isGroupAdmin;
 
           return (
             <Box
@@ -777,18 +821,33 @@ const NewGroupPage = () => {
                       }}
                     />
                   ))}
+                  {likeError && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "#ff6b6b",
+                        display: "block",
+                        mb: 2,
+                        textAlign: "center",
+                      }}
+                    >
+                      {likeError}
+                    </Typography>
+                  )}
                 </Stack>
               )}
 
               <Typography sx={{ color: "#777", fontSize: 12, mt: 1.5 }}>
-                {post.createdAt ? new Date(post.createdAt).toLocaleString() : ""}
+                {post.createdAt
+                  ? new Date(post.createdAt).toLocaleString()
+                  : ""}
               </Typography>
 
               <Stack direction="row" spacing={2} sx={{ mt: 1.5, mb: 1 }}>
                 <Button
                   size="small"
                   onClick={() => handleLikePost(post.id)}
-                  disabled={likingPost}
+                  disabled={!isJoined || likingPost}
                   startIcon={
                     hasLiked ? (
                       <FavoriteIcon sx={{ fontSize: 18 }} />
@@ -798,9 +857,12 @@ const NewGroupPage = () => {
                   }
                   sx={{
                     textTransform: "none",
-                    color: hasLiked ? "#FFD100" : "#aaa",
+                    color: !isJoined ? "#666" : hasLiked ? "#FFD100" : "#aaa",
                     minWidth: "auto",
                     p: 0,
+                    "&.Mui-disabled": {
+                      color: "#666",
+                    },
                   }}
                 >
                   {hasLiked ? "Liked" : "Like"} · {likeCount}
@@ -858,7 +920,7 @@ const NewGroupPage = () => {
                 </Stack>
               )}
 
-              {isJoined && (
+              {isJoined ? (
                 <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
                   <TextField
                     fullWidth
@@ -893,23 +955,34 @@ const NewGroupPage = () => {
                     Comment
                   </Button>
                 </Stack>
+              ) : (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: "block",
+                    mt: 1.5,
+                    color: "#888",
+                    fontStyle: "italic",
+                  }}
+                >
+                  Join to interact
+                </Typography>
               )}
             </Box>
           );
         })
       )}
 
-      {commentError && (
+      {commentErrors[post.id] && (
         <Typography
           variant="caption"
           sx={{
             color: "#ff6b6b",
             display: "block",
-            mt: 2,
-            textAlign: "center",
+            mt: 1,
           }}
         >
-          {commentError}
+          {commentErrors[post.id]}
         </Typography>
       )}
     </Box>
