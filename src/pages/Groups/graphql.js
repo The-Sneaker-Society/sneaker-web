@@ -1,5 +1,53 @@
 import { gql } from "@apollo/client";
 
+export const GROUP_MEMBER_FIELDS = gql`
+  fragment GroupMemberFields on Member {
+    id
+    firstName
+    lastName
+    email
+  }
+`;
+
+export const POST_COMMENT_FIELDS = gql`
+  fragment PostCommentFields on PostComment {
+    id
+    content
+    createdAt
+    author {
+      ...GroupMemberFields
+    }
+  }
+  ${GROUP_MEMBER_FIELDS}
+`;
+
+export const POST_FIELDS = gql`
+  fragment PostFields on Post {
+    id
+    groupId
+    content
+    images
+    shares
+    createdAt
+    commentCount
+    author {
+      ...GroupMemberFields
+    }
+    likes {
+      id
+    }
+    commentsPage(limit: $commentLimit, offset: 0) {
+      items {
+        ...PostCommentFields
+      }
+      totalCount
+      hasMore
+      nextOffset
+    }
+  }
+  ${POST_COMMENT_FIELDS}
+`;
+
 export const GET_GROUP = gql`
   query GetGroup($id: ID!) {
     getGroup(id: $id) {
@@ -7,59 +55,38 @@ export const GET_GROUP = gql`
       name
       description
       avatar
-      members {
-        id
-        firstName
-        lastName
-        email
-      }
+      createdAt
       createdBy {
-        id
-        firstName
-        lastName
-        email
+        ...GroupMemberFields
       }
       admins {
-        id
-        firstName
-        lastName
-        email
+        ...GroupMemberFields
       }
-      createdAt
+      members {
+        ...GroupMemberFields
+      }
     }
   }
+  ${GROUP_MEMBER_FIELDS}
 `;
 
 export const GET_POSTS_BY_GROUP = gql`
-  query GetPostsByGroup($groupId: ID!) {
-    getPostsByGroup(groupId: $groupId) {
-      id
-      content
-      images
-      shares
-      createdAt
-      author {
-        id
-        firstName
-        lastName
-        email
+  query GetPostsByGroup(
+    $groupId: ID!
+    $limit: Int = 10
+    $offset: Int = 0
+    $commentLimit: Int = 3
+  ) {
+    getPostsByGroup(groupId: $groupId, limit: $limit, offset: $offset) {
+      items {
+        ...PostFields
       }
-      likes {
-        id
-      }
-      comments {
-        id
-        content
-        createdAt
-        author {
-          id
-          firstName
-          lastName
-          email
-        }
-      }
+      totalCount
+      hasMore
+      nextOffset
     }
   }
+  ${POST_FIELDS}
 `;
 
 export const JOIN_GROUP = gql`
@@ -67,19 +94,11 @@ export const JOIN_GROUP = gql`
     joinGroup(groupId: $groupId) {
       id
       members {
-        id
-        firstName
-        lastName
-        email
-      }
-      createdBy {
-        id
-      }
-      admins {
-        id
+        ...GroupMemberFields
       }
     }
   }
+  ${GROUP_MEMBER_FIELDS}
 `;
 
 export const LEAVE_GROUP = gql`
@@ -87,136 +106,21 @@ export const LEAVE_GROUP = gql`
     leaveGroup(groupId: $groupId) {
       id
       members {
-        id
-        firstName
-        lastName
-        email
-      }
-      createdBy {
-        id
+        ...GroupMemberFields
       }
       admins {
         id
       }
     }
   }
-`;
-
-export const UPDATE_GROUP = gql`
-  mutation UpdateGroup(
-    $id: ID!
-    $name: String
-    $description: String
-    $avatar: String
-    $memberIds: [ID!]
-  ) {
-    updateGroup(
-      id: $id
-      name: $name
-      description: $description
-      avatar: $avatar
-      memberIds: $memberIds
-    ) {
-      id
-      name
-      description
-      avatar
-      members {
-        id
-        firstName
-        lastName
-        email
-      }
-      createdBy {
-        id
-        firstName
-        lastName
-        email
-      }
-      admins {
-        id
-        firstName
-        lastName
-        email
-      }
-      createdAt
-    }
-  }
-`;
-
-export const DELETE_GROUP = gql`
-  mutation DeleteGroup($id: ID!) {
-    deleteGroup(id: $id)
-  }
+  ${GROUP_MEMBER_FIELDS}
 `;
 
 export const CREATE_POST = gql`
   mutation CreatePost($groupId: ID!, $content: String!, $images: [String!]) {
     createPost(groupId: $groupId, content: $content, images: $images) {
       id
-      content
-      images
-      shares
-      createdAt
-      author {
-        id
-        firstName
-        lastName
-        email
-      }
-      likes {
-        id
-      }
-      comments {
-        id
-        content
-        createdAt
-        author {
-          id
-          firstName
-          lastName
-          email
-        }
-      }
     }
-  }
-`;
-
-export const UPDATE_POST = gql`
-  mutation UpdatePost($postId: ID!, $content: String!, $images: [String!]) {
-    updatePost(postId: $postId, content: $content, images: $images) {
-      id
-      content
-      images
-      shares
-      createdAt
-      author {
-        id
-        firstName
-        lastName
-        email
-      }
-      likes {
-        id
-      }
-      comments {
-        id
-        content
-        createdAt
-        author {
-          id
-          firstName
-          lastName
-          email
-        }
-      }
-    }
-  }
-`;
-
-export const DELETE_POST = gql`
-  mutation DeletePost($postId: ID!) {
-    deletePost(postId: $postId)
   }
 `;
 
@@ -238,32 +142,15 @@ export const ADD_COMMENT = gql`
       content
       createdAt
       author {
-        id
-        firstName
-        lastName
-        email
+        ...GroupMemberFields
       }
     }
   }
+  ${GROUP_MEMBER_FIELDS}
 `;
 
-export const UPDATE_COMMENT = gql`
-  mutation UpdateComment($postId: ID!, $commentId: ID!, $content: String!) {
-    updateComment(postId: $postId, commentId: $commentId, content: $content) {
-      id
-      content
-      createdAt
-      author {
-        id
-        firstName
-        lastName
-        email
-      }
-    }
+export const DELETE_POST = gql`
+  mutation DeletePost($postId: ID!) {
+    deletePost(postId: $postId)
   }
 `;
-
-export const DELETE_COMMENT = gql`
-  mutation DeleteComment($postId: ID!, $commentId: ID!) {
-    deleteComment(postId: $postId, commentId: $commentId)
-  }

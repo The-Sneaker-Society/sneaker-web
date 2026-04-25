@@ -2,72 +2,26 @@ import {
   Box,
   Typography,
   Button,
+  Avatar,
   Divider,
   TextField,
   Modal,
   Stack,
+  AvatarGroup,
   CircularProgress,
-  IconButton,
 } from "@mui/material";
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
-import CloseIcon from "@mui/icons-material/Close";
-import { useNewGroupPage } from "./hooks/useNewGroupPage";
+import { useNewGroupPage } from "./useNewGroupPage";
 import PostCard from "./PostCard";
 import DeletePostModal from "./DeletePostModal";
-import GroupHeaderBanner from "./components/GroupHeaderBanner";
-import GroupSidebar from "./components/GroupSidebar";
-import GroupActionSnackbar from "./components/GroupActionSnackbar";
-import GroupPageLayout from "./layout/GroupPageLayout";
 
-const modalSx = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  bgcolor: "#1a1a1a",
-  borderRadius: 2,
-  p: 4,
-  width: "min(92vw, 480px)",
-  boxShadow: 24,
-};
-
-const stateCardSx = {
+const pageContainerSx = {
+  minHeight: "100vh",
   bgcolor: "#111",
-  border: "1px solid #2b2b2b",
-  borderRadius: 3,
-  px: 3,
+  color: "#fff",
+  px: { xs: 2, md: 4 },
   py: 4,
-  textAlign: "center",
 };
-
-const imageThumbSx = {
-  width: 80,
-  height: 80,
-  objectFit: "cover",
-  borderRadius: 1,
-  border: "1px solid #333",
-};
-
-const ErrorStateCard = ({ title, description, onRetry }) => (
-  <Box sx={stateCardSx}>
-    <Typography sx={{ color: "#fff", fontWeight: 700, mb: 1 }}>{title}</Typography>
-    <Typography sx={{ color: "#9a9a9a", mb: 2 }}>{description}</Typography>
-    <Button
-      variant="outlined"
-      onClick={onRetry}
-      sx={{
-        borderRadius: "999px",
-        textTransform: "none",
-        fontWeight: 700,
-        color: "#FFD100",
-        borderColor: "#FFD100",
-        "&:hover": { borderColor: "#ffde33", bgcolor: "rgba(255,209,0,0.08)" },
-      }}
-    >
-      Try again
-    </Button>
-  </Box>
-);
 
 const NewGroupPage = () => {
   const {
@@ -81,13 +35,16 @@ const NewGroupPage = () => {
     currentUser,
     isJoined,
     isCreator,
-    canManageGroup,
     memberCount,
-    adminIds,
+    hasMorePosts,
+    loadingMorePosts,
+    loadingMoreCommentsByPost,
+
     modalOpen,
     setModalOpen,
     isHovering,
     setIsHovering,
+
     joinLeaveError,
     likeErrors,
     deleteModalOpen,
@@ -95,17 +52,7 @@ const NewGroupPage = () => {
     deleteError,
     setDeleteError,
     postToDelete,
-    editGroupModalOpen,
-    setEditGroupModalOpen,
-    deleteGroupModalOpen,
-    setDeleteGroupModalOpen,
-    groupActionError,
-    editGroupName,
-    setEditGroupName,
-    editGroupDescription,
-    setEditGroupDescription,
-    editGroupAvatar,
-    editAvatarInputRef,
+
     postContent,
     setPostContent,
     imageSrcs,
@@ -113,38 +60,30 @@ const NewGroupPage = () => {
     commentInputs,
     commentErrors,
     fileInputRef,
+
     joining,
     leaving,
     posting,
-    updatingGroup,
-    deletingGroup,
     likingPostId,
     commentLoadingByPost,
     deletingPostId,
-    actionToast,
-    closeToast,
-    handleRetryGroupLoad,
-    handleRetryPostsLoad,
+
     handleJoinGroup,
     handleLeaveGroup,
-    openEditGroupModal,
-    openDeleteGroupModal,
-    handleEditGroupAvatarChange,
-    handleUpdateGroup,
-    handleDeleteGroup,
     handleDeletePost,
     handleFileInputChange,
-    handleRemoveComposerImage,
     handlePostSubmit,
     handleLikePost,
     handleCommentChange,
     handleAddComment,
+    handleLoadMorePosts,
+    handleLoadMoreComments,
     openDeletePostModal,
   } = useNewGroupPage();
 
   if (loading || currentUserLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={{ ...pageContainerSx, display: "grid", placeItems: "center" }}>
         <CircularProgress sx={{ color: "#FFD100" }} />
       </Box>
     );
@@ -152,54 +91,145 @@ const NewGroupPage = () => {
 
   if (error || !group) {
     return (
-      <Box sx={{ maxWidth: 680, mx: "auto", px: 2, py: 4 }}>
-        <ErrorStateCard
-          title="We couldn't load this group"
-          description="Something went wrong while fetching the group details. Please try again."
-          onRetry={handleRetryGroupLoad}
-        />
+      <Box sx={{ ...pageContainerSx, display: "grid", placeItems: "center" }}>
+        <Typography color="error.main">Unable to load group.</Typography>
       </Box>
     );
   }
 
   return (
-    <>
-      <GroupPageLayout
-        header={
-          <GroupHeaderBanner
-            group={group}
-            memberCount={memberCount}
-            isJoined={isJoined}
-            isCreator={isCreator}
-            canManageGroup={canManageGroup}
-            joining={joining}
-            leaving={leaving}
-            isHovering={isHovering}
-            setIsHovering={setIsHovering}
-            onJoin={handleJoinGroup}
-            onOpenLeave={() => setModalOpen(true)}
-            onEditGroup={openEditGroupModal}
-            onDeleteGroup={openDeleteGroupModal}
-          />
-        }
-        sidebar={<GroupSidebar group={group} memberCount={memberCount} adminIds={adminIds} />}
-      >
-        {joinLeaveError && (
-          <Typography variant="caption" sx={{ color: "#ff6b6b", display: "block", mb: 2 }}>
-            {joinLeaveError}
-          </Typography>
-        )}
+    <Box sx={pageContainerSx}>
+      <Stack spacing={3} maxWidth="900px" mx="auto">
+        <Box sx={{ p: 3, bgcolor: "#1a1a1a", borderRadius: 3, border: "1px solid #2a2a2a" }}>
+          <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between">
+            <Box>
+              <Typography variant="h4" fontWeight={800} sx={{ color: "#FFD100", mb: 1 }}>
+                {group.name}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#aaa", mb: 1 }}>
+                {memberCount} {memberCount === 1 ? "member" : "members"}
+              </Typography>
+              {group.description && (
+                <Typography variant="body1" sx={{ color: "#ddd" }}>
+                  {group.description}
+                </Typography>
+              )}
+            </Box>
 
-        <Typography sx={{ color: "#fff", fontWeight: 700, mb: 1.5 }}>Discussion</Typography>
-        <Divider sx={{ borderColor: "#333", mb: 3 }} />
+            <Stack spacing={2} alignItems={{ xs: "flex-start", md: "flex-end" }}>
+              <AvatarGroup max={6}>
+                {(group.members || []).map((member) => (
+                  <Avatar key={member.id} sx={{ bgcolor: "#333", color: "#FFD100" }}>
+                    {member.firstName?.[0] ?? member.email?.[0] ?? "?"}
+                  </Avatar>
+                ))}
+              </AvatarGroup>
+
+              {!isCreator && (
+                <>
+                  {isJoined ? (
+                    <Button
+                      variant="outlined"
+                      onClick={() => setModalOpen(true)}
+                      onMouseEnter={() => setIsHovering(true)}
+                      onMouseLeave={() => setIsHovering(false)}
+                      disabled={leaving}
+                      sx={{
+                        borderRadius: "999px",
+                        textTransform: "none",
+                        fontWeight: 700,
+                        color: isHovering ? "#ff6b6b" : "#FFD100",
+                        borderColor: isHovering ? "#ff6b6b" : "#FFD100",
+                        "&:hover": {
+                          bgcolor: "rgba(255,107,107,0.08)",
+                          borderColor: "#ff6b6b",
+                        },
+                      }}
+                    >
+                      {leaving ? <CircularProgress size={18} sx={{ color: "inherit" }} /> : isHovering ? "Leave Group" : "Joined ✓"}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      onClick={handleJoinGroup}
+                      disabled={joining}
+                      sx={{
+                        borderRadius: "999px",
+                        textTransform: "none",
+                        fontWeight: 700,
+                        bgcolor: "#FFD100",
+                        color: "#111",
+                        "&:hover": { bgcolor: "#f5c400" },
+                      }}
+                    >
+                      {joining ? <CircularProgress size={18} sx={{ color: "#111" }} /> : "Join Group"}
+                    </Button>
+                  )}
+
+                  {joinLeaveError && (
+                    <Typography variant="caption" color="error.main">
+                      {joinLeaveError}
+                    </Typography>
+                  )}
+                </>
+              )}
+            </Stack>
+          </Stack>
+        </Box>
+
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+          <Box
+            sx={{
+              bgcolor: "#1a1a1a",
+              color: "#fff",
+              p: 3,
+              borderRadius: 3,
+              border: "1px solid #333",
+              width: "min(420px, calc(100vw - 32px))",
+              mx: "auto",
+              mt: "20vh",
+            }}
+          >
+            <Stack spacing={2}>
+              <Typography variant="h6">Are you sure you want to leave this group?</Typography>
+              <Stack direction="row" spacing={2} justifyContent="flex-end">
+                <Button
+                  variant="outlined"
+                  onClick={() => setModalOpen(false)}
+                  sx={{ color: "#aaa", borderColor: "#444", textTransform: "none" }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleLeaveGroup}
+                  sx={{ bgcolor: "#ff6b6b", textTransform: "none", "&:hover": { bgcolor: "#ff5252" } }}
+                >
+                  Yes, leave group
+                </Button>
+              </Stack>
+            </Stack>
+          </Box>
+        </Modal>
+
+        <DeletePostModal
+          open={deleteModalOpen}
+          onClose={() => {
+            setDeleteModalOpen(false);
+            setDeleteError("");
+          }}
+          onConfirm={handleDeletePost}
+          loading={postToDelete?.id && deletingPostId === postToDelete.id}
+          error={deleteError}
+        />
 
         {isJoined && (
-          <Box sx={{ bgcolor: "#111", borderRadius: 2, p: 2, mb: 3, border: "1px solid #2b2b2b" }}>
+          <Box sx={{ p: 3, bgcolor: "#1a1a1a", borderRadius: 3, border: "1px solid #2a2a2a" }}>
             <TextField
               fullWidth
-              placeholder="Write something to the group..."
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
+              placeholder="Share something with the group..."
               multiline
               minRows={2}
               sx={{
@@ -207,51 +237,42 @@ const NewGroupPage = () => {
                 "& .MuiInputBase-root": {
                   bgcolor: "#000",
                   color: "#fff",
-                  borderRadius: 1,
+                  borderRadius: 2,
                 },
                 "& fieldset": { borderColor: "#333" },
               }}
             />
 
             {postError && (
-              <Typography variant="caption" sx={{ color: "#ff6b6b", display: "block", mb: 1 }}>
+              <Typography variant="caption" color="error.main">
                 {postError}
               </Typography>
             )}
 
             {imageSrcs.length > 0 && (
-              <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: "wrap" }}>
+              <Stack direction="row" spacing={1} sx={{ my: 2, flexWrap: "wrap" }}>
                 {imageSrcs.map((src, i) => (
-                  <Box key={i} sx={{ position: "relative" }}>
-                    <Box component="img" src={src} alt={`preview-${i}`} sx={imageThumbSx} />
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemoveComposerImage(i)}
-                      sx={{
-                        position: "absolute",
-                        top: 4,
-                        right: 4,
-                        bgcolor: "rgba(0,0,0,0.72)",
-                        color: "#fff",
-                        "&:hover": { bgcolor: "rgba(0,0,0,0.88)" },
-                      }}
-                    >
-                      <CloseIcon sx={{ fontSize: 14 }} />
-                    </IconButton>
-                  </Box>
+                  <Box
+                    key={`${src}-${i}`}
+                    component="img"
+                    src={src}
+                    alt={`Selected upload ${i + 1}`}
+                    sx={{ width: 88, height: 88, objectFit: "cover", borderRadius: 2 }}
+                  />
                 ))}
               </Stack>
             )}
 
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                onChange={handleFileInputChange}
-              />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={handleFileInputChange}
+            />
+
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Button
                 startIcon={<InsertPhotoIcon />}
                 onClick={() => fileInputRef.current?.click()}
@@ -262,123 +283,80 @@ const NewGroupPage = () => {
               <Button
                 variant="contained"
                 onClick={handlePostSubmit}
-                disabled={posting || !postContent.trim()}
+                disabled={posting}
                 sx={{
-                  borderRadius: "999px",
                   textTransform: "none",
-                  fontWeight: 700,
+                  borderRadius: "999px",
                   bgcolor: "#FFD100",
-                  color: "#000",
-                  "&:hover": { bgcolor: "#ffde33" },
-                  "&.Mui-disabled": { bgcolor: "#555", color: "#888" },
+                  color: "#111",
+                  "&:hover": { bgcolor: "#f5c400" },
                 }}
               >
-                {posting ? <CircularProgress size={16} sx={{ color: "#000" }} /> : "Post"}
+                {posting ? <CircularProgress size={18} sx={{ color: "#111" }} /> : "Post"}
               </Button>
             </Stack>
           </Box>
         )}
 
-        {postsLoading ? (
-          <Typography sx={{ color: "#999", textAlign: "center", mt: 3 }}>Loading posts...</Typography>
+        <Divider sx={{ borderColor: "#2a2a2a" }} />
+
+        {postsLoading && posts.length === 0 ? (
+          <Box sx={{ py: 6, textAlign: "center" }}>
+            <Typography sx={{ color: "#aaa" }}>Loading posts...</Typography>
+          </Box>
         ) : postsError ? (
-          <ErrorStateCard
-            title="We couldn't load the post feed"
-            description="The group loaded, but the post feed did not. Try fetching the posts again."
-            onRetry={handleRetryPostsLoad}
-          />
+          <Box sx={{ py: 6, textAlign: "center" }}>
+            <Typography color="error.main">Failed to load posts.</Typography>
+          </Box>
         ) : posts.length === 0 ? (
-          <Box sx={stateCardSx}>
-            <Typography sx={{ color: "#fff", fontWeight: 700, mb: 1 }}>No posts yet</Typography>
-            <Typography sx={{ color: "#9a9a9a" }}>
-              {isJoined
-                ? "Be the first to start the conversation in this group."
-                : "Join the group to start participating in the conversation."}
-            </Typography>
+          <Box sx={{ py: 6, textAlign: "center" }}>
+            <Typography sx={{ color: "#aaa" }}>No posts yet</Typography>
           </Box>
         ) : (
-          posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              currentUser={currentUser}
-              group={group}
-              isJoined={isJoined}
-              liking={likingPostId === post.id}
-              deleting={deletingPostId === post.id}
-              commentLoading={!!commentLoadingByPost[post.id]}
-              commentValue={commentInputs[post.id] || ""}
-              commentError={commentErrors[post.id] || ""}
-              likeError={likeErrors[post.id] || ""}
-              onLike={() => handleLikePost(post.id)}
-              onCommentChange={(value) => handleCommentChange(post.id, value)}
-              onAddComment={() => handleAddComment(post.id)}
-              onDelete={() => openDeletePostModal(post)}
-            />
-          ))
+          <Stack spacing={2}>
+            {posts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUser={currentUser}
+                group={group}
+                isJoined={isJoined}
+                liking={likingPostId === post.id}
+                deleting={deletingPostId === post.id}
+                commentLoading={!!commentLoadingByPost[post.id]}
+                commentValue={commentInputs[post.id] || ""}
+                commentError={commentErrors[post.id] || ""}
+                likeError={likeErrors[post.id] || ""}
+                loadingMoreComments={!!loadingMoreCommentsByPost[post.id]}
+                onLike={() => handleLikePost(post.id)}
+                onCommentChange={(value) => handleCommentChange(post.id, value)}
+                onAddComment={() => handleAddComment(post.id)}
+                onLoadMoreComments={() => handleLoadMoreComments(post.id)}
+                onDelete={() => openDeletePostModal(post)}
+              />
+            ))}
+
+            {hasMorePosts && (
+              <Box sx={{ display: "flex", justifyContent: "center", pt: 1 }}>
+                <Button
+                  variant="outlined"
+                  onClick={handleLoadMorePosts}
+                  disabled={loadingMorePosts}
+                  sx={{
+                    textTransform: "none",
+                    borderRadius: "999px",
+                    color: "#FFD100",
+                    borderColor: "#FFD100",
+                  }}
+                >
+                  {loadingMorePosts ? <CircularProgress size={18} sx={{ color: "#FFD100" }} /> : "Load more posts"}
+                </Button>
+              </Box>
+            )}
+          </Stack>
         )}
-      </GroupPageLayout>
-
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <Box sx={modalSx}>
-          <Typography sx={{ color: "#fff", mb: 2 }}>Are you sure you want to leave this group?</Typography>
-          <Button fullWidth variant="contained" onClick={handleLeaveGroup} sx={{ bgcolor: "#ff6b6b", color: "#fff", mb: 1, "&:hover": { bgcolor: "#e05555" } }}>
-            Yes, leave group
-          </Button>
-          <Button fullWidth variant="outlined" color="inherit" onClick={() => setModalOpen(false)} sx={{ color: "#aaa", borderColor: "#444" }}>
-            Cancel
-          </Button>
-        </Box>
-      </Modal>
-
-      <Modal open={editGroupModalOpen} onClose={() => setEditGroupModalOpen(false)}>
-        <Box sx={modalSx}>
-          <Typography variant="h6" sx={{ color: "#FFD100", fontWeight: 700, mb: 3 }}>Edit Group</Typography>
-          <Box sx={{ textAlign: "center", mb: 3 }}>
-            <input ref={editAvatarInputRef} accept="image/*" style={{ display: "none" }} id="edit-group-avatar" type="file" onChange={handleEditGroupAvatarChange} />
-            <label htmlFor="edit-group-avatar">
-              <IconButton component="span">
-                <Box component="img" src={editGroupAvatar || group.avatar || undefined} alt={group.name} sx={{ width: 84, height: 84, borderRadius: "50%", objectFit: "cover", bgcolor: "#333" }} />
-              </IconButton>
-            </label>
-            <Typography variant="caption" sx={{ color: "#b3b3b3", mt: 1, display: "block" }}>Upload Group Photo</Typography>
-          </Box>
-          <TextField fullWidth label="Group Name" variant="outlined" value={editGroupName} onChange={(e) => setEditGroupName(e.target.value)} sx={{ mb: 2, "& .MuiInputBase-root": { bgcolor: "#000", color: "#fff" }, "& .MuiInputLabel-root": { color: "#b3b3b3" } }} />
-          <TextField fullWidth label="Description" variant="outlined" multiline rows={3} value={editGroupDescription} onChange={(e) => setEditGroupDescription(e.target.value)} sx={{ mb: 2, "& .MuiInputBase-root": { bgcolor: "#000", color: "#fff" }, "& .MuiInputLabel-root": { color: "#b3b3b3" } }} />
-          {groupActionError && <Typography variant="caption" sx={{ color: "#ff6b6b", display: "block", mb: 2 }}>{groupActionError}</Typography>}
-          <Stack direction="row" spacing={1.5} justifyContent="flex-end">
-            <Button onClick={() => setEditGroupModalOpen(false)} sx={{ color: "#aaa", textTransform: "none" }}>Cancel</Button>
-            <Button variant="contained" onClick={handleUpdateGroup} disabled={updatingGroup} sx={{ textTransform: "none", fontWeight: 700, bgcolor: "#FFD100", color: "#000", "&:hover": { bgcolor: "#ffde33" } }}>
-              {updatingGroup ? <CircularProgress size={16} sx={{ color: "#000" }} /> : "Save Changes"}
-            </Button>
-          </Stack>
-        </Box>
-      </Modal>
-
-      <Modal open={deleteGroupModalOpen} onClose={() => setDeleteGroupModalOpen(false)}>
-        <Box sx={modalSx}>
-          <Typography variant="h6" sx={{ color: "#ff6b6b", fontWeight: 700, mb: 2 }}>Delete Group</Typography>
-          <Typography sx={{ color: "#fff", mb: 2 }}>Are you sure you want to delete <strong>{group.name}</strong>? This action cannot be undone.</Typography>
-          {groupActionError && <Typography variant="caption" sx={{ color: "#ff6b6b", display: "block", mb: 2 }}>{groupActionError}</Typography>}
-          <Stack direction="row" spacing={1.5} justifyContent="flex-end">
-            <Button variant="outlined" onClick={() => setDeleteGroupModalOpen(false)} sx={{ color: "#aaa", borderColor: "#444", textTransform: "none" }}>Cancel</Button>
-            <Button variant="contained" onClick={handleDeleteGroup} disabled={deletingGroup} sx={{ textTransform: "none", fontWeight: 700, bgcolor: "#ff6b6b", color: "#fff", "&:hover": { bgcolor: "#e05555" } }}>
-              {deletingGroup ? <CircularProgress size={16} sx={{ color: "#fff" }} /> : "Delete Group"}
-            </Button>
-          </Stack>
-        </Box>
-      </Modal>
-
-      <DeletePostModal
-        open={deleteModalOpen}
-        onClose={() => { setDeleteModalOpen(false); setDeleteError(""); }}
-        onConfirm={handleDeletePost}
-        loading={postToDelete?.id && deletingPostId === postToDelete.id}
-        error={deleteError}
-      />
-
-      <GroupActionSnackbar open={actionToast.open} onClose={closeToast} message={actionToast.message} severity={actionToast.severity} />
-    </>
+      </Stack>
+    </Box>
   );
 };
 
