@@ -15,9 +15,15 @@ export const GET_GROUP = gql`
       }
       createdBy {
         id
+        firstName
+        lastName
+        email
       }
       admins {
         id
+        firstName
+        lastName
+        email
       }
       createdAt
     }
@@ -66,6 +72,12 @@ export const JOIN_GROUP = gql`
         lastName
         email
       }
+      createdBy {
+        id
+      }
+      admins {
+        id
+      }
     }
   }
 `;
@@ -80,7 +92,61 @@ export const LEAVE_GROUP = gql`
         lastName
         email
       }
+      createdBy {
+        id
+      }
+      admins {
+        id
+      }
     }
+  }
+`;
+
+export const UPDATE_GROUP = gql`
+  mutation UpdateGroup(
+    $id: ID!
+    $name: String
+    $description: String
+    $avatar: String
+    $memberIds: [ID!]
+  ) {
+    updateGroup(
+      id: $id
+      name: $name
+      description: $description
+      avatar: $avatar
+      memberIds: $memberIds
+    ) {
+      id
+      name
+      description
+      avatar
+      members {
+        id
+        firstName
+        lastName
+        email
+      }
+      createdBy {
+        id
+        firstName
+        lastName
+        email
+      }
+      admins {
+        id
+        firstName
+        lastName
+        email
+      }
+      createdAt
+    }
+  }
+`;
+
+export const DELETE_GROUP = gql`
+  mutation DeleteGroup($id: ID!) {
+    deleteGroup(id: $id)
   }
 `;
 

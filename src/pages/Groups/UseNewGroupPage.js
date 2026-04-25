@@ -1,12 +1,14 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "@apollo/client";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSneakerMember } from "../../context/MemberContext";
 import {
   GET_GROUP,
   GET_POSTS_BY_GROUP,
   JOIN_GROUP,
   LEAVE_GROUP,
+  UPDATE_GROUP,
+  DELETE_GROUP,
   CREATE_POST,
   LIKE_POST,
   ADD_COMMENT,
@@ -15,24 +17,31 @@ import {
 
 export const useNewGroupPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const groupId = id;
   const skip = !groupId;
 
-  const { member: currentUser, loading: currentUserLoading } =
-    useSneakerMember();
+  const { member: currentUser, loading: currentUserLoading } = useSneakerMember();
 
   const pendingCommentPostIdRef = useRef(null);
   const fileInputRef = useRef(null);
+  const editAvatarInputRef = useRef(null);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-
   const [joinLeaveError, setJoinLeaveError] = useState("");
-  const [likeError, setLikeError] = useState("");
+  const [likeErrors, setLikeErrors] = useState({});
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
   const [deleteError, setDeleteError] = useState("");
+
+  const [editGroupModalOpen, setEditGroupModalOpen] = useState(false);
+  const [deleteGroupModalOpen, setDeleteGroupModalOpen] = useState(false);
+  const [groupActionError, setGroupActionError] = useState("");
+  const [editGroupName, setEditGroupName] = useState("");
+  const [editGroupDescription, setEditGroupDescription] = useState("");
+  const [editGroupAvatar, setEditGroupAvatar] = useState(null);
 
   const [postContent, setPostContent] = useState("");
   const [imageSrcs, setImageSrcs] = useState([]);
@@ -46,7 +55,12 @@ export const useNewGroupPage = () => {
   const [commentLoadingByPost, setCommentLoadingByPost] = useState({});
   const [deletingPostId, setDeletingPostId] = useState(null);
 
-  const { data, loading, error } = useQuery(GET_GROUP, {
+  const {
+    data,
+    loading,
+    error,
+    refetch: refetchGroup,
+  } = useQuery(GET_GROUP, {
     variables: { id: groupId },
     skip,
   });
@@ -55,6 +69,7 @@ export const useNewGroupPage = () => {
     data: postsData,
     loading: postsLoading,
     error: postsError,
+    refetch: refetchPosts,
   } = useQuery(GET_POSTS_BY_GROUP, {
     variables: { groupId },
     skip,
@@ -63,27 +78,69 @@ export const useNewGroupPage = () => {
   const group = data?.getGroup;
   const posts = postsData?.getPostsByGroup || [];
 
+  useEffect(() => {
+    if (!group) return;
+    setEditGroupName(group.name || "");
+    setEditGroupDescription(group.description || "");
+    setEditGroupAvatar(group.avatar || null);
+  }, [group]);
+
   const isJoined = useMemo(() => {
     if (!currentUser?.id || !group?.members) return false;
     return group.members.some((m) => m.id === currentUser.id);
   }, [group, currentUser]);
 
-  const refetchPostQueries = [
-    { query: GET_POSTS_BY_GROUP, variables: { groupId } },
-  ];
+  const isCreator =
+    currentUser?.id && group?.createdBy
+      ? group.createdBy.id === currentUser.id
+      : false;
+
+  const isAdmin = useMemo(() => {
+    if (!currentUser?.id || !group?.admins) return false;
+    return group.admins.some((admin) => admin.id === currentUser.id);
+  }, [group, currentUser]);
+
+  const canManageGroup = isCreator || isAdmin;
+  const memberCount = group?.members?.length || 0;
+  const adminIds = useMemo(
+    () => new Set((group?.admins || []).map((admin) => admin.id)),
+    [group],
+  );
+
+  const refetchGroupQueries = [{ query: GET_GROUP, variables: { id: groupId } }];
+  const refetchPostQueries = [{ query: GET_POSTS_BY_GROUP, variables: { groupId } }];
 
   const [joinGroup, { loading: joining }] = useMutation(JOIN_GROUP, {
-    refetchQueries: [{ query: GET_GROUP, variables: { id: groupId } }],
+    refetchQueries: refetchGroupQueries,
     awaitRefetchQueries: true,
     onCompleted: () => setJoinLeaveError(""),
     onError: (err) => setJoinLeaveError(err.message),
   });
 
   const [leaveGroup, { loading: leaving }] = useMutation(LEAVE_GROUP, {
-    refetchQueries: [{ query: GET_GROUP, variables: { id: groupId } }],
+    refetchQueries: refetchGroupQueries,
     awaitRefetchQueries: true,
     onCompleted: () => setJoinLeaveError(""),
     onError: (err) => setJoinLeaveError(err.message),
+  });
+
+  const [updateGroup, { loading: updatingGroup }] = useMutation(UPDATE_GROUP, {
+    refetchQueries: refetchGroupQueries,
+    awaitRefetchQueries: true,
+    onCompleted: () => {
+      setGroupActionError("");
+      setEditGroupModalOpen(false);
+    },
+    onError: (err) => setGroupActionError(err.message),
+  });
+
+  const [deleteGroup, { loading: deletingGroup }] = useMutation(DELETE_GROUP, {
+    onCompleted: () => {
+      setGroupActionError("");
+      setDeleteGroupModalOpen(false);
+      navigate("/member/groups");
+    },
+    onError: (err) => setGroupActionError(err.message),
   });
 
   const [createPost, { loading: posting }] = useMutation(CREATE_POST, {
@@ -103,12 +160,16 @@ export const useNewGroupPage = () => {
     refetchQueries: refetchPostQueries,
     awaitRefetchQueries: true,
     onCompleted: () => {
-      setLikeError("");
-      setLikingPostId(null);
+      if (likingPostId) {
+        setLikeErrors((prev) => ({ ...prev, [likingPostId]: "" }));
+        setLikingPostId(null);
+      }
     },
     onError: (err) => {
-      setLikeError(err.message);
-      setLikingPostId(null);
+      if (likingPostId) {
+        setLikeErrors((prev) => ({ ...prev, [likingPostId]: err.message }));
+        setLikingPostId(null);
+      }
     },
   });
 
@@ -118,16 +179,8 @@ export const useNewGroupPage = () => {
     onError: (err) => {
       if (pendingCommentPostIdRef.current) {
         const failedPostId = pendingCommentPostIdRef.current;
-
-        setCommentErrors((prev) => ({
-          ...prev,
-          [failedPostId]: err.message,
-        }));
-
-        setCommentLoadingByPost((prev) => ({
-          ...prev,
-          [failedPostId]: false,
-        }));
+        setCommentErrors((prev) => ({ ...prev, [failedPostId]: err.message }));
+        setCommentLoadingByPost((prev) => ({ ...prev, [failedPostId]: false }));
       }
     },
   });
@@ -147,6 +200,16 @@ export const useNewGroupPage = () => {
     },
   });
 
+  const handleRetryGroupLoad = () => {
+    if (!groupId) return;
+    refetchGroup({ id: groupId });
+  };
+
+  const handleRetryPostsLoad = () => {
+    if (!groupId) return;
+    refetchPosts({ groupId });
+  };
+
   const handleJoinGroup = () => {
     if (!groupId) return;
     setJoinLeaveError("");
@@ -160,6 +223,58 @@ export const useNewGroupPage = () => {
     leaveGroup({ variables: { groupId } });
   };
 
+  const openEditGroupModal = () => {
+    if (!group) return;
+    setGroupActionError("");
+    setEditGroupName(group.name || "");
+    setEditGroupDescription(group.description || "");
+    setEditGroupAvatar(group.avatar || null);
+    setEditGroupModalOpen(true);
+  };
+
+  const openDeleteGroupModal = () => {
+    setGroupActionError("");
+    setDeleteGroupModalOpen(true);
+  };
+
+  const handleEditGroupAvatarChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => setEditGroupAvatar(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleUpdateGroup = async () => {
+    if (!groupId) return;
+    if (!editGroupName.trim()) {
+      setGroupActionError("Group name cannot be empty.");
+      return;
+    }
+
+    setGroupActionError("");
+
+    try {
+      await updateGroup({
+        variables: {
+          id: groupId,
+          name: editGroupName.trim(),
+          description: editGroupDescription.trim(),
+          avatar: editGroupAvatar,
+          memberIds: (group?.members || []).map((member) => member.id),
+        },
+      });
+    } catch {}
+  };
+
+  const handleDeleteGroup = async () => {
+    if (!groupId) return;
+    setGroupActionError("");
+    try {
+      await deleteGroup({ variables: { id: groupId } });
+    } catch {}
+  };
+
   const openDeletePostModal = (post) => {
     setPostToDelete(post);
     setDeleteError("");
@@ -168,10 +283,8 @@ export const useNewGroupPage = () => {
 
   const handleDeletePost = async () => {
     if (!postToDelete?.id || deletingPostId === postToDelete.id) return;
-
     setDeleteError("");
     setDeletingPostId(postToDelete.id);
-
     try {
       await deletePost({ variables: { postId: postToDelete.id } });
     } catch {}
@@ -182,7 +295,6 @@ export const useNewGroupPage = () => {
     if (!files.length) return;
 
     imageSrcs.forEach((url) => URL.revokeObjectURL(url));
-
     const urls = files.map((file) => URL.createObjectURL(file));
     setImageSrcs(urls);
     setImageFiles(files);
@@ -218,7 +330,7 @@ export const useNewGroupPage = () => {
   const handleLikePost = async (postId) => {
     if (!isJoined || likingPostId === postId) return;
 
-    setLikeError("");
+    setLikeErrors((prev) => ({ ...prev, [postId]: "" }));
     setLikingPostId(postId);
 
     try {
@@ -227,22 +339,14 @@ export const useNewGroupPage = () => {
   };
 
   const handleCommentChange = (postId, value) => {
-    setCommentInputs((prev) => ({
-      ...prev,
-      [postId]: value,
-    }));
-
-    setCommentErrors((prev) => ({
-      ...prev,
-      [postId]: "",
-    }));
+    setCommentInputs((prev) => ({ ...prev, [postId]: value }));
+    setCommentErrors((prev) => ({ ...prev, [postId]: "" }));
   };
 
   const handleAddComment = async (postId) => {
     if (!isJoined || commentLoadingByPost[postId]) return;
 
     const content = commentInputs[postId]?.trim();
-
     if (!content) {
       setCommentErrors((prev) => ({
         ...prev,
@@ -252,41 +356,18 @@ export const useNewGroupPage = () => {
     }
 
     pendingCommentPostIdRef.current = postId;
-
-    setCommentLoadingByPost((prev) => ({
-      ...prev,
-      [postId]: true,
-    }));
+    setCommentLoadingByPost((prev) => ({ ...prev, [postId]: true }));
 
     try {
-      await addComment({
-        variables: { postId, content },
-      });
-
-      setCommentInputs((prev) => ({
-        ...prev,
-        [postId]: "",
-      }));
-
-      setCommentErrors((prev) => ({
-        ...prev,
-        [postId]: "",
-      }));
+      await addComment({ variables: { postId, content } });
+      setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
+      setCommentErrors((prev) => ({ ...prev, [postId]: "" }));
     } catch {
     } finally {
-      setCommentLoadingByPost((prev) => ({
-        ...prev,
-        [postId]: false,
-      }));
+      setCommentLoadingByPost((prev) => ({ ...prev, [postId]: false }));
       pendingCommentPostIdRef.current = null;
     }
   };
-
-  const memberCount = group?.members?.length || 0;
-  const isCreator =
-    currentUser?.id && group?.createdBy
-      ? group.createdBy.id === currentUser.id
-      : false;
 
   return {
     loading,
@@ -299,19 +380,34 @@ export const useNewGroupPage = () => {
     currentUserLoading,
     isJoined,
     isCreator,
+    isAdmin,
+    canManageGroup,
     memberCount,
+    adminIds,
 
     modalOpen,
     setModalOpen,
     isHovering,
     setIsHovering,
-
     joinLeaveError,
-    likeError,
+    likeErrors,
     deleteModalOpen,
     setDeleteModalOpen,
     deleteError,
+    setDeleteError,
     postToDelete,
+
+    editGroupModalOpen,
+    setEditGroupModalOpen,
+    deleteGroupModalOpen,
+    setDeleteGroupModalOpen,
+    groupActionError,
+    editGroupName,
+    setEditGroupName,
+    editGroupDescription,
+    setEditGroupDescription,
+    editGroupAvatar,
+    editAvatarInputRef,
 
     postContent,
     setPostContent,
@@ -324,13 +420,21 @@ export const useNewGroupPage = () => {
     joining,
     leaving,
     posting,
-
+    updatingGroup,
+    deletingGroup,
     likingPostId,
     commentLoadingByPost,
     deletingPostId,
 
+    handleRetryGroupLoad,
+    handleRetryPostsLoad,
     handleJoinGroup,
     handleLeaveGroup,
+    openEditGroupModal,
+    openDeleteGroupModal,
+    handleEditGroupAvatarChange,
+    handleUpdateGroup,
+    handleDeleteGroup,
     openDeletePostModal,
     handleDeletePost,
     handleFileInputChange,
