@@ -182,6 +182,44 @@ export const CREATE_POST = gql`
   }
 `;
 
+export const UPDATE_POST = gql`
+  mutation UpdatePost($postId: ID!, $content: String!, $images: [String!]) {
+    updatePost(postId: $postId, content: $content, images: $images) {
+      id
+      content
+      images
+      shares
+      createdAt
+      author {
+        id
+        firstName
+        lastName
+        email
+      }
+      likes {
+        id
+      }
+      comments {
+        id
+        content
+        createdAt
+        author {
+          id
+          firstName
+          lastName
+          email
+        }
+      }
+    }
+  }
+`;
+
+export const DELETE_POST = gql`
+  mutation DeletePost($postId: ID!) {
+    deletePost(postId: $postId)
+  }
+`;
+
 export const LIKE_POST = gql`
   mutation LikePost($postId: ID!) {
     likePost(postId: $postId) {
@@ -209,8 +247,23 @@ export const ADD_COMMENT = gql`
   }
 `;
 
-export const DELETE_POST = gql`
-  mutation DeletePost($postId: ID!) {
-    deletePost(postId: $postId)
+export const UPDATE_COMMENT = gql`
+  mutation UpdateComment($postId: ID!, $commentId: ID!, $content: String!) {
+    updateComment(postId: $postId, commentId: $commentId, content: $content) {
+      id
+      content
+      createdAt
+      author {
+        id
+        firstName
+        lastName
+        email
+      }
+    }
   }
 `;
+
+export const DELETE_COMMENT = gql`
+  mutation DeleteComment($postId: ID!, $commentId: ID!) {
+    deleteComment(postId: $postId, commentId: $commentId)
+  }
