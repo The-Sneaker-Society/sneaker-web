@@ -64,19 +64,16 @@ const Sidebar = () => {
 
   const settingsItem = (
     <Box sx={{ padding: 2, borderTop: `1px solid ${colors.border}` }}>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <SidebarItem
-          text="Settings"
-          icon={<SettingsOutlined />}
-          onClick={() => navigate("/member/settings")}
-        />
-        <ThemeToggle />
-      </Box>
+      <SidebarItem
+        text="Settings"
+        icon={<SettingsOutlined />}
+        onClick={() => navigate("/member/settings")}
+      />
     </Box>
   );
 
   const logoBox = (
-    <Box sx={{ padding: 2, textAlign: "center" }}>
+    <Box sx={{ padding: 2, textAlign: "center", position: "relative" }}>
       <Box
         component="img"
         src={colors.isDark ? LogoBlack : LogoWhite}
@@ -90,6 +87,9 @@ const Sidebar = () => {
         }}
         onClick={() => navigate("/member/dashboard")}
       />
+      <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+        <ThemeToggle />
+      </Box>
     </Box>
   );
 
