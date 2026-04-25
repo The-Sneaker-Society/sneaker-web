@@ -32,12 +32,11 @@ const Layout = ({ children }) => {
       <Box
         sx={{
           flexGrow: 1,
-          p: 3,
           overflowY: "auto",
           height: "100vh",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          alignItems: "flex-start",
+          justifyContent: "flex-start",
         }}
       >
         {isLoading ? <CircularProgress /> : children}
