@@ -81,6 +81,7 @@ const GroupMembersPanel = ({ members = [], adminIds = new Set() }) => {
                   <Chip
                     size="small"
                     label="Admin"
+                    icon={<AdminPanelSettingsIcon sx={{ color: "#FFD100 !important" }} />}
                     sx={{
                       bgcolor: "rgba(255,209,0,0.12)",
                       color: "#FFD100",

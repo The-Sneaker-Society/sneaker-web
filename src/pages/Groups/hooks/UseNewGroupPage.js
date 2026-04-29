@@ -1,16 +1,18 @@
-import { useState, useRef, useMemo, useEffect } from "react";
-import { useQuery, useMutation } from "@apollo/client";
-import { useParams } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useMutation, useQuery } from "@apollo/client";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSneakerMember } from "../../../context/MemberContext";
 import {
+  ADD_COMMENT,
+  CREATE_POST,
+  DELETE_GROUP,
+  DELETE_POST,
   GET_GROUP,
   GET_POSTS_BY_GROUP,
   JOIN_GROUP,
   LEAVE_GROUP,
-  CREATE_POST,
   LIKE_POST,
-  ADD_COMMENT,
-  DELETE_POST,
+  UPDATE_GROUP,
 } from "../graphql";
 
 const POSTS_PAGE_SIZE = 10;
@@ -39,11 +41,23 @@ const useGroupMembership = ({ groupId, currentUser, skip }) => {
     return group.members.some((member) => member.id === currentUser.id);
   }, [group, currentUser]);
 
+  const isCreator = useMemo(() => {
+    if (!currentUser?.id || !group?.createdBy?.id) return false;
+    return group.createdBy.id === currentUser.id;
+  }, [group, currentUser]);
+
+  const isGroupAdmin = useMemo(() => {
+    if (!currentUser?.id || !group?.admins) return false;
+    return group.admins.some((admin) => admin.id === currentUser.id);
+  }, [group, currentUser]);
+
+  const canManageGroup = isCreator || isGroupAdmin;
   const memberCount = group?.members?.length || 0;
-  const isCreator =
-    currentUser?.id && group?.createdBy
-      ? group.createdBy.id === currentUser.id
-      : false;
+  const adminCount = group?.admins?.length || 0;
+  const adminIds = useMemo(
+    () => new Set((group?.admins || []).map((admin) => admin.id)),
+    [group],
+  );
 
   const [joinGroup, { loading: joining }] = useMutation(JOIN_GROUP, {
     refetchQueries: [{ query: GET_GROUP, variables: { id: groupId } }],
@@ -78,7 +92,11 @@ const useGroupMembership = ({ groupId, currentUser, skip }) => {
     group,
     isJoined,
     isCreator,
+    isGroupAdmin,
+    canManageGroup,
     memberCount,
+    adminCount,
+    adminIds,
     modalOpen,
     setModalOpen,
     isHovering,
@@ -124,6 +142,9 @@ const useGroupComposer = ({ groupId }) => {
       setImageSrcs([]);
       setImageFiles([]);
       setPostError("");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     },
     onError: (err) => setPostError(err.message),
   });
@@ -137,27 +158,26 @@ const useGroupComposer = ({ groupId }) => {
     const urls = files.map((file) => URL.createObjectURL(file));
     setImageSrcs(urls);
     setImageFiles(files);
+    setPostError("");
   };
 
   const handleRemoveImage = (indexToRemove) => {
     setImageSrcs((prev) => {
       const next = [...prev];
       const [removedUrl] = next.splice(indexToRemove, 1);
-
       if (removedUrl) {
         URL.revokeObjectURL(removedUrl);
       }
-
       return next;
     });
 
-    setImageFiles((prev) =>
-      prev.filter((_, index) => index !== indexToRemove),
-    );
-
-    if (fileInputRef.current && imageFiles.length <= 1) {
-      fileInputRef.current.value = "";
-    }
+    setImageFiles((prev) => {
+      const next = prev.filter((_, index) => index !== indexToRemove);
+      if (fileInputRef.current && next.length === 0) {
+        fileInputRef.current.value = "";
+      }
+      return next;
+    });
   };
 
   const handlePostSubmit = () => {
@@ -435,6 +455,112 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
   };
 };
 
+const useGroupManagement = ({ groupId, group, skip }) => {
+  const navigate = useNavigate();
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteGroupModalOpen, setDeleteGroupModalOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editAvatar, setEditAvatar] = useState("");
+  const [editGroupError, setEditGroupError] = useState("");
+  const [deleteGroupError, setDeleteGroupError] = useState("");
+
+  useEffect(() => {
+    if (!editModalOpen || !group) return;
+    setEditName(group.name || "");
+    setEditDescription(group.description || "");
+    setEditAvatar(group.avatar || "");
+  }, [editModalOpen, group]);
+
+  const [updateGroup, { loading: updatingGroup }] = useMutation(UPDATE_GROUP, {
+    refetchQueries: skip ? [] : [{ query: GET_GROUP, variables: { id: groupId } }],
+    awaitRefetchQueries: true,
+    onCompleted: () => {
+      setEditGroupError("");
+      setEditModalOpen(false);
+    },
+    onError: (err) => setEditGroupError(err.message),
+  });
+
+  const [deleteGroup, { loading: deletingGroup }] = useMutation(DELETE_GROUP, {
+    onCompleted: () => {
+      setDeleteGroupError("");
+      setDeleteGroupModalOpen(false);
+      navigate("/groups");
+    },
+    onError: (err) => setDeleteGroupError(err.message),
+  });
+
+  const openEditGroupModal = () => {
+    if (!group) return;
+    setEditName(group.name || "");
+    setEditDescription(group.description || "");
+    setEditAvatar(group.avatar || "");
+    setEditGroupError("");
+    setEditModalOpen(true);
+  };
+
+  const handleUpdateGroup = async (event) => {
+    event?.preventDefault?.();
+
+    if (!groupId) return;
+
+    const trimmedName = editName.trim();
+    if (!trimmedName) {
+      setEditGroupError("Group name cannot be empty.");
+      return;
+    }
+
+    setEditGroupError("");
+
+    try {
+      await updateGroup({
+        variables: {
+          id: groupId,
+          name: trimmedName,
+          description: editDescription.trim(),
+          avatar: editAvatar.trim(),
+        },
+      });
+    } catch {}
+  };
+
+  const openDeleteGroupModal = () => {
+    setDeleteGroupError("");
+    setDeleteGroupModalOpen(true);
+  };
+
+  const handleDeleteGroup = async () => {
+    if (!groupId) return;
+    setDeleteGroupError("");
+
+    try {
+      await deleteGroup({ variables: { id: groupId } });
+    } catch {}
+  };
+
+  return {
+    editModalOpen,
+    setEditModalOpen,
+    deleteGroupModalOpen,
+    setDeleteGroupModalOpen,
+    editName,
+    setEditName,
+    editDescription,
+    setEditDescription,
+    editAvatar,
+    setEditAvatar,
+    editGroupError,
+    deleteGroupError,
+    updatingGroup,
+    deletingGroup,
+    openEditGroupModal,
+    handleUpdateGroup,
+    openDeleteGroupModal,
+    handleDeleteGroup,
+  };
+};
+
 export const useNewGroupPage = () => {
   const { id } = useParams();
   const groupId = id;
@@ -459,11 +585,18 @@ export const useNewGroupPage = () => {
     isJoined: membership.isJoined,
   });
 
+  const management = useGroupManagement({
+    groupId,
+    group: membership.group,
+    skip,
+  });
+
   return {
     currentUser,
     currentUserLoading,
     ...membership,
     ...composer,
     ...feed,
+    ...management,
   };
 };

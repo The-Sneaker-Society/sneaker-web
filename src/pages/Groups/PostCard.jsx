@@ -48,8 +48,8 @@ const PostCard = ({
   const hasLiked = !!post.likes?.some((like) => like.id === currentUser?.id);
 
   const isPostAuthor = post.author?.id === currentUser?.id;
-  const isGroupCreator = group.createdBy?.id === currentUser?.id;
-  const isGroupAdmin = !!group.admins?.some(
+  const isGroupCreator = group?.createdBy?.id === currentUser?.id;
+  const isGroupAdmin = !!group?.admins?.some(
     (admin) => admin.id === currentUser?.id,
   );
   const canDeletePost = isPostAuthor || isGroupCreator || isGroupAdmin;
