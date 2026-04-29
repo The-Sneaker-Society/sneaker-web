@@ -1,178 +1,17 @@
-import { useState, useRef, useMemo, useEffect } from "react";
-import { useQuery, useMutation } from "@apollo/client";
-import { useParams } from "react-router-dom";
-import { useSneakerMember } from "../../../context/MemberContext";
+import { useRef, useState } from "react";
+import { useMutation, useQuery } from "@apollo/client";
 import {
-  GET_GROUP,
-  GET_POSTS_BY_GROUP,
-  JOIN_GROUP,
-  LEAVE_GROUP,
-  CREATE_POST,
-  LIKE_POST,
   ADD_COMMENT,
   DELETE_POST,
+  GET_POSTS_BY_GROUP,
+  LIKE_POST,
 } from "../graphql";
 
 const POSTS_PAGE_SIZE = 10;
 const INITIAL_COMMENT_PAGE_SIZE = 3;
 const COMMENT_PAGE_SIZE = 5;
 
-const useGroupMembership = ({ groupId, currentUser, skip }) => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-  const [joinLeaveError, setJoinLeaveError] = useState("");
-
-  const { data, loading, error } = useQuery(GET_GROUP, {
-    variables: { id: groupId },
-    skip,
-  });
-
-  const group = data?.getGroup;
-
-  const isJoined = useMemo(() => {
-    if (!currentUser?.id || !group?.members) return false;
-    return group.members.some((member) => member.id === currentUser.id);
-  }, [group, currentUser]);
-
-  const memberCount = group?.members?.length || 0;
-  const isCreator =
-    currentUser?.id && group?.createdBy
-      ? group.createdBy.id === currentUser.id
-      : false;
-
-  const [joinGroup, { loading: joining }] = useMutation(JOIN_GROUP, {
-    refetchQueries: [{ query: GET_GROUP, variables: { id: groupId } }],
-    awaitRefetchQueries: true,
-    onCompleted: () => setJoinLeaveError(""),
-    onError: (err) => setJoinLeaveError(err.message),
-  });
-
-  const [leaveGroup, { loading: leaving }] = useMutation(LEAVE_GROUP, {
-    refetchQueries: [{ query: GET_GROUP, variables: { id: groupId } }],
-    awaitRefetchQueries: true,
-    onCompleted: () => setJoinLeaveError(""),
-    onError: (err) => setJoinLeaveError(err.message),
-  });
-
-  const handleJoinGroup = () => {
-    if (!groupId) return;
-    setJoinLeaveError("");
-    joinGroup({ variables: { groupId } });
-  };
-
-  const handleLeaveGroup = () => {
-    if (!groupId) return;
-    setJoinLeaveError("");
-    setModalOpen(false);
-    leaveGroup({ variables: { groupId } });
-  };
-
-  return {
-    loading,
-    error,
-    group,
-    isJoined,
-    isCreator,
-    memberCount,
-    modalOpen,
-    setModalOpen,
-    isHovering,
-    setIsHovering,
-    joinLeaveError,
-    joining,
-    leaving,
-    handleJoinGroup,
-    handleLeaveGroup,
-  };
-};
-
-const useGroupComposer = ({ groupId }) => {
-  const fileInputRef = useRef(null);
-  const [postContent, setPostContent] = useState("");
-  const [imageSrcs, setImageSrcs] = useState([]);
-  const [imageFiles, setImageFiles] = useState([]);
-  const [postError, setPostError] = useState("");
-
-  useEffect(() => {
-    return () => {
-      imageSrcs.forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [imageSrcs]);
-
-  const [createPost, { loading: posting }] = useMutation(CREATE_POST, {
-    refetchQueries: [
-      {
-        query: GET_POSTS_BY_GROUP,
-        variables: {
-          groupId,
-          limit: POSTS_PAGE_SIZE,
-          offset: 0,
-          commentLimit: INITIAL_COMMENT_PAGE_SIZE,
-        },
-      },
-    ],
-    awaitRefetchQueries: true,
-    onCompleted: () => {
-      imageSrcs.forEach((url) => URL.revokeObjectURL(url));
-      setPostContent("");
-      setImageSrcs([]);
-      setImageFiles([]);
-      setPostError("");
-    },
-    onError: (err) => setPostError(err.message),
-  });
-
-  const handleFileInputChange = (event) => {
-    const files = Array.from(event.target.files || []);
-    if (!files.length) return;
-
-    imageSrcs.forEach((url) => URL.revokeObjectURL(url));
-
-    const urls = files.map((file) => URL.createObjectURL(file));
-    setImageSrcs(urls);
-    setImageFiles(files);
-  };
-
-  const handlePostSubmit = () => {
-    if (!postContent.trim()) {
-      setPostError("Post content cannot be empty.");
-      return;
-    }
-
-    if (!groupId) return;
-
-    const toBase64 = (file) =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-    Promise.all(imageFiles.map(toBase64)).then((base64Images) => {
-      createPost({
-        variables: {
-          groupId,
-          content: postContent.trim(),
-          images: base64Images,
-        },
-      });
-    });
-  };
-
-  return {
-    fileInputRef,
-    postContent,
-    setPostContent,
-    imageSrcs,
-    postError,
-    posting,
-    handleFileInputChange,
-    handlePostSubmit,
-  };
-};
-
-const useGroupFeed = ({ groupId, skip, isJoined }) => {
+export const useGroupFeed = ({ groupId, skip, isJoined }) => {
   const pendingCommentPostIdRef = useRef(null);
 
   const [likeErrors, setLikeErrors] = useState({});
@@ -185,9 +24,7 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
   const [commentLoadingByPost, setCommentLoadingByPost] = useState({});
   const [deletingPostId, setDeletingPostId] = useState(null);
   const [loadingMorePosts, setLoadingMorePosts] = useState(false);
-  const [loadingMoreCommentsByPost, setLoadingMoreCommentsByPost] = useState(
-    {},
-  );
+  const [loadingMoreCommentsByPost, setLoadingMoreCommentsByPost] = useState({});
 
   const {
     data: postsData,
@@ -241,10 +78,7 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
       if (pendingCommentPostIdRef.current) {
         const failedPostId = pendingCommentPostIdRef.current;
         setCommentErrors((prev) => ({ ...prev, [failedPostId]: err.message }));
-        setCommentLoadingByPost((prev) => ({
-          ...prev,
-          [failedPostId]: false,
-        }));
+        setCommentLoadingByPost((prev) => ({ ...prev, [failedPostId]: false }));
       }
     },
   });
@@ -404,37 +238,5 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
     handleLoadMorePosts,
     handleLoadMoreComments,
     refetchPosts,
-  };
-};
-
-export const useNewGroupPage = () => {
-  const { id } = useParams();
-  const groupId = id;
-  const skip = !groupId;
-
-  const { member: currentUser, loading: currentUserLoading } = useSneakerMember();
-
-  const membership = useGroupMembership({
-    groupId,
-    currentUser,
-    skip,
-  });
-
-  const composer = useGroupComposer({
-    groupId,
-  });
-
-  const feed = useGroupFeed({
-    groupId,
-    skip,
-    isJoined: membership.isJoined,
-  });
-
-  return {
-    currentUser,
-    currentUserLoading,
-    ...membership,
-    ...composer,
-    ...feed,
   };
 };
