@@ -8,7 +8,12 @@ import {
 
 const DeletePostModal = ({ open, onClose, onConfirm, loading, error }) => {
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="delete-post-title"
+      aria-describedby="delete-post-description"
+    >
       <Box
         sx={{
           position: "absolute",
@@ -21,11 +26,17 @@ const DeletePostModal = ({ open, onClose, onConfirm, loading, error }) => {
           width: 340,
         }}
       >
-        <Typography sx={{ color: "#fff", mb: 2, fontWeight: 700 }}>
+        <Typography
+          id="delete-post-title"
+          sx={{ color: "#fff", mb: 2, fontWeight: 700 }}
+        >
           Delete post?
         </Typography>
 
-        <Typography sx={{ color: "#aaa", mb: 2, fontSize: 14 }}>
+        <Typography
+          id="delete-post-description"
+          sx={{ color: "#aaa", mb: 2, fontSize: 14 }}
+        >
           This action cannot be undone.
         </Typography>
 

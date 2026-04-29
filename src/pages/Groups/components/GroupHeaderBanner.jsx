@@ -86,12 +86,14 @@ const GroupHeaderBanner = ({
             >
               {group.name}
             </Typography>
+
             <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
               <Chip
                 size="small"
                 label={`${memberCount} ${memberCount === 1 ? "member" : "members"}`}
                 sx={{ bgcolor: "rgba(255,255,255,0.08)", color: "#fff" }}
               />
+
               <Chip
                 size="small"
                 label={isJoined ? "Member" : "Public community"}
@@ -102,6 +104,7 @@ const GroupHeaderBanner = ({
                   color: isJoined ? "#FFD100" : "#fff",
                 }}
               />
+
               {isCreator && (
                 <Chip
                   size="small"
@@ -139,26 +142,24 @@ const GroupHeaderBanner = ({
                 Edit Group
               </Button>
 
-              {isCreator && (
-                <Button
-                  variant="outlined"
-                  startIcon={<DeleteForeverIcon />}
-                  onClick={onDeleteGroup}
-                  sx={{
-                    borderRadius: "999px",
-                    textTransform: "none",
-                    fontWeight: 700,
-                    color: "#ff6b6b",
+              <Button
+                variant="outlined"
+                startIcon={<DeleteForeverIcon />}
+                onClick={onDeleteGroup}
+                sx={{
+                  borderRadius: "999px",
+                  textTransform: "none",
+                  fontWeight: 700,
+                  color: "#ff6b6b",
+                  borderColor: "#ff6b6b",
+                  "&:hover": {
+                    bgcolor: "rgba(255,107,107,0.08)",
                     borderColor: "#ff6b6b",
-                    "&:hover": {
-                      bgcolor: "rgba(255,107,107,0.08)",
-                      borderColor: "#ff6b6b",
-                    },
-                  }}
-                >
-                  Delete Group
-                </Button>
-              )}
+                  },
+                }}
+              >
+                Delete Group
+              </Button>
             </>
           )}
 

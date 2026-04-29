@@ -15,8 +15,8 @@ import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useNewGroupPage } from "./hooks/useNewGroupPage";
 import GroupPageLayout from "./layout/GroupPageLayout";
-import GroupHeaderBanner from "./GroupHeaderBanner";
-import GroupSidebar from "./GroupSidebar";
+import GroupHeaderBanner from "../Groups/components/GroupHeaderBanner";
+import GroupSidebar from "../Groups/components/GroupSidebar";
 import PostCard from "./PostCard";
 import DeletePostModal from "./DeletePostModal";
 
