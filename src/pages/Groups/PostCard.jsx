@@ -67,18 +67,24 @@ const PostCard = ({
 
   const likeCount = post.likes?.length || 0;
   const commentCount = post.comments?.length || 0;
-  const shareCount = post.shares || 0;
   const hasLiked = !!post.likes?.some((like) => like.id === currentUser?.id);
 
   const isPostAuthor = post.author?.id === currentUser?.id;
   const isGroupCreator = group.createdBy?.id === currentUser?.id;
-  const isGroupAdmin = !!group.admins?.some((admin) => admin.id === currentUser?.id);
+  const isGroupAdmin = !!group.admins?.some(
+    (admin) => admin.id === currentUser?.id,
+  );
   const canDeletePost = isPostAuthor || isGroupCreator || isGroupAdmin;
   const isEditingPost = editingPostId === post.id;
 
   return (
     <Box sx={{ bgcolor: "#111", borderRadius: 2, p: 2, mb: 2 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 1 }}
+      >
         <Typography fontWeight={700} sx={{ color: "#fff" }}>
           {authorName}
         </Typography>
@@ -139,7 +145,10 @@ const PostCard = ({
           />
 
           {editPostError && (
-            <Typography variant="caption" sx={{ color: "#ff6b6b", display: "block", mb: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{ color: "#ff6b6b", display: "block", mb: 1 }}
+            >
               {editPostError}
             </Typography>
           )}
@@ -147,8 +156,16 @@ const PostCard = ({
           {editingPostImages?.length > 0 && (
             <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: "wrap" }}>
               {editingPostImages.map((img, i) => (
-                <Box key={`${post.id}-edit-image-${i}`} sx={{ position: "relative" }}>
-                  <Box component="img" src={img} alt={`edit-post-${i}`} sx={imageThumbSx} />
+                <Box
+                  key={`${post.id}-edit-image-${i}`}
+                  sx={{ position: "relative" }}
+                >
+                  <Box
+                    component="img"
+                    src={img}
+                    alt={`edit-post-${i}`}
+                    sx={imageThumbSx}
+                  />
                   <IconButton
                     size="small"
                     onClick={() => onRemoveEditPostImage(i)}
@@ -168,18 +185,35 @@ const PostCard = ({
             </Stack>
           )}
 
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Button
               component="label"
               startIcon={<InsertPhotoIcon />}
-              sx={{ textTransform: "none", color: "#aaa", "&:hover": { color: "#FFD100" } }}
+              sx={{
+                textTransform: "none",
+                color: "#aaa",
+                "&:hover": { color: "#FFD100" },
+              }}
             >
               Add Photo
-              <input hidden type="file" accept="image/*" multiple onChange={onEditPostImagesChange} />
+              <input
+                hidden
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={onEditPostImagesChange}
+              />
             </Button>
 
             <Stack direction="row" spacing={1}>
-              <Button onClick={onCancelEditPost} sx={{ textTransform: "none", color: "#aaa" }}>
+              <Button
+                onClick={onCancelEditPost}
+                sx={{ textTransform: "none", color: "#aaa" }}
+              >
                 Cancel
               </Button>
               <Button
@@ -211,14 +245,23 @@ const PostCard = ({
           {post.images && post.images.length > 0 && (
             <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: "wrap" }}>
               {post.images.map((img, i) => (
-                <Box key={i} component="img" src={img} alt={`post-${i}`} sx={imageThumbSx} />
+                <Box
+                  key={i}
+                  component="img"
+                  src={img}
+                  alt={`post-${i}`}
+                  sx={imageThumbSx}
+                />
               ))}
             </Stack>
           )}
         </>
       )}
 
-      <Typography variant="caption" sx={{ color: "#888", display: "block", mb: 1 }}>
+      <Typography
+        variant="caption"
+        sx={{ color: "#888", display: "block", mb: 1 }}
+      >
         {post.createdAt ? new Date(post.createdAt).toLocaleString() : ""}
       </Typography>
 
@@ -228,7 +271,10 @@ const PostCard = ({
           disabled={!isJoined || liking}
           startIcon={
             liking ? (
-              <CircularProgress size={16} sx={{ color: hasLiked ? "#FFD100" : "#aaa" }} />
+              <CircularProgress
+                size={16}
+                sx={{ color: hasLiked ? "#FFD100" : "#aaa" }}
+              />
             ) : hasLiked ? (
               <FavoriteIcon fontSize="small" />
             ) : (
@@ -255,12 +301,13 @@ const PostCard = ({
         >
           {commentCount}
         </Button>
-
-        <Typography sx={{ color: "#aaa" }}>Shares · {shareCount}</Typography>
       </Stack>
 
       {likeError && (
-        <Typography variant="caption" sx={{ color: "#ff6b6b", display: "block", mb: 1 }}>
+        <Typography
+          variant="caption"
+          sx={{ color: "#ff6b6b", display: "block", mb: 1 }}
+        >
           {likeError}
         </Typography>
       )}
@@ -279,10 +326,31 @@ const PostCard = ({
             const isEditingComment = editingCommentId === comment.id;
 
             return (
-              <Box key={comment.id} sx={{ bgcolor: "#181818", borderRadius: 2, px: 1.5, py: 1.25, mb: 1 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
+              <Box
+                key={comment.id}
+                sx={{
+                  bgcolor: "#181818",
+                  borderRadius: 2,
+                  px: 1.5,
+                  py: 1.25,
+                  mb: 1,
+                }}
+              >
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="flex-start"
+                  spacing={1}
+                >
                   <Box sx={{ flex: 1 }}>
-                    <Typography sx={{ color: "#FFD100", fontWeight: 700, fontSize: 13, mb: 0.5 }}>
+                    <Typography
+                      sx={{
+                        color: "#FFD100",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        mb: 0.5,
+                      }}
+                    >
                       {commentAuthor}
                     </Typography>
 
@@ -295,13 +363,19 @@ const PostCard = ({
                           onChange={(e) => onEditCommentChange(e.target.value)}
                           sx={{
                             mb: 1,
-                            "& .MuiInputBase-root": { bgcolor: "#000", color: "#fff" },
+                            "& .MuiInputBase-root": {
+                              bgcolor: "#000",
+                              color: "#fff",
+                            },
                             "& fieldset": { borderColor: "#333" },
                           }}
                         />
 
                         {commentActionErrors && (
-                          <Typography variant="caption" sx={{ color: "#ff6b6b", display: "block", mb: 1 }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "#ff6b6b", display: "block", mb: 1 }}
+                          >
                             {commentActionErrors}
                           </Typography>
                         )}
@@ -310,7 +384,12 @@ const PostCard = ({
                           <Button
                             size="small"
                             onClick={onCancelEditComment}
-                            sx={{ textTransform: "none", color: "#aaa", minWidth: "auto", p: 0 }}
+                            sx={{
+                              textTransform: "none",
+                              color: "#aaa",
+                              minWidth: "auto",
+                              p: 0,
+                            }}
                           >
                             Cancel
                           </Button>
@@ -318,10 +397,18 @@ const PostCard = ({
                             size="small"
                             onClick={onSaveCommentEdit}
                             disabled={savingCommentId === comment.id}
-                            sx={{ textTransform: "none", color: "#FFD100", minWidth: "auto", p: 0 }}
+                            sx={{
+                              textTransform: "none",
+                              color: "#FFD100",
+                              minWidth: "auto",
+                              p: 0,
+                            }}
                           >
                             {savingCommentId === comment.id ? (
-                              <CircularProgress size={14} sx={{ color: "#FFD100" }} />
+                              <CircularProgress
+                                size={14}
+                                sx={{ color: "#FFD100" }}
+                              />
                             ) : (
                               "Save"
                             )}
@@ -329,13 +416,19 @@ const PostCard = ({
                         </Stack>
                       </>
                     ) : (
-                      <Typography sx={{ color: "#ddd", fontSize: 14 }}>{comment.content}</Typography>
+                      <Typography sx={{ color: "#ddd", fontSize: 14 }}>
+                        {comment.content}
+                      </Typography>
                     )}
                   </Box>
 
                   <Stack direction="row" spacing={0.5}>
                     {canEditComment && !isEditingComment && (
-                      <IconButton size="small" onClick={onEditComment} sx={{ color: "#FFD100" }}>
+                      <IconButton
+                        size="small"
+                        onClick={onEditComment}
+                        sx={{ color: "#FFD100" }}
+                      >
                         <EditOutlinedIcon sx={{ fontSize: 16 }} />
                       </IconButton>
                     )}
@@ -347,7 +440,10 @@ const PostCard = ({
                         sx={{ color: "#ff6b6b" }}
                       >
                         {deletingCommentId === comment.id ? (
-                          <CircularProgress size={14} sx={{ color: "#ff6b6b" }} />
+                          <CircularProgress
+                            size={14}
+                            sx={{ color: "#ff6b6b" }}
+                          />
                         ) : (
                           <DeleteOutlineIcon sx={{ fontSize: 16 }} />
                         )}
@@ -383,12 +479,19 @@ const PostCard = ({
               disabled={commentLoading}
               sx={{ textTransform: "none", color: "#FFD100", minWidth: 80 }}
             >
-              {commentLoading ? <CircularProgress size={16} sx={{ color: "#FFD100" }} /> : "Comment"}
+              {commentLoading ? (
+                <CircularProgress size={16} sx={{ color: "#FFD100" }} />
+              ) : (
+                "Comment"
+              )}
             </Button>
           </Stack>
 
           {commentError && (
-            <Typography variant="caption" sx={{ color: "#ff6b6b", display: "block", mt: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{ color: "#ff6b6b", display: "block", mt: 1 }}
+            >
               {commentError}
             </Typography>
           )}
