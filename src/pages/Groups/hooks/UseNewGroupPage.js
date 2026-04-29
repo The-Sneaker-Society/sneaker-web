@@ -127,75 +127,77 @@ const useGroupComposer = ({ groupId }) => {
     },
     onError: (err) => setPostError(err.message),
   });
-};
 
-const handleFileInputChange = (event) => {
-  const files = Array.from(event.target.files || []);
-  if (!files.length) return;
+  const handleFileInputChange = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
 
-  imageSrcs.forEach((url) => URL.revokeObjectURL(url));
+    imageSrcs.forEach((url) => URL.revokeObjectURL(url));
 
-  const urls = files.map((file) => URL.createObjectURL(file));
-  setImageSrcs(urls);
-  setImageFiles(files);
-};
+    const urls = files.map((file) => URL.createObjectURL(file));
+    setImageSrcs(urls);
+    setImageFiles(files);
+  };
 
-const handleRemoveImage = (indexToRemove) => {
-  setImageSrcs((prev) => {
-    const next = [...prev];
-    const [removedUrl] = next.splice(indexToRemove, 1);
+  const handleRemoveImage = (indexToRemove) => {
+    setImageSrcs((prev) => {
+      const next = [...prev];
+      const [removedUrl] = next.splice(indexToRemove, 1);
 
-    if (removedUrl) {
-      URL.revokeObjectURL(removedUrl);
+      if (removedUrl) {
+        URL.revokeObjectURL(removedUrl);
+      }
+
+      return next;
+    });
+
+    setImageFiles((prev) =>
+      prev.filter((_, index) => index !== indexToRemove),
+    );
+
+    if (fileInputRef.current && imageFiles.length <= 1) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handlePostSubmit = () => {
+    if (!postContent.trim()) {
+      setPostError("Post content cannot be empty.");
+      return;
     }
 
-    return next;
-  });
+    if (!groupId) return;
 
-  setImageFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+    const toBase64 = (file) =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
-  if (fileInputRef.current && imageFiles.length <= 1) {
-    fileInputRef.current.value = "";
-  }
-};
-
-const handlePostSubmit = () => {
-  if (!postContent.trim()) {
-    setPostError("Post content cannot be empty.");
-    return;
-  }
-
-  if (!groupId) return;
-
-  const toBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+    Promise.all(imageFiles.map(toBase64)).then((base64Images) => {
+      createPost({
+        variables: {
+          groupId,
+          content: postContent.trim(),
+          images: base64Images,
+        },
+      });
     });
+  };
 
-  Promise.all(imageFiles.map(toBase64)).then((base64Images) => {
-    createPost({
-      variables: {
-        groupId,
-        content: postContent.trim(),
-        images: base64Images,
-      },
-    });
-  });
-};
-
-return {
-  fileInputRef,
-  postContent,
-  setPostContent,
-  imageSrcs,
-  postError,
-  posting,
-  handleFileInputChange,
-  handleRemoveImage,
-  handlePostSubmit,
+  return {
+    fileInputRef,
+    postContent,
+    setPostContent,
+    imageSrcs,
+    postError,
+    posting,
+    handleFileInputChange,
+    handleRemoveImage,
+    handlePostSubmit,
+  };
 };
 
 const useGroupFeed = ({ groupId, skip, isJoined }) => {
@@ -244,9 +246,7 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
   };
 
   const [likePost] = useMutation(LIKE_POST, {
-    refetchQueries: [
-      { query: GET_POSTS_BY_GROUP, variables: baseFeedVariables },
-    ],
+    refetchQueries: [{ query: GET_POSTS_BY_GROUP, variables: baseFeedVariables }],
     awaitRefetchQueries: true,
     onCompleted: () => {
       if (likingPostId) {
@@ -263,9 +263,7 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
   });
 
   const [addComment] = useMutation(ADD_COMMENT, {
-    refetchQueries: [
-      { query: GET_POSTS_BY_GROUP, variables: baseFeedVariables },
-    ],
+    refetchQueries: [{ query: GET_POSTS_BY_GROUP, variables: baseFeedVariables }],
     awaitRefetchQueries: true,
     onError: (err) => {
       if (pendingCommentPostIdRef.current) {
@@ -280,9 +278,7 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
   });
 
   const [deletePost] = useMutation(DELETE_POST, {
-    refetchQueries: [
-      { query: GET_POSTS_BY_GROUP, variables: baseFeedVariables },
-    ],
+    refetchQueries: [{ query: GET_POSTS_BY_GROUP, variables: baseFeedVariables }],
     awaitRefetchQueries: true,
     onCompleted: () => {
       setDeleteModalOpen(false);
@@ -376,10 +372,7 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
           return {
             getPostsByGroup: {
               ...nextPage,
-              items: [
-                ...(previousPage?.items || []),
-                ...(nextPage.items || []),
-              ],
+              items: [...(previousPage?.items || []), ...(nextPage.items || [])],
             },
           };
         },
@@ -393,7 +386,7 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
     const post = posts.find((item) => item.id === postId);
     const nextOffset = post?.commentsPage?.nextOffset;
 
-    if (!nextOffset || loadingMoreCommentsByPost[postId]) return;
+    if (nextOffset == null || loadingMoreCommentsByPost[postId]) return;
 
     setLoadingMoreCommentsByPost((prev) => ({ ...prev, [postId]: true }));
 

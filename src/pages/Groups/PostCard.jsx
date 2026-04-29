@@ -5,22 +5,16 @@ import {
   Stack,
   TextField,
   CircularProgress,
-  IconButton,
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
-import CloseIcon from "@mui/icons-material/Close";
 
-const imageThumbSx = {
-  width: 80,
-  height: 80,
-  objectFit: "cover",
-  borderRadius: 1,
-  border: "1px solid #333",
+const actionButtonSx = {
+  textTransform: "none",
+  minWidth: "auto",
+  p: 0,
 };
 
 const PostCard = ({
@@ -34,31 +28,12 @@ const PostCard = ({
   commentValue,
   commentError,
   likeError,
+  loadingMoreComments,
   onLike,
   onCommentChange,
   onAddComment,
+  onLoadMoreComments,
   onDelete,
-  onEditPost,
-  onCancelEditPost,
-  onEditPostContentChange,
-  onEditPostImagesChange,
-  onRemoveEditPostImage,
-  onSavePostEdit,
-  editingPostId,
-  editingPostContent,
-  editingPostImages,
-  editPostError,
-  savingPostId,
-  onEditComment,
-  onCancelEditComment,
-  onEditCommentChange,
-  onSaveCommentEdit,
-  onDeleteComment,
-  editingCommentId,
-  editingCommentContent,
-  commentActionErrors,
-  savingCommentId,
-  deletingCommentId,
 }) => {
   const authorName =
     `${post.author?.firstName || ""} ${post.author?.lastName || ""}`.trim() ||
@@ -66,7 +41,10 @@ const PostCard = ({
     "Unknown user";
 
   const likeCount = post.likes?.length || 0;
-  const commentCount = post.comments?.length || 0;
+  const commentCount = post.commentCount || 0;
+  const visibleComments = post.commentsPage?.items || [];
+  const hasMoreComments = !!post.commentsPage?.hasMore;
+
   const hasLiked = !!post.likes?.some((like) => like.id === currentUser?.id);
 
   const isPostAuthor = post.author?.id === currentUser?.id;
@@ -75,44 +53,42 @@ const PostCard = ({
     (admin) => admin.id === currentUser?.id,
   );
   const canDeletePost = isPostAuthor || isGroupCreator || isGroupAdmin;
-  const isEditingPost = editingPostId === post.id;
 
   return (
-    <Box sx={{ bgcolor: "#111", borderRadius: 2, p: 2, mb: 2 }}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 1 }}
-      >
-        <Typography fontWeight={700} sx={{ color: "#fff" }}>
-          {authorName}
-        </Typography>
-
-        <Stack direction="row" spacing={1} alignItems="center">
-          {isPostAuthor && (
-            <Button
-              onClick={isEditingPost ? onCancelEditPost : onEditPost}
-              sx={{
-                textTransform: "none",
-                minWidth: "auto",
-                p: 0,
-                color: "#FFD100",
-                "&:hover": { backgroundColor: "transparent", color: "#ffde33" },
-              }}
+    <Box
+      sx={{
+        p: 3,
+        bgcolor: "#1a1a1a",
+        borderRadius: 3,
+        border: "1px solid #2a2a2a",
+      }}
+    >
+      <Stack spacing={2}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="flex-start"
+          spacing={2}
+        >
+          <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{ color: "#FFD100", fontWeight: 700 }}
             >
-              {isEditingPost ? "Cancel edit" : "Edit"}
-            </Button>
-          )}
+              {authorName}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "#777" }}>
+              {post.createdAt ? new Date(post.createdAt).toLocaleString() : ""}
+            </Typography>
+          </Box>
 
           {canDeletePost && (
             <Button
+              startIcon={<DeleteOutlineIcon />}
               onClick={onDelete}
               disabled={deleting}
               sx={{
-                textTransform: "none",
-                minWidth: "auto",
-                p: 0,
+                ...actionButtonSx,
                 color: "#ff6b6b",
                 "&:hover": {
                   backgroundColor: "transparent",
@@ -127,339 +103,136 @@ const PostCard = ({
             </Button>
           )}
         </Stack>
-      </Stack>
 
-      {isEditingPost ? (
-        <Box sx={{ mb: 1.5 }}>
-          <TextField
-            fullWidth
-            multiline
-            minRows={3}
-            value={editingPostContent}
-            onChange={(e) => onEditPostContentChange(e.target.value)}
+        <Typography variant="body1" sx={{ color: "#eee", whiteSpace: "pre-wrap" }}>
+          {post.content}
+        </Typography>
+
+        {post.images?.length > 0 && (
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+            {post.images.map((img, i) => (
+              <Box
+                key={`${img}-${i}`}
+                component="img"
+                src={img}
+                alt={`Post image ${i + 1}`}
+                sx={{
+                  width: 120,
+                  height: 120,
+                  objectFit: "cover",
+                  borderRadius: 2,
+                  border: "1px solid #2a2a2a",
+                }}
+              />
+            ))}
+          </Stack>
+        )}
+
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          sx={{ color: "#aaa", flexWrap: "wrap" }}
+        >
+          <Button
+            startIcon={
+              liking ? (
+                <CircularProgress size={16} sx={{ color: "#FFD100" }} />
+              ) : hasLiked ? (
+                <FavoriteIcon fontSize="small" />
+              ) : (
+                <FavoriteBorderIcon fontSize="small" />
+              )
+            }
+            onClick={onLike}
+            disabled={!isJoined || liking}
             sx={{
-              mb: 1,
-              "& .MuiInputBase-root": { bgcolor: "#000", color: "#fff" },
-              "& fieldset": { borderColor: "#333" },
+              ...actionButtonSx,
+              color: !isJoined ? "#666" : hasLiked ? "#FFD100" : "#aaa",
+              "&.Mui-disabled": {
+                color: "#666",
+              },
             }}
-          />
+          >
+            {hasLiked ? "Liked" : "Like"} · {likeCount}
+          </Button>
 
-          {editPostError && (
-            <Typography
-              variant="caption"
-              sx={{ color: "#ff6b6b", display: "block", mb: 1 }}
-            >
-              {editPostError}
+          <Stack direction="row" spacing={0.75} alignItems="center">
+            <ChatBubbleOutlineIcon sx={{ fontSize: 18, color: "#888" }} />
+            <Typography variant="body2" sx={{ color: "#888" }}>
+              {commentCount}
             </Typography>
-          )}
+          </Stack>
+        </Stack>
 
-          {editingPostImages?.length > 0 && (
-            <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: "wrap" }}>
-              {editingPostImages.map((img, i) => (
+        {likeError && (
+          <Typography variant="caption" color="error.main">
+            {likeError}
+          </Typography>
+        )}
+
+        {visibleComments.length > 0 && (
+          <Stack spacing={1.25}>
+            {visibleComments.map((comment) => {
+              const commentAuthor =
+                `${comment.author?.firstName || ""} ${
+                  comment.author?.lastName || ""
+                }`.trim() ||
+                comment.author?.email ||
+                "Unknown user";
+
+              return (
                 <Box
-                  key={`${post.id}-edit-image-${i}`}
-                  sx={{ position: "relative" }}
+                  key={comment.id}
+                  sx={{
+                    p: 1.5,
+                    bgcolor: "#141414",
+                    border: "1px solid #2a2a2a",
+                    borderRadius: 2,
+                  }}
                 >
-                  <Box
-                    component="img"
-                    src={img}
-                    alt={`edit-post-${i}`}
-                    sx={imageThumbSx}
-                  />
-                  <IconButton
-                    size="small"
-                    onClick={() => onRemoveEditPostImage(i)}
+                  <Typography
+                    variant="caption"
                     sx={{
-                      position: "absolute",
-                      top: 4,
-                      right: 4,
-                      bgcolor: "rgba(0,0,0,0.72)",
-                      color: "#fff",
-                      "&:hover": { bgcolor: "rgba(0,0,0,0.88)" },
+                      color: "#FFD100",
+                      display: "block",
+                      mb: 0.5,
+                      fontWeight: 700,
                     }}
                   >
-                    <CloseIcon sx={{ fontSize: 14 }} />
-                  </IconButton>
+                    {commentAuthor}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#ddd" }}>
+                    {comment.content}
+                  </Typography>
                 </Box>
-              ))}
-            </Stack>
-          )}
+              );
+            })}
 
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Button
-              component="label"
-              startIcon={<InsertPhotoIcon />}
-              sx={{
-                textTransform: "none",
-                color: "#aaa",
-                "&:hover": { color: "#FFD100" },
-              }}
-            >
-              Add Photo
-              <input
-                hidden
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={onEditPostImagesChange}
-              />
-            </Button>
-
-            <Stack direction="row" spacing={1}>
+            {hasMoreComments && (
               <Button
-                onClick={onCancelEditPost}
-                sx={{ textTransform: "none", color: "#aaa" }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                onClick={onSavePostEdit}
-                disabled={savingPostId === post.id}
+                variant="text"
+                onClick={onLoadMoreComments}
+                disabled={loadingMoreComments}
                 sx={{
-                  borderRadius: "999px",
+                  alignSelf: "flex-start",
                   textTransform: "none",
-                  fontWeight: 700,
-                  bgcolor: "#FFD100",
-                  color: "#000",
-                  "&:hover": { bgcolor: "#ffde33" },
+                  color: "#FFD100",
+                  px: 0,
                 }}
               >
-                {savingPostId === post.id ? (
-                  <CircularProgress size={16} sx={{ color: "#000" }} />
+                {loadingMoreComments ? (
+                  <CircularProgress size={16} sx={{ color: "#FFD100" }} />
                 ) : (
-                  "Save"
+                  "Load more comments"
                 )}
               </Button>
-            </Stack>
+            )}
           </Stack>
-        </Box>
-      ) : (
-        <>
-          <Typography sx={{ color: "#fff", mb: 1 }}>{post.content}</Typography>
+        )}
 
-          {post.images && post.images.length > 0 && (
-            <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: "wrap" }}>
-              {post.images.map((img, i) => (
-                <Box
-                  key={i}
-                  component="img"
-                  src={img}
-                  alt={`post-${i}`}
-                  sx={imageThumbSx}
-                />
-              ))}
-            </Stack>
-          )}
-        </>
-      )}
-
-      <Typography
-        variant="caption"
-        sx={{ color: "#888", display: "block", mb: 1 }}
-      >
-        {post.createdAt ? new Date(post.createdAt).toLocaleString() : ""}
-      </Typography>
-
-      <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
-        <Button
-          onClick={onLike}
-          disabled={!isJoined || liking}
-          startIcon={
-            liking ? (
-              <CircularProgress
-                size={16}
-                sx={{ color: hasLiked ? "#FFD100" : "#aaa" }}
-              />
-            ) : hasLiked ? (
-              <FavoriteIcon fontSize="small" />
-            ) : (
-              <FavoriteBorderIcon fontSize="small" />
-            )
-          }
-          sx={{
-            textTransform: "none",
-            color: !isJoined ? "#666" : hasLiked ? "#FFD100" : "#aaa",
-            minWidth: "auto",
-            p: 0,
-            "&.Mui-disabled": {
-              color: "#666",
-            },
-          }}
-        >
-          {hasLiked ? "Liked" : "Like"} · {likeCount}
-        </Button>
-
-        <Button
-          disabled
-          startIcon={<ChatBubbleOutlineIcon fontSize="small" />}
-          sx={{ textTransform: "none", color: "#aaa", minWidth: "auto", p: 0 }}
-        >
-          {commentCount}
-        </Button>
-      </Stack>
-
-      {likeError && (
-        <Typography
-          variant="caption"
-          sx={{ color: "#ff6b6b", display: "block", mb: 1 }}
-        >
-          {likeError}
-        </Typography>
-      )}
-
-      {post.comments?.length > 0 && (
-        <Box sx={{ mb: 1.5 }}>
-          {post.comments.map((comment) => {
-            const commentAuthor =
-              `${comment.author?.firstName || ""} ${comment.author?.lastName || ""}`.trim() ||
-              comment.author?.email ||
-              "Unknown user";
-
-            const canEditComment = comment.author?.id === currentUser?.id;
-            const canDeleteComment =
-              canEditComment || isGroupCreator || isGroupAdmin;
-            const isEditingComment = editingCommentId === comment.id;
-
-            return (
-              <Box
-                key={comment.id}
-                sx={{
-                  bgcolor: "#181818",
-                  borderRadius: 2,
-                  px: 1.5,
-                  py: 1.25,
-                  mb: 1,
-                }}
-              >
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="flex-start"
-                  spacing={1}
-                >
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
-                      sx={{
-                        color: "#FFD100",
-                        fontWeight: 700,
-                        fontSize: 13,
-                        mb: 0.5,
-                      }}
-                    >
-                      {commentAuthor}
-                    </Typography>
-
-                    {isEditingComment ? (
-                      <>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          value={editingCommentContent}
-                          onChange={(e) => onEditCommentChange(e.target.value)}
-                          sx={{
-                            mb: 1,
-                            "& .MuiInputBase-root": {
-                              bgcolor: "#000",
-                              color: "#fff",
-                            },
-                            "& fieldset": { borderColor: "#333" },
-                          }}
-                        />
-
-                        {commentActionErrors && (
-                          <Typography
-                            variant="caption"
-                            sx={{ color: "#ff6b6b", display: "block", mb: 1 }}
-                          >
-                            {commentActionErrors}
-                          </Typography>
-                        )}
-
-                        <Stack direction="row" spacing={1}>
-                          <Button
-                            size="small"
-                            onClick={onCancelEditComment}
-                            sx={{
-                              textTransform: "none",
-                              color: "#aaa",
-                              minWidth: "auto",
-                              p: 0,
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="small"
-                            onClick={onSaveCommentEdit}
-                            disabled={savingCommentId === comment.id}
-                            sx={{
-                              textTransform: "none",
-                              color: "#FFD100",
-                              minWidth: "auto",
-                              p: 0,
-                            }}
-                          >
-                            {savingCommentId === comment.id ? (
-                              <CircularProgress
-                                size={14}
-                                sx={{ color: "#FFD100" }}
-                              />
-                            ) : (
-                              "Save"
-                            )}
-                          </Button>
-                        </Stack>
-                      </>
-                    ) : (
-                      <Typography sx={{ color: "#ddd", fontSize: 14 }}>
-                        {comment.content}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Stack direction="row" spacing={0.5}>
-                    {canEditComment && !isEditingComment && (
-                      <IconButton
-                        size="small"
-                        onClick={onEditComment}
-                        sx={{ color: "#FFD100" }}
-                      >
-                        <EditOutlinedIcon sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    )}
-                    {canDeleteComment && (
-                      <IconButton
-                        size="small"
-                        onClick={onDeleteComment}
-                        disabled={deletingCommentId === comment.id}
-                        sx={{ color: "#ff6b6b" }}
-                      >
-                        {deletingCommentId === comment.id ? (
-                          <CircularProgress
-                            size={14}
-                            sx={{ color: "#ff6b6b" }}
-                          />
-                        ) : (
-                          <DeleteOutlineIcon sx={{ fontSize: 16 }} />
-                        )}
-                      </IconButton>
-                    )}
-                  </Stack>
-                </Stack>
-              </Box>
-            );
-          })}
-        </Box>
-      )}
-
-      {isJoined ? (
-        <>
-          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+        {isJoined ? (
+          <Stack spacing={1.25}>
             <TextField
               fullWidth
               size="small"
@@ -474,33 +247,40 @@ const PostCard = ({
                 "& fieldset": { borderColor: "#333" },
               }}
             />
-            <Button
-              onClick={onAddComment}
-              disabled={commentLoading}
-              sx={{ textTransform: "none", color: "#FFD100", minWidth: 80 }}
-            >
-              {commentLoading ? (
-                <CircularProgress size={16} sx={{ color: "#FFD100" }} />
-              ) : (
-                "Comment"
-              )}
-            </Button>
-          </Stack>
 
-          {commentError && (
-            <Typography
-              variant="caption"
-              sx={{ color: "#ff6b6b", display: "block", mt: 1 }}
-            >
-              {commentError}
-            </Typography>
-          )}
-        </>
-      ) : (
-        <Typography variant="caption" sx={{ color: "#777" }}>
-          Join to interact
-        </Typography>
-      )}
+            <Stack direction="row" justifyContent="flex-end">
+              <Button
+                variant="contained"
+                onClick={onAddComment}
+                disabled={commentLoading}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: "999px",
+                  bgcolor: "#FFD100",
+                  color: "#111",
+                  "&:hover": { bgcolor: "#f5c400" },
+                }}
+              >
+                {commentLoading ? (
+                  <CircularProgress size={18} sx={{ color: "#111" }} />
+                ) : (
+                  "Comment"
+                )}
+              </Button>
+            </Stack>
+
+            {commentError && (
+              <Typography variant="caption" color="error.main">
+                {commentError}
+              </Typography>
+            )}
+          </Stack>
+        ) : (
+          <Typography variant="body2" sx={{ color: "#777" }}>
+            Join to interact
+          </Typography>
+        )}
+      </Stack>
     </Box>
   );
 };

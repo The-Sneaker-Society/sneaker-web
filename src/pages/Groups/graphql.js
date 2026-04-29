@@ -21,33 +21,6 @@ export const POST_COMMENT_FIELDS = gql`
   ${GROUP_MEMBER_FIELDS}
 `;
 
-export const POST_FIELDS = gql`
-  fragment PostFields on Post {
-    id
-    groupId
-    content
-    images
-    shares
-    createdAt
-    commentCount
-    author {
-      ...GroupMemberFields
-    }
-    likes {
-      id
-    }
-    commentsPage(limit: $commentLimit, offset: 0) {
-      items {
-        ...PostCommentFields
-      }
-      totalCount
-      hasMore
-      nextOffset
-    }
-  }
-  ${POST_COMMENT_FIELDS}
-`;
-
 export const GET_GROUP = gql`
   query GetGroup($id: ID!) {
     getGroup(id: $id) {
@@ -79,14 +52,34 @@ export const GET_POSTS_BY_GROUP = gql`
   ) {
     getPostsByGroup(groupId: $groupId, limit: $limit, offset: $offset) {
       items {
-        ...PostFields
+        id
+        groupId
+        content
+        images
+        createdAt
+        commentCount
+        author {
+          ...GroupMemberFields
+        }
+        likes {
+          id
+        }
+        commentsPage(limit: $commentLimit, offset: 0) {
+          items {
+            ...PostCommentFields
+          }
+          totalCount
+          hasMore
+          nextOffset
+        }
       }
       totalCount
       hasMore
       nextOffset
     }
   }
-  ${POST_FIELDS}
+  ${GROUP_MEMBER_FIELDS}
+  ${POST_COMMENT_FIELDS}
 `;
 
 export const JOIN_GROUP = gql`
@@ -95,6 +88,9 @@ export const JOIN_GROUP = gql`
       id
       members {
         ...GroupMemberFields
+      }
+      admins {
+        id
       }
     }
   }
@@ -152,5 +148,43 @@ export const ADD_COMMENT = gql`
 export const DELETE_POST = gql`
   mutation DeletePost($postId: ID!) {
     deletePost(postId: $postId)
+  }
+`;
+
+export const UPDATE_GROUP = gql`
+  mutation UpdateGroup(
+    $id: ID!
+    $name: String
+    $description: String
+    $avatar: String
+  ) {
+    updateGroup(
+      id: $id
+      name: $name
+      description: $description
+      avatar: $avatar
+    ) {
+      id
+      name
+      description
+      avatar
+      createdAt
+      createdBy {
+        ...GroupMemberFields
+      }
+      admins {
+        ...GroupMemberFields
+      }
+      members {
+        ...GroupMemberFields
+      }
+    }
+  }
+  ${GROUP_MEMBER_FIELDS}
+`;
+
+export const DELETE_GROUP = gql`
+  mutation DeleteGroup($id: ID!) {
+    deleteGroup(id: $id)
   }
 `;

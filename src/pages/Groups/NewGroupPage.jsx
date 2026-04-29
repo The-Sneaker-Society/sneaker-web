@@ -121,6 +121,7 @@ const NewGroupPage = () => {
     currentUser,
     isJoined,
     isCreator,
+    isGroupAdmin,
     memberCount,
     hasMorePosts,
     loadingMorePosts,
@@ -169,6 +170,25 @@ const NewGroupPage = () => {
 
     refetchGroup,
     refetchPosts,
+
+    editModalOpen,
+    setEditModalOpen,
+    deleteGroupModalOpen,
+    setDeleteGroupModalOpen,
+    editName,
+    setEditName,
+    editDescription,
+    setEditDescription,
+    editAvatar,
+    setEditAvatar,
+    editGroupError,
+    deleteGroupError,
+    updatingGroup,
+    deletingGroup,
+    openEditGroupModal,
+    handleUpdateGroup,
+    openDeleteGroupModal,
+    handleDeleteGroup,
   } = useNewGroupPage();
 
   if (loading || currentUserLoading) {
@@ -236,7 +256,6 @@ const NewGroupPage = () => {
             </Typography>
           )}
         </Box>
-
         <Stack spacing={2} alignItems={{ xs: "flex-start", md: "flex-end" }}>
           <AvatarGroup max={6}>
             {(group.members || []).map((member) => (
@@ -306,6 +325,43 @@ const NewGroupPage = () => {
                 </Typography>
               )}
             </>
+          )}
+
+          {(isCreator || isGroupAdmin) && (
+            <Stack direction="row" spacing={1.5}>
+              <Button
+                variant="outlined"
+                onClick={openEditGroupModal}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: "999px",
+                  color: "#FFD100",
+                  borderColor: "#FFD100",
+                  "&:hover": { borderColor: "#f5c400", color: "#f5c400" },
+                }}
+              >
+                Edit group
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={openDeleteGroupModal}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: "999px",
+                  color: "#ff6b6b",
+                  borderColor: "#ff6b6b",
+                  "&:hover": { borderColor: "#ff5252", color: "#ff5252" },
+                }}
+              >
+                Delete group
+              </Button>
+            </Stack>
+          )}
+
+          {joinLeaveError && !isCreator && (
+            <Typography variant="caption" color="error.main">
+              {joinLeaveError}
+            </Typography>
           )}
         </Stack>
       </Stack>
@@ -516,6 +572,182 @@ const NewGroupPage = () => {
           loading={postToDelete?.id && deletingPostId === postToDelete.id}
           error={deleteError}
         />
+
+        <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
+          <Box
+            sx={{
+              bgcolor: "#1a1a1a",
+              color: "#fff",
+              p: 3,
+              borderRadius: 3,
+              border: "1px solid #333",
+              width: "min(480px, calc(100vw - 32px))",
+              mx: "auto",
+              mt: "15vh",
+            }}
+          >
+            <form onSubmit={handleUpdateGroup}>
+              <Stack spacing={2}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  Edit group details
+                </Typography>
+
+                <TextField
+                  fullWidth
+                  label="Group name"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  required
+                  InputLabelProps={{ shrink: true }}
+                  sx={{
+                    "& .MuiInputBase-root": {
+                      bgcolor: "#000",
+                      color: "#fff",
+                      borderRadius: 2,
+                    },
+                    "& fieldset": { borderColor: "#333" },
+                  }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Description"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  multiline
+                  minRows={3}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{
+                    "& .MuiInputBase-root": {
+                      bgcolor: "#000",
+                      color: "#fff",
+                      borderRadius: 2,
+                    },
+                    "& fieldset": { borderColor: "#333" },
+                  }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Avatar URL"
+                  value={editAvatar}
+                  onChange={(e) => setEditAvatar(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{
+                    "& .MuiInputBase-root": {
+                      bgcolor: "#000",
+                      color: "#fff",
+                      borderRadius: 2,
+                    },
+                    "& fieldset": { borderColor: "#333" },
+                  }}
+                />
+
+                {editGroupError && (
+                  <Typography variant="caption" color="error.main">
+                    {editGroupError}
+                  </Typography>
+                )}
+
+                <Stack direction="row" spacing={2} justifyContent="flex-end">
+                  <Button
+                    variant="outlined"
+                    onClick={() => setEditModalOpen(false)}
+                    sx={{
+                      color: "#aaa",
+                      borderColor: "#444",
+                      textTransform: "none",
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={updatingGroup}
+                    sx={{
+                      bgcolor: "#FFD100",
+                      color: "#111",
+                      textTransform: "none",
+                      "&:hover": { bgcolor: "#f5c400" },
+                    }}
+                  >
+                    {updatingGroup ? (
+                      <CircularProgress size={18} sx={{ color: "#111" }} />
+                    ) : (
+                      "Save changes"
+                    )}
+                  </Button>
+                </Stack>
+              </Stack>
+            </form>
+          </Box>
+        </Modal>
+
+        {/* Delete Group Modal */}
+        <Modal
+          open={deleteGroupModalOpen}
+          onClose={() => setDeleteGroupModalOpen(false)}
+        >
+          <Box
+            sx={{
+              bgcolor: "#1a1a1a",
+              color: "#fff",
+              p: 3,
+              borderRadius: 3,
+              border: "1px solid #333",
+              width: "min(420px, calc(100vw - 32px))",
+              mx: "auto",
+              mt: "20vh",
+            }}
+          >
+            <Stack spacing={2}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                Delete this group?
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#aaa" }}>
+                This will remove the group and all of its posts for all members.
+                This action cannot be undone.
+              </Typography>
+
+              {deleteGroupError && (
+                <Typography variant="caption" color="error.main">
+                  {deleteGroupError}
+                </Typography>
+              )}
+
+              <Stack direction="row" spacing={2} justifyContent="flex-end">
+                <Button
+                  variant="outlined"
+                  onClick={() => setDeleteGroupModalOpen(false)}
+                  sx={{
+                    color: "#aaa",
+                    borderColor: "#444",
+                    textTransform: "none",
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleDeleteGroup}
+                  disabled={deletingGroup}
+                  sx={{
+                    bgcolor: "#ff6b6b",
+                    textTransform: "none",
+                    "&:hover": { bgcolor: "#ff5252" },
+                  }}
+                >
+                  {deletingGroup ? (
+                    <CircularProgress size={18} sx={{ color: "#fff" }} />
+                  ) : (
+                    "Yes, delete group"
+                  )}
+                </Button>
+              </Stack>
+            </Stack>
+          </Box>
+        </Modal>
 
         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box
