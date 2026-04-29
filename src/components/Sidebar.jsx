@@ -9,17 +9,17 @@ import {
   DirectionsRunOutlined,
   Menu,
 } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import { useColors } from "../theme/colors";
 import SidebarItem from "./SidebarItem";
 import ThemeToggle from "./ThemeToggle";
 import LogoBlack from "../assets/ss-logo-black.svg";
 import LogoWhite from "../assets/ss-logo.svg";
-import SettingsModal from "./SettingsModal";
-import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
   const colors = useColors();
+  const navigate = useNavigate();
 
   const toggleDrawer = (isOpen) => (event) => {
     if (
@@ -28,19 +28,70 @@ const Sidebar = () => {
     ) {
       return;
     }
-
     setOpen(isOpen);
   };
-  const navigate = useNavigate();
-  const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
 
-  const handleSettingsClick = () => {
-    setSettingsModalOpen(true);
-  };
+  const navItems = (
+    <>
+      <SidebarItem
+        text="My Society"
+        icon={<DirectionsRunOutlined />}
+        onClick={() => navigate("/member/my-society")}
+      />
+      <SidebarItem
+        text="Discover"
+        icon={<ExploreOutlined />}
+        onClick={() => navigate("/member/discover")}
+      />
+      <SidebarItem
+        text="Groups"
+        icon={<GroupsOutlined />}
+        onClick={() => navigate("/member/groups")}
+      />
+      <SidebarItem
+        text="The Vault"
+        icon={<Inventory2Outlined />}
+        onClick={() => navigate("/member/the-vault")}
+      />
+      <SidebarItem
+        text="Messages"
+        icon={<ChatBubbleOutline />}
+        notification={5}
+        onClick={() => navigate("/member/messages")}
+      />
+    </>
+  );
 
-  const handleCloseSettingsModal = () => {
-    setSettingsModalOpen(false);
-  };
+  const settingsItem = (
+    <Box sx={{ padding: 2, borderTop: `1px solid ${colors.border}` }}>
+      <SidebarItem
+        text="Settings"
+        icon={<SettingsOutlined />}
+        onClick={() => navigate("/member/settings")}
+      />
+    </Box>
+  );
+
+  const logoBox = (
+    <Box sx={{ padding: 2, textAlign: "center", position: "relative" }}>
+      <Box
+        component="img"
+        src={colors.isDark ? LogoBlack : LogoWhite}
+        alt="Logo"
+        sx={{
+          width: "80%",
+          maxWidth: "300px",
+          height: "auto",
+          my: 4,
+          cursor: "pointer",
+        }}
+        onClick={() => navigate("/member/dashboard")}
+      />
+      <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+        <ThemeToggle />
+      </Box>
+    </Box>
+  );
 
   return (
     <Box>
@@ -55,7 +106,7 @@ const Sidebar = () => {
         <Menu />
       </IconButton>
 
-      {/* Collapsible Drawer for mobile view */}
+      {/* Collapsible Drawer for mobile */}
       <Drawer anchor="left" open={open} onClose={toggleDrawer(false)}>
         <Box
           sx={{
@@ -69,53 +120,11 @@ const Sidebar = () => {
           onClick={toggleDrawer(false)}
           onKeyDown={toggleDrawer(false)}
         >
-          {/* Sidebar Content */}
-          <Box sx={{ padding: 2, textAlign: "center" }}>
-            <Box
-              component="img"
-              src={colors.isDark ? LogoBlack : LogoWhite}
-              alt="Logo"
-              sx={{
-                width: "80%",
-                maxWidth: "300px",
-                height: "auto",
-                my: 4,
-                cursor: "pointer",
-              }}
-              onClick={() => (window.location.href = "/dashboard")}
-            />
-          </Box>
-
-          <List
-            component="nav"
-            aria-label="main mailbox folders"
-            sx={{ flexGrow: 1 }}
-          >
-            <SidebarItem text="My Society" icon={<DirectionsRunOutlined />} />
-            <SidebarItem text="Discover" icon={<ExploreOutlined />} />
-            <SidebarItem
-              text="Groups"
-              icon={<GroupsOutlined />}
-              onClick={() => navigate("/member/groups")}
-            />{" "}
-            <SidebarItem text="The Vault" icon={<Inventory2Outlined />} />
-            <SidebarItem
-              text="Messages"
-              icon={<ChatBubbleOutline />}
-              notification={5}
-            />
+          {logoBox}
+          <List component="nav" aria-label="sidebar nav" sx={{ flexGrow: 1 }}>
+            {navItems}
           </List>
-
-          <Box sx={{ padding: 2, borderTop: `1px solid ${colors.border}` }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <SidebarItem
-                text="Settings"
-                icon={<SettingsOutlined />}
-                onClick={handleSettingsClick}
-              />
-              <ThemeToggle />
-            </Box>
-          </Box>
+          {settingsItem}
         </Box>
       </Drawer>
 
@@ -130,61 +139,13 @@ const Sidebar = () => {
             flexDirection: "column",
           }}
         >
-          {/* Sidebar Content */}
-          <Box sx={{ padding: 2, textAlign: "center" }}>
-            <Box
-              component="img"
-              src={colors.isDark ? LogoBlack : LogoWhite}
-              alt="Logo"
-              sx={{
-                width: "80%",
-                maxWidth: "300px",
-                height: "auto",
-                my: 4,
-                cursor: "pointer",
-              }}
-              onClick={() => (window.location.href = "/dashboard")}
-            />
-          </Box>
-
-          <List
-            component="nav"
-            aria-label="main mailbox folders"
-            sx={{ flexGrow: 1 }}
-          >
-            <SidebarItem text="My Society" icon={<DirectionsRunOutlined />} />
-            <SidebarItem text="Discover" icon={<ExploreOutlined />} />
-            <SidebarItem
-              text="Groups"
-              icon={<GroupsOutlined />}
-              onClick={() => navigate("/member/groups")}
-            />{" "}
-            <SidebarItem text="The Vault" icon={<Inventory2Outlined />} />
-            <SidebarItem
-              text="Messages"
-              icon={<ChatBubbleOutline />}
-              notification={5}
-            />
+          {logoBox}
+          <List component="nav" aria-label="sidebar nav" sx={{ flexGrow: 1 }}>
+            {navItems}
           </List>
-
-          <Box sx={{ padding: 2, borderTop: `1px solid ${colors.border}` }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <SidebarItem
-                text="Settings"
-                icon={<SettingsOutlined />}
-                onClick={handleSettingsClick}
-              />
-              <ThemeToggle />
-            </Box>
-          </Box>
+          {settingsItem}
         </Box>
       </Box>
-
-      {/* Settings Modal */}
-      <SettingsModal
-        open={isSettingsModalOpen}
-        onClose={handleCloseSettingsModal}
-      />
     </Box>
   );
 };

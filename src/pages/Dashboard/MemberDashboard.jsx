@@ -55,7 +55,7 @@ export const MemberDashboard = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        width: "100vw",
+        width: "100%",
         display: "flex",
         flexDirection: "column",
         overflow: "auto",
@@ -66,7 +66,7 @@ export const MemberDashboard = () => {
       <Box
         sx={{
           flexShrink: 0,
-          padding: "20px",
+          padding: { xs: "16px", sm: "24px 32px" },
         }}
       >
         <Box
