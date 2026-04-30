@@ -11,7 +11,12 @@ import { ChatDashboardMember } from "../pages/Chats/ChatDashboardMember";
 import { GenerateMember } from "../pages/GenerateMember/GenerateMember";
 import { OnboardMember } from "../pages/OnboardMember/OnboardMember";
 import GroupsPage from "../pages/Groups/Groups";
-import NewGroupPage from "../pages/Groups/NewGroupPage";
+import NewGroupPage from "../pages/GroupsPage/NewGroupPage";
+import MySociety from "../pages/Dashboard/MySociety";
+import Discover from "../pages/Dashboard/Discover";
+import TheVault from "../pages/Vault/TheVault";
+import ChatSidebar from "../pages/Chats/ChatSidebar";
+import MemberSettings from "../pages/membersettings";
 
 const MemberRoutes = () => {
   return (
@@ -80,6 +85,46 @@ const MemberRoutes = () => {
           element={
             <Layout>
               <NewGroupPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="my-society"
+          element={
+            <Layout>
+              <MySociety />
+            </Layout>
+          }
+        />
+        <Route
+          path="discover"
+          element={
+            <Layout>
+              <Discover />
+            </Layout>
+          }
+        />
+        <Route
+          path="the-vault"
+          element={
+            <Layout>
+              <TheVault />
+            </Layout>
+          }
+        />
+        <Route
+          path="messages"
+          element={
+            <Layout>
+              <ChatSidebar />
+            </Layout>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <Layout>
+              <MemberSettings />
             </Layout>
           }
         />
