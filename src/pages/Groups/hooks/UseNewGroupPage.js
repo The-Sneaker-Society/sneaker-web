@@ -110,6 +110,10 @@ const useGroupMembership = ({ groupId, currentUser, skip }) => {
   };
 };
 
+const MAX_IMAGES_PER_POST = 4;
+const MAX_IMAGE_SIZE_MB = 5;
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+
 const useGroupComposer = ({ groupId }) => {
   const fileInputRef = useRef(null);
   const [postContent, setPostContent] = useState("");
@@ -153,12 +157,49 @@ const useGroupComposer = ({ groupId }) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
+    const invalidTypeFiles = files.filter(
+      (file) => !file.type.startsWith("image/"),
+    );
+    const imageOnlyFiles = files.filter((file) =>
+      file.type.startsWith("image/"),
+    );
+    const oversizedFiles = imageOnlyFiles.filter(
+      (file) => file.size > MAX_IMAGE_SIZE_BYTES,
+    );
+    const validFiles = imageOnlyFiles.filter(
+      (file) => file.size <= MAX_IMAGE_SIZE_BYTES,
+    );
+
+    const nextFiles = validFiles.slice(0, MAX_IMAGES_PER_POST);
+    const errors = [];
+
+    if (invalidTypeFiles.length > 0) {
+      errors.push("Only image files can be uploaded.");
+    }
+
+    if (files.length > MAX_IMAGES_PER_POST) {
+      errors.push(
+        `You can upload up to ${MAX_IMAGES_PER_POST} images per post.`,
+      );
+    }
+
+    if (oversizedFiles.length > 0) {
+      const oversizedNames = oversizedFiles.map((file) => file.name).join(", ");
+      errors.push(
+        `Each image must be ${MAX_IMAGE_SIZE_MB}MB or smaller. Too large: ${oversizedNames}.`,
+      );
+    }
+
     imageSrcs.forEach((url) => URL.revokeObjectURL(url));
 
-    const urls = files.map((file) => URL.createObjectURL(file));
+    const urls = nextFiles.map((file) => URL.createObjectURL(file));
     setImageSrcs(urls);
-    setImageFiles(files);
-    setPostError("");
+    setImageFiles(nextFiles);
+    setPostError(errors.join(" "));
+
+    if (fileInputRef.current && nextFiles.length === 0) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleRemoveImage = (indexToRemove) => {
@@ -266,7 +307,9 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
   };
 
   const [likePost] = useMutation(LIKE_POST, {
-    refetchQueries: [{ query: GET_POSTS_BY_GROUP, variables: baseFeedVariables }],
+    refetchQueries: [
+      { query: GET_POSTS_BY_GROUP, variables: baseFeedVariables },
+    ],
     awaitRefetchQueries: true,
     onCompleted: () => {
       if (likingPostId) {
@@ -283,7 +326,9 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
   });
 
   const [addComment] = useMutation(ADD_COMMENT, {
-    refetchQueries: [{ query: GET_POSTS_BY_GROUP, variables: baseFeedVariables }],
+    refetchQueries: [
+      { query: GET_POSTS_BY_GROUP, variables: baseFeedVariables },
+    ],
     awaitRefetchQueries: true,
     onError: (err) => {
       if (pendingCommentPostIdRef.current) {
@@ -298,7 +343,9 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
   });
 
   const [deletePost] = useMutation(DELETE_POST, {
-    refetchQueries: [{ query: GET_POSTS_BY_GROUP, variables: baseFeedVariables }],
+    refetchQueries: [
+      { query: GET_POSTS_BY_GROUP, variables: baseFeedVariables },
+    ],
     awaitRefetchQueries: true,
     onCompleted: () => {
       setDeleteModalOpen(false);
@@ -392,7 +439,10 @@ const useGroupFeed = ({ groupId, skip, isJoined }) => {
           return {
             getPostsByGroup: {
               ...nextPage,
-              items: [...(previousPage?.items || []), ...(nextPage.items || [])],
+              items: [
+                ...(previousPage?.items || []),
+                ...(nextPage.items || []),
+              ],
             },
           };
         },
@@ -473,7 +523,9 @@ const useGroupManagement = ({ groupId, group, skip }) => {
   }, [editModalOpen, group]);
 
   const [updateGroup, { loading: updatingGroup }] = useMutation(UPDATE_GROUP, {
-    refetchQueries: skip ? [] : [{ query: GET_GROUP, variables: { id: groupId } }],
+    refetchQueries: skip
+      ? []
+      : [{ query: GET_GROUP, variables: { id: groupId } }],
     awaitRefetchQueries: true,
     onCompleted: () => {
       setEditGroupError("");

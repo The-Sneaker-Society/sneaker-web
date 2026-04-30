@@ -92,7 +92,9 @@ const StatePanel = ({
 );
 
 const PageLoadingState = () => (
-  <Box sx={{ ...pageContainerSx, display: "grid", placeItems: "center", px: 2 }}>
+  <Box
+    sx={{ ...pageContainerSx, display: "grid", placeItems: "center", px: 2 }}
+  >
     <Box sx={{ ...stateCardSx, width: "min(560px, 100%)" }}>
       <Stack spacing={2} alignItems="center">
         <CircularProgress sx={{ color: "#FFD100" }} />
@@ -189,7 +191,14 @@ const NewGroupPage = () => {
 
   if (error || !group) {
     return (
-      <Box sx={{ ...pageContainerSx, display: "grid", placeItems: "center", px: 2 }}>
+      <Box
+        sx={{
+          ...pageContainerSx,
+          display: "grid",
+          placeItems: "center",
+          px: 2,
+        }}
+      >
         <Box sx={{ width: "min(560px, 100%)" }}>
           <StatePanel
             icon={<ErrorOutlineIcon />}
@@ -408,11 +417,19 @@ const NewGroupPage = () => {
           >
             <form onSubmit={handleUpdateGroup}>
               <Stack spacing={2}>
-                <Typography id="edit-group-title" variant="h6" sx={{ fontWeight: 700 }}>
+                <Typography
+                  id="edit-group-title"
+                  variant="h6"
+                  sx={{ fontWeight: 700 }}
+                >
                   Edit group details
                 </Typography>
 
-                <Typography id="edit-group-description" variant="body2" sx={{ color: "#aaa" }}>
+                <Typography
+                  id="edit-group-description"
+                  variant="body2"
+                  sx={{ color: "#aaa" }}
+                >
                   Update this group’s basic information.
                 </Typography>
 
@@ -527,10 +544,18 @@ const NewGroupPage = () => {
             }}
           >
             <Stack spacing={2}>
-              <Typography id="delete-group-title" variant="h6" sx={{ fontWeight: 700 }}>
+              <Typography
+                id="delete-group-title"
+                variant="h6"
+                sx={{ fontWeight: 700 }}
+              >
                 Delete this group?
               </Typography>
-              <Typography id="delete-group-description" variant="body2" sx={{ color: "#aaa" }}>
+              <Typography
+                id="delete-group-description"
+                variant="body2"
+                sx={{ color: "#aaa" }}
+              >
                 This will remove the group and all of its posts for all members.
                 This action cannot be undone.
               </Typography>
@@ -596,7 +621,11 @@ const NewGroupPage = () => {
               <Typography id="leave-group-title" variant="h6">
                 Are you sure you want to leave this group?
               </Typography>
-              <Typography id="leave-group-description" variant="body2" sx={{ color: "#aaa" }}>
+              <Typography
+                id="leave-group-description"
+                variant="body2"
+                sx={{ color: "#aaa" }}
+              >
                 You will need to join again to post, like, or comment.
               </Typography>
               {joinLeaveError && (
@@ -670,7 +699,11 @@ const NewGroupPage = () => {
             )}
 
             {imageSrcs.length > 0 && (
-              <Stack direction="row" spacing={1.25} sx={{ my: 2, flexWrap: "wrap" }}>
+              <Stack
+                direction="row"
+                spacing={1.25}
+                sx={{ my: 2, flexWrap: "wrap" }}
+              >
                 {imageSrcs.map((src, i) => (
                   <Box
                     key={`${src}-${i}`}
@@ -733,7 +766,11 @@ const NewGroupPage = () => {
               onChange={handleFileInputChange}
             />
 
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Button
                 startIcon={<InsertPhotoIcon />}
                 onClick={() => fileInputRef.current?.click()}
@@ -745,6 +782,9 @@ const NewGroupPage = () => {
               >
                 Photo
               </Button>
+              <Typography variant="caption" sx={{ color: "#777" }}>
+                Up to 4 images, 5MB each
+              </Typography>
               <Button
                 variant="contained"
                 onClick={handlePostSubmit}
