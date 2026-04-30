@@ -185,6 +185,20 @@ const NewGroupPage = () => {
     handleDeleteGroup,
   } = useNewGroupPage();
 
+    console.error("NewGroupPage debug", {
+    loading,
+    error,
+    group,
+    posts,
+    postsLoading,
+    postsError,
+    currentUserLoading,
+    currentUser,
+    isJoined,
+    isCreator,
+    canManageGroup,
+  });
+
   if (loading || currentUserLoading) {
     return <PageLoadingState />;
   }
