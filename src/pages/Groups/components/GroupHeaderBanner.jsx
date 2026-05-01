@@ -1,15 +1,36 @@
-import {
-  Box,
-  Typography,
-  Button,
-  Avatar,
-  Stack,
-  Chip,
-  CircularProgress,
-} from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { Box, Typography, Button, Stack, Chip } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+
+const pillChipSx = {
+  height: 28,
+  borderRadius: "999px",
+  bgcolor: "rgba(255,255,255,0.10)",
+  color: "#f3f3f3",
+  fontWeight: 700,
+  border: "1px solid rgba(255,255,255,0.08)",
+  "& .MuiChip-label": {
+    px: 1.25,
+    fontWeight: 700,
+  },
+};
+
+const creatorChipSx = {
+  ...pillChipSx,
+  bgcolor: "#FFD100",
+  color: "#111",
+  border: "none",
+};
+
+const actionButtonBaseSx = {
+  textTransform: "none",
+  fontWeight: 700,
+  borderRadius: "999px",
+  minHeight: 44,
+  px: 2.25,
+  boxShadow: "none",
+};
 
 const GroupHeaderBanner = ({
   group,
@@ -26,171 +47,174 @@ const GroupHeaderBanner = ({
   onEditGroup,
   onDeleteGroup,
 }) => {
+  const title = group?.name || "Group";
+  const description = group?.description || "No description provided.";
+
   return (
     <Box
       sx={{
         position: "relative",
         overflow: "hidden",
         borderRadius: 4,
-        border: "1px solid #2b2b2b",
+        border: "1px solid rgba(255,255,255,0.08)",
         background:
-          "linear-gradient(135deg, rgba(255,209,0,0.18) 0%, rgba(17,17,17,1) 42%, rgba(0,0,0,1) 100%)",
-        mb: 3,
+          "linear-gradient(180deg, rgba(255,209,0,0.10) 0%, rgba(7,7,8,1) 34%, rgba(10,11,14,1) 100%)",
+        boxShadow: "0 24px 60px rgba(0,0,0,0.28)",
       }}
     >
       <Box
         sx={{
-          height: 168,
-          backgroundImage: group.avatar ? `url(${group.avatar})` : "none",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(circle at top left, rgba(255,209,0,0.14), transparent 28%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      <Box
+        sx={{
           position: "relative",
+          px: { xs: 2, md: 3 },
+          pt: { xs: 9, md: 12 },
+          pb: { xs: 3, md: 4 },
         }}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.64) 68%, rgba(0,0,0,0.92) 100%)",
-          }}
-        />
-      </Box>
-
-      <Box sx={{ position: "relative", px: 3, pb: 3 }}>
         <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          alignItems={{ xs: "flex-start", sm: "flex-end" }}
-          sx={{ mt: -5.5, mb: 2 }}
+          direction={{ xs: "column", md: "row" }}
+          spacing={{ xs: 2.5, md: 2.75 }}
+          alignItems={{ xs: "flex-start", md: "flex-end" }}
         >
-          <Avatar
-            src={group.avatar || undefined}
+          <Box
             sx={{
-              width: 96,
-              height: 96,
-              bgcolor: "#232323",
+              width: { xs: 84, md: 96 },
+              height: { xs: 84, md: 96 },
+              borderRadius: "50%",
+              display: "grid",
+              placeItems: "center",
+              bgcolor: "#1b1d22",
               color: "#FFD100",
-              border: "3px solid #111",
-              fontSize: 34,
               fontWeight: 800,
+              fontSize: { xs: "1.9rem", md: "2.2rem" },
+              border: "2px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+              flexShrink: 0,
             }}
           >
-            {group.name?.[0] || "G"}
-          </Avatar>
+            {title.charAt(0).toUpperCase()}
+          </Box>
 
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography
-              variant="h4"
-              sx={{ color: "#fff", fontWeight: 800, lineHeight: 1.1 }}
+              variant="h2"
+              sx={{
+                fontSize: { xs: "2rem", md: "3.1rem" },
+                lineHeight: 1.05,
+                fontWeight: 800,
+                letterSpacing: "-0.03em",
+                mb: 1.25,
+              }}
             >
-              {group.name}
+              {title}
             </Typography>
 
-            <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              flexWrap="wrap"
+              useFlexGap
+              sx={{ mb: 2 }}
+            >
               <Chip
-                size="small"
-                label={`${memberCount} ${memberCount === 1 ? "member" : "members"}`}
-                sx={{ bgcolor: "rgba(255,255,255,0.08)", color: "#fff" }}
+                label={`${memberCount || 0} member${memberCount === 1 ? "" : "s"}`}
+                sx={pillChipSx}
               />
-
-              <Chip
-                size="small"
-                label={isJoined ? "Member" : "Public community"}
-                sx={{
-                  bgcolor: isJoined
-                    ? "rgba(255,209,0,0.15)"
-                    : "rgba(255,255,255,0.08)",
-                  color: isJoined ? "#FFD100" : "#fff",
-                }}
-              />
-
+              {isJoined && <Chip label="Member" sx={pillChipSx} />}
               {isCreator && (
                 <Chip
-                  size="small"
-                  icon={<CheckCircleIcon sx={{ color: "#000 !important" }} />}
+                  icon={<CheckCircleIcon sx={{ color: "#111 !important" }} />}
                   label="Creator"
-                  sx={{ bgcolor: "#FFD100", color: "#000", fontWeight: 700 }}
+                  sx={creatorChipSx}
                 />
               )}
             </Stack>
-          </Box>
-        </Stack>
 
-        {group.description && (
-          <Typography sx={{ color: "#cfcfcf", maxWidth: 620, mb: 2 }}>
-            {group.description}
-          </Typography>
-        )}
+            <Typography
+              variant="body1"
+              sx={{
+                color: "#c7c9ce",
+                maxWidth: 760,
+                lineHeight: 1.65,
+                mb: 2.5,
+              }}
+            >
+              {description}
+            </Typography>
 
-        <Stack direction="row" spacing={1.25} sx={{ flexWrap: "wrap" }}>
-          {canManageGroup && (
-            <>
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                onClick={onEditGroup}
-                sx={{
-                  borderRadius: "999px",
-                  textTransform: "none",
-                  fontWeight: 700,
-                  bgcolor: "#FFD100",
-                  color: "#000",
-                  "&:hover": { bgcolor: "#ffde33" },
-                }}
-              >
-                Edit Group
-              </Button>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              alignItems={{ xs: "stretch", sm: "center" }}
+            >
+              {canManageGroup ? (
+                <>
+                  <Button
+                    variant="contained"
+                    startIcon={<EditIcon />}
+                    onClick={onEditGroup}
+                    sx={{
+                      ...actionButtonBaseSx,
+                      bgcolor: "#FFD100",
+                      color: "#111",
+                      "&:hover": {
+                        bgcolor: "#f5c400",
+                        boxShadow: "none",
+                      },
+                    }}
+                  >
+                    Edit Group
+                  </Button>
 
-              <Button
-                variant="outlined"
-                startIcon={<DeleteForeverIcon />}
-                onClick={onDeleteGroup}
-                sx={{
-                  borderRadius: "999px",
-                  textTransform: "none",
-                  fontWeight: 700,
-                  color: "#ff6b6b",
-                  borderColor: "#ff6b6b",
-                  "&:hover": {
-                    bgcolor: "rgba(255,107,107,0.08)",
-                    borderColor: "#ff6b6b",
-                  },
-                }}
-              >
-                Delete Group
-              </Button>
-            </>
-          )}
-
-          {!isCreator && (
-            <>
-              {isJoined ? (
+                  <Button
+                    variant="outlined"
+                    startIcon={<DeleteOutlineIcon />}
+                    onClick={onDeleteGroup}
+                    sx={{
+                      ...actionButtonBaseSx,
+                      color: "#ff8e8e",
+                      borderColor: "rgba(255,107,107,0.45)",
+                      "&:hover": {
+                        borderColor: "#ff6b6b",
+                        bgcolor: "rgba(255,107,107,0.08)",
+                      },
+                    }}
+                  >
+                    Delete Group
+                  </Button>
+                </>
+              ) : isJoined ? (
                 <Button
                   variant="outlined"
                   onClick={onOpenLeave}
-                  onMouseEnter={() => setIsHovering(true)}
-                  onMouseLeave={() => setIsHovering(false)}
+                  onMouseEnter={() => setIsHovering?.(true)}
+                  onMouseLeave={() => setIsHovering?.(false)}
                   disabled={leaving}
                   sx={{
-                    borderRadius: "999px",
-                    textTransform: "none",
-                    fontWeight: 700,
-                    color: isHovering ? "#ff6b6b" : "#FFD100",
-                    borderColor: isHovering ? "#ff6b6b" : "#FFD100",
+                    ...actionButtonBaseSx,
+                    color: isHovering ? "#fff" : "#FFD100",
+                    borderColor: isHovering
+                      ? "rgba(255,107,107,0.7)"
+                      : "rgba(255,209,0,0.55)",
+                    bgcolor: isHovering
+                      ? "rgba(255,107,107,0.14)"
+                      : "transparent",
                     "&:hover": {
-                      bgcolor: "rgba(255,107,107,0.08)",
                       borderColor: "#ff6b6b",
+                      bgcolor: "rgba(255,107,107,0.14)",
                     },
                   }}
                 >
-                  {leaving ? (
-                    <CircularProgress size={16} sx={{ color: "#FFD100" }} />
-                  ) : isHovering ? (
-                    "Leave Group"
-                  ) : (
-                    "Joined ✓"
-                  )}
+                  {leaving ? "Leaving..." : "Leave Group"}
                 </Button>
               ) : (
                 <Button
@@ -198,23 +222,20 @@ const GroupHeaderBanner = ({
                   onClick={onJoin}
                   disabled={joining}
                   sx={{
-                    borderRadius: "999px",
-                    textTransform: "none",
-                    fontWeight: 700,
+                    ...actionButtonBaseSx,
                     bgcolor: "#FFD100",
-                    color: "#000",
-                    "&:hover": { bgcolor: "#ffde33" },
+                    color: "#111",
+                    "&:hover": {
+                      bgcolor: "#f5c400",
+                      boxShadow: "none",
+                    },
                   }}
                 >
-                  {joining ? (
-                    <CircularProgress size={16} sx={{ color: "#000" }} />
-                  ) : (
-                    "Join Group"
-                  )}
+                  {joining ? "Joining..." : "Join Group"}
                 </Button>
               )}
-            </>
-          )}
+            </Stack>
+          </Box>
         </Stack>
       </Box>
     </Box>

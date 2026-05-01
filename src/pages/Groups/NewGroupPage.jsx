@@ -21,23 +21,121 @@ import PostCard from "./PostCard";
 import DeletePostModal from "./DeletePostModal";
 
 const cardSx = {
-  p: 3,
-  bgcolor: "#1a1a1a",
+  p: { xs: 2, md: 2.5 },
+  bgcolor: "#151618",
   borderRadius: 3,
-  border: "1px solid #2a2a2a",
+  border: "1px solid rgba(255,255,255,0.08)",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
 };
 
 const pageContainerSx = {
   minHeight: "100vh",
-  bgcolor: "#111",
+  bgcolor: "#0b0b0c",
   color: "#fff",
 };
 
 const stateCardSx = {
   ...cardSx,
-  py: 5,
-  px: 4,
+  py: { xs: 4, md: 5 },
+  px: { xs: 2.5, md: 4 },
   textAlign: "center",
+};
+
+const modalCardSx = {
+  bgcolor: "#151618",
+  color: "#fff",
+  p: 3,
+  borderRadius: 3,
+  border: "1px solid rgba(255,255,255,0.08)",
+  boxShadow: "0 24px 60px rgba(0,0,0,0.34)",
+  width: "min(440px, calc(100vw - 32px))",
+  mx: "auto",
+  mt: { xs: "12vh", sm: "16vh" },
+};
+
+const modalFieldSx = {
+  "& .MuiInputBase-root": {
+    bgcolor: "#0d0e10",
+    color: "#fff",
+    borderRadius: 2,
+  },
+  "& .MuiInputLabel-root": {
+    color: "#9ea3ab",
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: "#FFD100",
+  },
+  "& fieldset": {
+    borderColor: "rgba(255,255,255,0.10)",
+  },
+  "& .MuiOutlinedInput-root:hover fieldset": {
+    borderColor: "rgba(255,209,0,0.35)",
+  },
+  "& .MuiOutlinedInput-root.Mui-focused fieldset": {
+    borderColor: "#FFD100",
+  },
+};
+
+const secondaryButtonSx = {
+  color: "#c2c6cc",
+  borderColor: "rgba(255,255,255,0.14)",
+  textTransform: "none",
+  fontWeight: 700,
+  borderRadius: "999px",
+  px: 2,
+  minHeight: 44,
+  "&:hover": {
+    borderColor: "rgba(255,209,0,0.35)",
+    bgcolor: "rgba(255,255,255,0.02)",
+  },
+};
+
+const primaryButtonSx = {
+  bgcolor: "#FFD100",
+  color: "#111",
+  textTransform: "none",
+  fontWeight: 700,
+  borderRadius: "999px",
+  boxShadow: "none",
+  px: 2,
+  minHeight: 44,
+  "&:hover": {
+    bgcolor: "#f5c400",
+    boxShadow: "none",
+  },
+};
+
+const destructiveButtonSx = {
+  bgcolor: "#ff6b6b",
+  color: "#fff",
+  textTransform: "none",
+  fontWeight: 700,
+  borderRadius: "999px",
+  boxShadow: "none",
+  px: 2,
+  minHeight: 44,
+  "&:hover": {
+    bgcolor: "#ff5252",
+    boxShadow: "none",
+  },
+};
+
+const filledUtilityButtonSx = {
+  textTransform: "none",
+  fontWeight: 700,
+  borderRadius: "999px",
+  alignSelf: "flex-start",
+  minHeight: 42,
+  px: 1.75,
+  bgcolor: "#23252a",
+  color: "#fff",
+  boxShadow: "none",
+  border: "1px solid rgba(255,255,255,0.10)",
+  "&:hover": {
+    bgcolor: "#2c2f35",
+    boxShadow: "none",
+    borderColor: "rgba(255,209,0,0.35)",
+  },
 };
 
 const StatePanel = ({
@@ -185,20 +283,6 @@ const NewGroupPage = () => {
     handleDeleteGroup,
   } = useNewGroupPage();
 
-    console.error("NewGroupPage debug", {
-    loading,
-    error,
-    group,
-    posts,
-    postsLoading,
-    postsError,
-    currentUserLoading,
-    currentUser,
-    isJoined,
-    isCreator,
-    canManageGroup,
-  });
-
   if (loading || currentUserLoading) {
     return <PageLoadingState />;
   }
@@ -223,13 +307,7 @@ const NewGroupPage = () => {
                 variant="contained"
                 startIcon={<RefreshIcon />}
                 onClick={() => refetchGroup?.()}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: "999px",
-                  bgcolor: "#FFD100",
-                  color: "#111",
-                  "&:hover": { bgcolor: "#f5c400" },
-                }}
+                sx={primaryButtonSx}
               >
                 Retry
               </Button>
@@ -285,10 +363,13 @@ const NewGroupPage = () => {
               startIcon={<RefreshIcon />}
               onClick={() => refetchPosts?.()}
               sx={{
-                textTransform: "none",
-                borderRadius: "999px",
+                ...secondaryButtonSx,
                 color: "#FFD100",
                 borderColor: "#FFD100",
+                "&:hover": {
+                  borderColor: "#FFD100",
+                  bgcolor: "rgba(255,209,0,0.05)",
+                },
               }}
             >
               Retry
@@ -313,13 +394,7 @@ const NewGroupPage = () => {
               <Button
                 variant="contained"
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: "999px",
-                  bgcolor: "#FFD100",
-                  color: "#111",
-                  "&:hover": { bgcolor: "#f5c400" },
-                }}
+                sx={primaryButtonSx}
               >
                 Create first post
               </Button>
@@ -328,13 +403,7 @@ const NewGroupPage = () => {
                 variant="contained"
                 onClick={handleJoinGroup}
                 disabled={joining}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: "999px",
-                  bgcolor: "#FFD100",
-                  color: "#111",
-                  "&:hover": { bgcolor: "#f5c400" },
-                }}
+                sx={primaryButtonSx}
               >
                 {joining ? (
                   <CircularProgress size={18} sx={{ color: "#111" }} />
@@ -379,10 +448,13 @@ const NewGroupPage = () => {
               onClick={handleLoadMorePosts}
               disabled={loadingMorePosts}
               sx={{
-                textTransform: "none",
-                borderRadius: "999px",
+                ...secondaryButtonSx,
                 color: "#FFD100",
                 borderColor: "#FFD100",
+                "&:hover": {
+                  borderColor: "#FFD100",
+                  bgcolor: "rgba(255,209,0,0.05)",
+                },
               }}
             >
               {loadingMorePosts ? (
@@ -417,18 +489,7 @@ const NewGroupPage = () => {
           aria-labelledby="edit-group-title"
           aria-describedby="edit-group-description"
         >
-          <Box
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "#fff",
-              p: 3,
-              borderRadius: 3,
-              border: "1px solid #333",
-              width: "min(480px, calc(100vw - 32px))",
-              mx: "auto",
-              mt: "15vh",
-            }}
-          >
+          <Box sx={modalCardSx}>
             <form onSubmit={handleUpdateGroup}>
               <Stack spacing={2}>
                 <Typography
@@ -454,14 +515,7 @@ const NewGroupPage = () => {
                   onChange={(e) => setEditName(e.target.value)}
                   required
                   InputLabelProps={{ shrink: true }}
-                  sx={{
-                    "& .MuiInputBase-root": {
-                      bgcolor: "#000",
-                      color: "#fff",
-                      borderRadius: 2,
-                    },
-                    "& fieldset": { borderColor: "#333" },
-                  }}
+                  sx={modalFieldSx}
                 />
 
                 <TextField
@@ -472,14 +526,7 @@ const NewGroupPage = () => {
                   multiline
                   minRows={3}
                   InputLabelProps={{ shrink: true }}
-                  sx={{
-                    "& .MuiInputBase-root": {
-                      bgcolor: "#000",
-                      color: "#fff",
-                      borderRadius: 2,
-                    },
-                    "& fieldset": { borderColor: "#333" },
-                  }}
+                  sx={modalFieldSx}
                 />
 
                 <TextField
@@ -488,14 +535,7 @@ const NewGroupPage = () => {
                   value={editAvatar}
                   onChange={(e) => setEditAvatar(e.target.value)}
                   InputLabelProps={{ shrink: true }}
-                  sx={{
-                    "& .MuiInputBase-root": {
-                      bgcolor: "#000",
-                      color: "#fff",
-                      borderRadius: 2,
-                    },
-                    "& fieldset": { borderColor: "#333" },
-                  }}
+                  sx={modalFieldSx}
                 />
 
                 {editGroupError && (
@@ -504,15 +544,15 @@ const NewGroupPage = () => {
                   </Typography>
                 )}
 
-                <Stack direction="row" spacing={2} justifyContent="flex-end">
+                <Stack
+                  direction={{ xs: "column-reverse", sm: "row" }}
+                  spacing={1.5}
+                  justifyContent="flex-end"
+                >
                   <Button
                     variant="outlined"
                     onClick={() => setEditModalOpen(false)}
-                    sx={{
-                      color: "#aaa",
-                      borderColor: "#444",
-                      textTransform: "none",
-                    }}
+                    sx={secondaryButtonSx}
                   >
                     Cancel
                   </Button>
@@ -520,12 +560,7 @@ const NewGroupPage = () => {
                     type="submit"
                     variant="contained"
                     disabled={updatingGroup}
-                    sx={{
-                      bgcolor: "#FFD100",
-                      color: "#111",
-                      textTransform: "none",
-                      "&:hover": { bgcolor: "#f5c400" },
-                    }}
+                    sx={primaryButtonSx}
                   >
                     {updatingGroup ? (
                       <CircularProgress size={18} sx={{ color: "#111" }} />
@@ -545,18 +580,7 @@ const NewGroupPage = () => {
           aria-labelledby="delete-group-title"
           aria-describedby="delete-group-description"
         >
-          <Box
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "#fff",
-              p: 3,
-              borderRadius: 3,
-              border: "1px solid #333",
-              width: "min(420px, calc(100vw - 32px))",
-              mx: "auto",
-              mt: "20vh",
-            }}
-          >
+          <Box sx={modalCardSx}>
             <Stack spacing={2}>
               <Typography
                 id="delete-group-title"
@@ -565,10 +589,11 @@ const NewGroupPage = () => {
               >
                 Delete this group?
               </Typography>
+
               <Typography
                 id="delete-group-description"
                 variant="body2"
-                sx={{ color: "#aaa" }}
+                sx={{ color: "#aaa", lineHeight: 1.6 }}
               >
                 This will remove the group and all of its posts for all members.
                 This action cannot be undone.
@@ -580,15 +605,15 @@ const NewGroupPage = () => {
                 </Typography>
               )}
 
-              <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Stack
+                direction={{ xs: "column-reverse", sm: "row" }}
+                spacing={1.5}
+                justifyContent="flex-end"
+              >
                 <Button
                   variant="outlined"
                   onClick={() => setDeleteGroupModalOpen(false)}
-                  sx={{
-                    color: "#aaa",
-                    borderColor: "#444",
-                    textTransform: "none",
-                  }}
+                  sx={secondaryButtonSx}
                 >
                   Cancel
                 </Button>
@@ -596,11 +621,7 @@ const NewGroupPage = () => {
                   variant="contained"
                   onClick={handleDeleteGroup}
                   disabled={deletingGroup}
-                  sx={{
-                    bgcolor: "#ff6b6b",
-                    textTransform: "none",
-                    "&:hover": { bgcolor: "#ff5252" },
-                  }}
+                  sx={destructiveButtonSx}
                 >
                   {deletingGroup ? (
                     <CircularProgress size={18} sx={{ color: "#fff" }} />
@@ -619,43 +640,39 @@ const NewGroupPage = () => {
           aria-labelledby="leave-group-title"
           aria-describedby="leave-group-description"
         >
-          <Box
-            sx={{
-              bgcolor: "#1a1a1a",
-              color: "#fff",
-              p: 3,
-              borderRadius: 3,
-              border: "1px solid #333",
-              width: "min(420px, calc(100vw - 32px))",
-              mx: "auto",
-              mt: "20vh",
-            }}
-          >
+          <Box sx={modalCardSx}>
             <Stack spacing={2}>
-              <Typography id="leave-group-title" variant="h6">
-                Are you sure you want to leave this group?
+              <Typography
+                id="leave-group-title"
+                variant="h6"
+                sx={{ fontWeight: 700 }}
+              >
+                Leave this group?
               </Typography>
+
               <Typography
                 id="leave-group-description"
                 variant="body2"
-                sx={{ color: "#aaa" }}
+                sx={{ color: "#aaa", lineHeight: 1.6 }}
               >
                 You will need to join again to post, like, or comment.
               </Typography>
+
               {joinLeaveError && (
                 <Typography variant="caption" color="error.main">
                   {joinLeaveError}
                 </Typography>
               )}
-              <Stack direction="row" spacing={2} justifyContent="flex-end">
+
+              <Stack
+                direction={{ xs: "column-reverse", sm: "row" }}
+                spacing={1.5}
+                justifyContent="flex-end"
+              >
                 <Button
                   variant="outlined"
                   onClick={() => setModalOpen(false)}
-                  sx={{
-                    color: "#aaa",
-                    borderColor: "#444",
-                    textTransform: "none",
-                  }}
+                  sx={secondaryButtonSx}
                 >
                   Cancel
                 </Button>
@@ -663,11 +680,7 @@ const NewGroupPage = () => {
                   variant="contained"
                   onClick={handleLeaveGroup}
                   disabled={leaving}
-                  sx={{
-                    bgcolor: "#ff6b6b",
-                    textTransform: "none",
-                    "&:hover": { bgcolor: "#ff5252" },
-                  }}
+                  sx={destructiveButtonSx}
                 >
                   {leaving ? (
                     <CircularProgress size={18} sx={{ color: "#fff" }} />
@@ -694,20 +707,36 @@ const NewGroupPage = () => {
               onChange={(e) => setPostContent(e.target.value)}
               placeholder="Share something with the group..."
               multiline
-              minRows={2}
+              minRows={3}
               sx={{
-                mb: 1,
+                mb: 1.75,
                 "& .MuiInputBase-root": {
-                  bgcolor: "#000",
+                  bgcolor: "#0d0e10",
                   color: "#fff",
-                  borderRadius: 2,
+                  borderRadius: 2.5,
                 },
-                "& fieldset": { borderColor: "#333" },
+                "& .MuiInputBase-input::placeholder": {
+                  color: "#7f848c",
+                  opacity: 1,
+                },
+                "& fieldset": {
+                  borderColor: "rgba(255,255,255,0.10)",
+                },
+                "& .MuiOutlinedInput-root:hover fieldset": {
+                  borderColor: "rgba(255,209,0,0.35)",
+                },
+                "& .MuiOutlinedInput-root.Mui-focused fieldset": {
+                  borderColor: "#FFD100",
+                },
               }}
             />
 
             {postError && (
-              <Typography variant="caption" color="error.main">
+              <Typography
+                variant="caption"
+                color="error.main"
+                sx={{ display: "block", mb: 1 }}
+              >
                 {postError}
               </Typography>
             )}
@@ -717,18 +746,19 @@ const NewGroupPage = () => {
                 direction="row"
                 spacing={1.25}
                 sx={{ my: 2, flexWrap: "wrap" }}
+                useFlexGap
               >
                 {imageSrcs.map((src, i) => (
                   <Box
                     key={`${src}-${i}`}
                     sx={{
                       position: "relative",
-                      width: 88,
-                      height: 88,
+                      width: 92,
+                      height: 92,
                       borderRadius: 2,
                       overflow: "hidden",
-                      border: "1px solid #2a2a2a",
-                      bgcolor: "#000",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      bgcolor: "#0d0e10",
                     }}
                   >
                     <Box
@@ -751,8 +781,8 @@ const NewGroupPage = () => {
                         top: 6,
                         right: 6,
                         minWidth: 0,
-                        width: 24,
-                        height: 24,
+                        width: 26,
+                        height: 26,
                         p: 0,
                         borderRadius: "50%",
                         bgcolor: "rgba(17,17,17,0.78)",
@@ -781,34 +811,45 @@ const NewGroupPage = () => {
             />
 
             <Stack
-              direction="row"
+              direction={{ xs: "column", sm: "row" }}
               justifyContent="space-between"
-              alignItems="center"
+              alignItems={{ xs: "stretch", sm: "center" }}
+              spacing={1.5}
             >
-              <Button
-                startIcon={<InsertPhotoIcon />}
-                onClick={() => fileInputRef.current?.click()}
-                sx={{
-                  textTransform: "none",
-                  color: "#aaa",
-                  "&:hover": { color: "#FFD100" },
-                }}
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={{ xs: 0.9, sm: 1.5 }}
+                alignItems={{ xs: "flex-start", sm: "center" }}
               >
-                Photo
-              </Button>
-              <Typography variant="caption" sx={{ color: "#777" }}>
-                Up to 4 images, 5MB each
-              </Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<InsertPhotoIcon />}
+                  onClick={() => fileInputRef.current?.click()}
+                  sx={filledUtilityButtonSx}
+                >
+                  Photo
+                </Button>
+
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "#aeb3bb",
+                    fontWeight: 700,
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  Up to 4 images, 5MB each
+                </Typography>
+              </Stack>
+
               <Button
                 variant="contained"
                 onClick={handlePostSubmit}
                 disabled={posting}
                 sx={{
-                  textTransform: "none",
-                  borderRadius: "999px",
-                  bgcolor: "#FFD100",
-                  color: "#111",
-                  "&:hover": { bgcolor: "#f5c400" },
+                  ...primaryButtonSx,
+                  alignSelf: { xs: "stretch", sm: "auto" },
+                  minWidth: { sm: 108 },
                 }}
               >
                 {posting ? (

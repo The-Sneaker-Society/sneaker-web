@@ -1,75 +1,103 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Typography, Stack } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import Groups2OutlinedIcon from "@mui/icons-material/Groups2Outlined";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 
-const rowIconSx = { color: "#FFD100", mt: 0.25 };
+const cardSx = {
+  p: { xs: 2, md: 2.25 },
+  bgcolor: "#0b0d12",
+  borderRadius: 3,
+  border: "1px solid rgba(255,255,255,0.08)",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
+};
 
-const AboutRow = ({ icon, label, value }) => (
-  <Stack direction="row" spacing={1.25} alignItems="flex-start">
-    <Box sx={rowIconSx}>{icon}</Box>
-    <Box>
-      <Typography variant="body2" sx={{ color: "#8f8f8f", mb: 0.25 }}>
-        {label}
-      </Typography>
-      <Typography variant="body2" sx={{ color: "#f4f4f4", lineHeight: 1.5 }}>
-        {value}
-      </Typography>
-    </Box>
-  </Stack>
-);
+const rowSx = {
+  display: "grid",
+  gridTemplateColumns: "16px minmax(0, 1fr)",
+  gap: 1.5,
+  alignItems: "start",
+};
 
-const GroupAboutSection = ({ group, memberCount = 0 }) => {
-  const creatorName =
-    `${group?.createdBy?.firstName || ""} ${group?.createdBy?.lastName || ""}`.trim() ||
-    group?.createdBy?.email ||
-    "Unknown member";
+const iconSx = {
+  color: "#FFD100",
+  fontSize: 16,
+  mt: "2px",
+};
 
-  const createdOn = group?.createdAt
-    ? new Date(group.createdAt).toLocaleDateString()
-    : "Unknown date";
+const GroupAboutSection = ({ group, memberCount }) => {
+  const createdBy =
+    group?.createdBy?.name ||
+    group?.createdBy?.fullName ||
+    group?.creator?.name ||
+    "Unknown";
 
   return (
-    <Box
-      sx={{
-        bgcolor: "#111",
-        border: "1px solid #2b2b2b",
-        borderRadius: 3,
-        p: 2,
-      }}
-    >
-      <Typography sx={{ color: "#fff", fontWeight: 700, mb: 0.5 }}>
-        About
-      </Typography>
-      <Typography variant="body2" sx={{ color: "#8f8f8f", mb: 2 }}>
-        Community details and background.
-      </Typography>
-
+    <Box sx={cardSx}>
       <Stack spacing={2}>
-        <AboutRow
-          icon={<InfoOutlinedIcon fontSize="small" />}
-          label="Description"
-          value={group?.description?.trim() || "No description added yet."}
-        />
+        <Box>
+          <Typography
+            variant="h6"
+            sx={{ color: "#fff", fontWeight: 800, mb: 0.5 }}
+          >
+            About
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ color: "#8f949c", lineHeight: 1.6 }}
+          >
+            Community details and background.
+          </Typography>
+        </Box>
 
-        <AboutRow
-          icon={<PersonOutlineOutlinedIcon fontSize="small" />}
-          label="Created by"
-          value={creatorName}
-        />
+        <Stack spacing={2}>
+          <Box sx={rowSx}>
+            <InfoOutlinedIcon sx={iconSx} />
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ color: "#8f949c", fontWeight: 700, display: "block", mb: 0.5 }}
+              >
+                Description
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: "#f5f5f5", lineHeight: 1.65 }}
+              >
+                {group?.description || "No description provided."}
+              </Typography>
+            </Box>
+          </Box>
 
-        <AboutRow
-          icon={<CalendarMonthOutlinedIcon fontSize="small" />}
-          label="Created on"
-          value={createdOn}
-        />
+          <Box sx={rowSx}>
+            <PersonOutlineIcon sx={iconSx} />
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ color: "#8f949c", fontWeight: 700, display: "block", mb: 0.5 }}
+              >
+                Created by
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#f5f5f5", fontWeight: 600 }}>
+                {createdBy}
+              </Typography>
+            </Box>
+          </Box>
 
-        <AboutRow
-          icon={<Groups2OutlinedIcon fontSize="small" />}
-          label="Community size"
-          value={`${memberCount} ${memberCount === 1 ? "member" : "members"}`}
-        />
+          <Box sx={rowSx}>
+            <GroupsOutlinedIcon sx={iconSx} />
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ color: "#8f949c", fontWeight: 700, display: "block", mb: 0.5 }}
+              >
+                Community size
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#f5f5f5", fontWeight: 600 }}>
+                {memberCount || 0} member{memberCount === 1 ? "" : "s"}
+              </Typography>
+            </Box>
+          </Box>
+        </Stack>
       </Stack>
     </Box>
   );
