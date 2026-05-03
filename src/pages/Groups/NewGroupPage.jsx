@@ -7,6 +7,7 @@ import {
   Modal,
   Stack,
   CircularProgress,
+  Skeleton,
 } from "@mui/material";
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import CloseIcon from "@mui/icons-material/Close";
@@ -138,6 +139,14 @@ const filledUtilityButtonSx = {
   },
 };
 
+const feedSectionLabelSx = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 2,
+  px: { xs: 0.25, sm: 0.5 },
+};
+
 const StatePanel = ({
   icon,
   title,
@@ -185,6 +194,336 @@ const StatePanel = ({
           {secondaryAction}
         </Stack>
       )}
+    </Stack>
+  </Box>
+);
+
+const FeedSectionHeader = ({ postCount }) => (
+  <Stack spacing={1.25}>
+    <Box sx={feedSectionLabelSx}>
+      <Stack spacing={0.25}>
+        <Typography
+          variant="overline"
+          sx={{
+            color: "#FFD100",
+            fontWeight: 800,
+            letterSpacing: "0.08em",
+            lineHeight: 1,
+          }}
+        >
+          Group feed
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "#9ea3ab",
+            fontWeight: 600,
+          }}
+        >
+          {postCount > 0
+            ? `${postCount} ${postCount === 1 ? "post" : "posts"}`
+            : "Recent conversations and updates"}
+        </Typography>
+      </Stack>
+
+      {postCount > 0 && (
+        <Typography
+          variant="caption"
+          sx={{
+            color: "#7f848c",
+            fontWeight: 700,
+            display: { xs: "none", sm: "block" },
+          }}
+        >
+          Newest activity first
+        </Typography>
+      )}
+    </Box>
+
+    <Divider sx={{ borderColor: "rgba(255,255,255,0.08)" }} />
+  </Stack>
+);
+
+const FeedLoadingSkeleton = () => (
+  <Stack spacing={2}>
+    {[0, 1, 2].map((item) => (
+      <Box key={item} sx={cardSx}>
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <Skeleton
+              variant="circular"
+              width={44}
+              height={44}
+              sx={{ bgcolor: "rgba(255,255,255,0.08)" }}
+            />
+            <Box sx={{ flex: 1 }}>
+              <Skeleton
+                variant="text"
+                width="32%"
+                height={28}
+                sx={{ bgcolor: "rgba(255,255,255,0.08)" }}
+              />
+              <Skeleton
+                variant="text"
+                width="20%"
+                height={22}
+                sx={{ bgcolor: "rgba(255,255,255,0.06)" }}
+              />
+            </Box>
+          </Stack>
+
+          <Stack spacing={1}>
+            <Skeleton
+              variant="text"
+              width="92%"
+              height={24}
+              sx={{ bgcolor: "rgba(255,255,255,0.07)" }}
+            />
+            <Skeleton
+              variant="text"
+              width="84%"
+              height={24}
+              sx={{ bgcolor: "rgba(255,255,255,0.07)" }}
+            />
+            <Skeleton
+              variant="text"
+              width="60%"
+              height={24}
+              sx={{ bgcolor: "rgba(255,255,255,0.07)" }}
+            />
+          </Stack>
+
+          <Skeleton
+            variant="rounded"
+            height={220}
+            sx={{
+              borderRadius: 2.5,
+              bgcolor: "rgba(255,255,255,0.06)",
+            }}
+          />
+
+          <Divider sx={{ borderColor: "rgba(255,255,255,0.06)" }} />
+
+          <Stack direction="row" spacing={1.25}>
+            <Skeleton
+              variant="rounded"
+              width={96}
+              height={36}
+              sx={{ borderRadius: "999px", bgcolor: "rgba(255,255,255,0.06)" }}
+            />
+            <Skeleton
+              variant="rounded"
+              width={112}
+              height={36}
+              sx={{ borderRadius: "999px", bgcolor: "rgba(255,255,255,0.06)" }}
+            />
+          </Stack>
+        </Stack>
+      </Box>
+    ))}
+  </Stack>
+);
+
+const ComposerCard = ({
+  postContent,
+  setPostContent,
+  postError,
+  imageSrcs,
+  fileInputRef,
+  handleFileInputChange,
+  handleRemoveImage,
+  handlePostSubmit,
+  posting,
+}) => (
+  <Box sx={cardSx}>
+    <Stack spacing={2}>
+      <Box>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: "#fff",
+            fontWeight: 800,
+            mb: 0.5,
+          }}
+        >
+          Create a post
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "#8f949c",
+            lineHeight: 1.6,
+          }}
+        >
+          Share an update, ask a question, or post a few photos with the group.
+        </Typography>
+      </Box>
+
+      <TextField
+        fullWidth
+        value={postContent}
+        onChange={(e) => setPostContent(e.target.value)}
+        placeholder="Share something with the group..."
+        multiline
+        minRows={3}
+        sx={{
+          "& .MuiInputBase-root": {
+            bgcolor: "#0d0e10",
+            color: "#fff",
+            borderRadius: 2.5,
+          },
+          "& .MuiInputBase-input::placeholder": {
+            color: "#7f848c",
+            opacity: 1,
+          },
+          "& fieldset": {
+            borderColor: "rgba(255,255,255,0.10)",
+          },
+          "& .MuiOutlinedInput-root:hover fieldset": {
+            borderColor: "rgba(255,209,0,0.35)",
+          },
+          "& .MuiOutlinedInput-root.Mui-focused fieldset": {
+            borderColor: "#FFD100",
+          },
+        }}
+      />
+
+      {postError && (
+        <Typography
+          variant="caption"
+          color="error.main"
+          sx={{ display: "block", mt: -0.5 }}
+        >
+          {postError}
+        </Typography>
+      )}
+
+      {imageSrcs.length > 0 && (
+        <Stack
+          direction="row"
+          spacing={1.25}
+          sx={{ flexWrap: "wrap" }}
+          useFlexGap
+        >
+          {imageSrcs.map((src, i) => (
+            <Box
+              key={`${src}-${i}`}
+              sx={{
+                position: "relative",
+                width: 92,
+                height: 92,
+                borderRadius: 2,
+                overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.08)",
+                bgcolor: "#0d0e10",
+              }}
+            >
+              <Box
+                component="img"
+                src={src}
+                alt={`Selected upload ${i + 1}`}
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+
+              <Button
+                type="button"
+                onClick={() => handleRemoveImage(i)}
+                sx={{
+                  position: "absolute",
+                  top: 6,
+                  right: 6,
+                  minWidth: 0,
+                  width: 26,
+                  height: 26,
+                  p: 0,
+                  borderRadius: "50%",
+                  bgcolor: "rgba(17,17,17,0.78)",
+                  color: "#fff",
+                  border: "1px solid rgba(255,255,255,0.14)",
+                  "&:hover": {
+                    bgcolor: "rgba(255,107,107,0.9)",
+                  },
+                }}
+                aria-label={`Remove selected image ${i + 1}`}
+              >
+                <CloseIcon sx={{ fontSize: 14 }} />
+              </Button>
+            </Box>
+          ))}
+        </Stack>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={handleFileInputChange}
+      />
+
+      <Box
+        sx={{
+          mt: 0.5,
+          pt: 1.75,
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "stretch", sm: "center" }}
+          spacing={1.5}
+        >
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 0.9, sm: 1.5 }}
+            alignItems={{ xs: "flex-start", sm: "center" }}
+          >
+            <Button
+              variant="contained"
+              startIcon={<InsertPhotoIcon />}
+              onClick={() => fileInputRef.current?.click()}
+              sx={filledUtilityButtonSx}
+            >
+              Add photos
+            </Button>
+
+            <Typography
+              variant="caption"
+              sx={{
+                color: "#aeb3bb",
+                fontWeight: 700,
+                letterSpacing: "0.01em",
+              }}
+            >
+              Up to 4 images, 5MB each
+            </Typography>
+          </Stack>
+
+          <Button
+            variant="contained"
+            onClick={handlePostSubmit}
+            disabled={posting}
+            sx={{
+              ...primaryButtonSx,
+              alignSelf: { xs: "stretch", sm: "auto" },
+              minWidth: { sm: 116 },
+            }}
+          >
+            {posting ? (
+              <CircularProgress size={18} sx={{ color: "#111" }} />
+            ) : (
+              "Post to group"
+            )}
+          </Button>
+        </Stack>
+      </Box>
     </Stack>
   </Box>
 );
@@ -342,13 +681,7 @@ const NewGroupPage = () => {
 
   const renderFeed = () => {
     if (postsLoading && posts.length === 0) {
-      return (
-        <StatePanel
-          icon={<ForumOutlinedIcon />}
-          title="Loading posts"
-          description="Fetching the latest conversations from this group."
-        />
-      );
+      return <FeedLoadingSkeleton />;
     }
 
     if (postsError) {
@@ -700,169 +1033,20 @@ const NewGroupPage = () => {
         )}
 
         {isJoined && (
-          <Box sx={cardSx}>
-            <TextField
-              fullWidth
-              value={postContent}
-              onChange={(e) => setPostContent(e.target.value)}
-              placeholder="Share something with the group..."
-              multiline
-              minRows={3}
-              sx={{
-                mb: 1.75,
-                "& .MuiInputBase-root": {
-                  bgcolor: "#0d0e10",
-                  color: "#fff",
-                  borderRadius: 2.5,
-                },
-                "& .MuiInputBase-input::placeholder": {
-                  color: "#7f848c",
-                  opacity: 1,
-                },
-                "& fieldset": {
-                  borderColor: "rgba(255,255,255,0.10)",
-                },
-                "& .MuiOutlinedInput-root:hover fieldset": {
-                  borderColor: "rgba(255,209,0,0.35)",
-                },
-                "& .MuiOutlinedInput-root.Mui-focused fieldset": {
-                  borderColor: "#FFD100",
-                },
-              }}
-            />
-
-            {postError && (
-              <Typography
-                variant="caption"
-                color="error.main"
-                sx={{ display: "block", mb: 1 }}
-              >
-                {postError}
-              </Typography>
-            )}
-
-            {imageSrcs.length > 0 && (
-              <Stack
-                direction="row"
-                spacing={1.25}
-                sx={{ my: 2, flexWrap: "wrap" }}
-                useFlexGap
-              >
-                {imageSrcs.map((src, i) => (
-                  <Box
-                    key={`${src}-${i}`}
-                    sx={{
-                      position: "relative",
-                      width: 92,
-                      height: 92,
-                      borderRadius: 2,
-                      overflow: "hidden",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      bgcolor: "#0d0e10",
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src={src}
-                      alt={`Selected upload ${i + 1}`}
-                      sx={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        display: "block",
-                      }}
-                    />
-
-                    <Button
-                      type="button"
-                      onClick={() => handleRemoveImage(i)}
-                      sx={{
-                        position: "absolute",
-                        top: 6,
-                        right: 6,
-                        minWidth: 0,
-                        width: 26,
-                        height: 26,
-                        p: 0,
-                        borderRadius: "50%",
-                        bgcolor: "rgba(17,17,17,0.78)",
-                        color: "#fff",
-                        border: "1px solid rgba(255,255,255,0.14)",
-                        "&:hover": {
-                          bgcolor: "rgba(255,107,107,0.9)",
-                        },
-                      }}
-                      aria-label={`Remove selected image ${i + 1}`}
-                    >
-                      <CloseIcon sx={{ fontSize: 14 }} />
-                    </Button>
-                  </Box>
-                ))}
-              </Stack>
-            )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={handleFileInputChange}
-            />
-
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              justifyContent="space-between"
-              alignItems={{ xs: "stretch", sm: "center" }}
-              spacing={1.5}
-            >
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={{ xs: 0.9, sm: 1.5 }}
-                alignItems={{ xs: "flex-start", sm: "center" }}
-              >
-                <Button
-                  variant="contained"
-                  startIcon={<InsertPhotoIcon />}
-                  onClick={() => fileInputRef.current?.click()}
-                  sx={filledUtilityButtonSx}
-                >
-                  Photo
-                </Button>
-
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "#aeb3bb",
-                    fontWeight: 700,
-                    letterSpacing: "0.01em",
-                  }}
-                >
-                  Up to 4 images, 5MB each
-                </Typography>
-              </Stack>
-
-              <Button
-                variant="contained"
-                onClick={handlePostSubmit}
-                disabled={posting}
-                sx={{
-                  ...primaryButtonSx,
-                  alignSelf: { xs: "stretch", sm: "auto" },
-                  minWidth: { sm: 108 },
-                }}
-              >
-                {posting ? (
-                  <CircularProgress size={18} sx={{ color: "#111" }} />
-                ) : (
-                  "Post"
-                )}
-              </Button>
-            </Stack>
-          </Box>
+          <ComposerCard
+            postContent={postContent}
+            setPostContent={setPostContent}
+            postError={postError}
+            imageSrcs={imageSrcs}
+            fileInputRef={fileInputRef}
+            handleFileInputChange={handleFileInputChange}
+            handleRemoveImage={handleRemoveImage}
+            handlePostSubmit={handlePostSubmit}
+            posting={posting}
+          />
         )}
 
-        <Divider sx={{ borderColor: "#2a2a2a" }} />
+        <FeedSectionHeader postCount={posts.length} />
 
         {renderFeed()}
       </Stack>

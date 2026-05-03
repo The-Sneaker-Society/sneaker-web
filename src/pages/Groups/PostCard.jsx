@@ -5,16 +5,33 @@ import {
   Stack,
   TextField,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-const actionButtonSx = {
+const actionChipButtonSx = {
   textTransform: "none",
   minWidth: "auto",
-  p: 0,
+  borderRadius: "999px",
+  px: 1.4,
+  py: 0.8,
+  fontWeight: 700,
+  lineHeight: 1,
+};
+
+const subtleMetaSx = {
+  color: "#8b9097",
+  fontWeight: 600,
+};
+
+const formatPostDate = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
 };
 
 const PostCard = ({
@@ -54,13 +71,16 @@ const PostCard = ({
   );
   const canDeletePost = isPostAuthor || isGroupCreator || isGroupAdmin;
 
+  const formattedDate = formatPostDate(post.createdAt);
+
   return (
     <Box
       sx={{
-        p: 3,
-        bgcolor: "#1a1a1a",
+        p: { xs: 2, md: 2.5 },
+        bgcolor: "#151618",
         borderRadius: 3,
-        border: "1px solid #2a2a2a",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
       }}
     >
       <Stack spacing={2}>
@@ -70,32 +90,54 @@ const PostCard = ({
           alignItems="flex-start"
           spacing={2}
         >
-          <Box>
+          <Stack spacing={0.35} sx={{ minWidth: 0 }}>
             <Typography
               variant="subtitle2"
-              sx={{ color: "#FFD100", fontWeight: 700 }}
+              sx={{
+                color: "#fff",
+                fontWeight: 800,
+                lineHeight: 1.2,
+              }}
             >
               {authorName}
             </Typography>
-            <Typography variant="caption" sx={{ color: "#777" }}>
-              {post.createdAt ? new Date(post.createdAt).toLocaleString() : ""}
-            </Typography>
-          </Box>
+
+            {formattedDate && (
+              <Typography
+                variant="caption"
+                sx={{
+                  ...subtleMetaSx,
+                  display: "block",
+                }}
+              >
+                {formattedDate}
+              </Typography>
+            )}
+          </Stack>
 
           {canDeletePost && (
             <Button
-              startIcon={<DeleteOutlineIcon />}
+              startIcon={
+                deleting ? (
+                  <CircularProgress size={14} sx={{ color: "#ff8a8a" }} />
+                ) : (
+                  <DeleteOutlineIcon fontSize="small" />
+                )
+              }
               onClick={onDelete}
               disabled={deleting}
               sx={{
-                ...actionButtonSx,
-                color: "#ff6b6b",
+                ...actionChipButtonSx,
+                color: "#ff8a8a",
+                border: "1px solid rgba(255,107,107,0.22)",
+                bgcolor: "rgba(255,107,107,0.08)",
                 "&:hover": {
-                  backgroundColor: "transparent",
-                  color: "#ff8a8a",
+                  bgcolor: "rgba(255,107,107,0.14)",
+                  borderColor: "rgba(255,107,107,0.32)",
                 },
                 "&.Mui-disabled": {
                   color: "#777",
+                  borderColor: "rgba(255,255,255,0.08)",
                 },
               }}
             >
@@ -104,12 +146,21 @@ const PostCard = ({
           )}
         </Stack>
 
-        <Typography variant="body1" sx={{ color: "#eee", whiteSpace: "pre-wrap" }}>
-          {post.content}
-        </Typography>
+        {!!post.content && (
+          <Typography
+            variant="body1"
+            sx={{
+              color: "#eceef1",
+              whiteSpace: "pre-wrap",
+              lineHeight: 1.7,
+            }}
+          >
+            {post.content}
+          </Typography>
+        )}
 
         {post.images?.length > 0 && (
-          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }} useFlexGap>
             {post.images.map((img, i) => (
               <Box
                 key={`${img}-${i}`}
@@ -117,22 +168,27 @@ const PostCard = ({
                 src={img}
                 alt={`Post image ${i + 1}`}
                 sx={{
-                  width: 120,
-                  height: 120,
+                  width: { xs: "calc(50% - 4px)", sm: 132 },
+                  height: { xs: 132, sm: 132 },
                   objectFit: "cover",
-                  borderRadius: 2,
-                  border: "1px solid #2a2a2a",
+                  borderRadius: 2.25,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  bgcolor: "#0d0e10",
+                  display: "block",
                 }}
               />
             ))}
           </Stack>
         )}
 
+        <Divider sx={{ borderColor: "rgba(255,255,255,0.08)" }} />
+
         <Stack
           direction="row"
-          spacing={2}
+          spacing={1}
           alignItems="center"
-          sx={{ color: "#aaa", flexWrap: "wrap" }}
+          sx={{ flexWrap: "wrap" }}
+          useFlexGap
         >
           <Button
             startIcon={
@@ -147,22 +203,46 @@ const PostCard = ({
             onClick={onLike}
             disabled={!isJoined || liking}
             sx={{
-              ...actionButtonSx,
-              color: !isJoined ? "#666" : hasLiked ? "#FFD100" : "#aaa",
+              ...actionChipButtonSx,
+              color: !isJoined ? "#666" : hasLiked ? "#FFD100" : "#c8cbd1",
+              bgcolor: hasLiked
+                ? "rgba(255,209,0,0.10)"
+                : "rgba(255,255,255,0.03)",
+              border: hasLiked
+                ? "1px solid rgba(255,209,0,0.28)"
+                : "1px solid rgba(255,255,255,0.08)",
+              "&:hover": {
+                bgcolor: hasLiked
+                  ? "rgba(255,209,0,0.15)"
+                  : "rgba(255,255,255,0.06)",
+              },
               "&.Mui-disabled": {
                 color: "#666",
+                borderColor: "rgba(255,255,255,0.06)",
               },
             }}
           >
             {hasLiked ? "Liked" : "Like"} · {likeCount}
           </Button>
 
-          <Stack direction="row" spacing={0.75} alignItems="center">
-            <ChatBubbleOutlineIcon sx={{ fontSize: 18, color: "#888" }} />
-            <Typography variant="body2" sx={{ color: "#888" }}>
-              {commentCount}
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.75,
+              px: 1.35,
+              py: 0.85,
+              borderRadius: "999px",
+              color: "#a5abb3",
+              bgcolor: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            <ChatBubbleOutlineIcon sx={{ fontSize: 17 }} />
+            <Typography variant="body2" sx={{ fontWeight: 700, color: "inherit" }}>
+              {commentCount} {commentCount === 1 ? "comment" : "comments"}
             </Typography>
-          </Stack>
+          </Box>
         </Stack>
 
         {likeError && (
@@ -171,114 +251,153 @@ const PostCard = ({
           </Typography>
         )}
 
-        {visibleComments.length > 0 && (
-          <Stack spacing={1.25}>
-            {visibleComments.map((comment) => {
-              const commentAuthor =
-                `${comment.author?.firstName || ""} ${
-                  comment.author?.lastName || ""
-                }`.trim() ||
-                comment.author?.email ||
-                "Unknown user";
+        {(visibleComments.length > 0 || isJoined) && (
+          <Box
+            sx={{
+              p: { xs: 1.5, sm: 1.75 },
+              borderRadius: 2.5,
+              bgcolor: "#111214",
+              border: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            <Stack spacing={1.4}>
+              {visibleComments.length > 0 && (
+                <Stack spacing={1.1}>
+                  {visibleComments.map((comment) => {
+                    const commentAuthor =
+                      `${comment.author?.firstName || ""} ${
+                        comment.author?.lastName || ""
+                      }`.trim() ||
+                      comment.author?.email ||
+                      "Unknown user";
 
-              return (
-                <Box
-                  key={comment.id}
-                  sx={{
-                    p: 1.5,
-                    bgcolor: "#141414",
-                    border: "1px solid #2a2a2a",
-                    borderRadius: 2,
-                  }}
-                >
-                  <Typography
-                    variant="caption"
+                    return (
+                      <Box
+                        key={comment.id}
+                        sx={{
+                          p: 1.35,
+                          bgcolor: "#17181b",
+                          border: "1px solid rgba(255,255,255,0.06)",
+                          borderRadius: 2,
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#FFD100",
+                            display: "block",
+                            mb: 0.45,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {commentAuthor}
+                        </Typography>
+
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "#d8dbe0",
+                            lineHeight: 1.6,
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          {comment.content}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
+
+                  {hasMoreComments && (
+                    <Button
+                      variant="text"
+                      onClick={onLoadMoreComments}
+                      disabled={loadingMoreComments}
+                      sx={{
+                        alignSelf: "flex-start",
+                        textTransform: "none",
+                        color: "#FFD100",
+                        px: 0,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {loadingMoreComments ? (
+                        <CircularProgress size={16} sx={{ color: "#FFD100" }} />
+                      ) : (
+                        "Load more comments"
+                      )}
+                    </Button>
+                  )}
+                </Stack>
+              )}
+
+              {isJoined ? (
+                <Stack spacing={1.1}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Write a comment..."
+                    value={commentValue}
+                    onChange={(e) => onCommentChange(e.target.value)}
                     sx={{
-                      color: "#FFD100",
-                      display: "block",
-                      mb: 0.5,
-                      fontWeight: 700,
+                      "& .MuiInputBase-root": {
+                        bgcolor: "#0b0c0e",
+                        color: "#fff",
+                        borderRadius: 2,
+                      },
+                      "& .MuiInputBase-input::placeholder": {
+                        color: "#7f848c",
+                        opacity: 1,
+                      },
+                      "& fieldset": {
+                        borderColor: "rgba(255,255,255,0.10)",
+                      },
+                      "& .MuiOutlinedInput-root:hover fieldset": {
+                        borderColor: "rgba(255,209,0,0.28)",
+                      },
+                      "& .MuiOutlinedInput-root.Mui-focused fieldset": {
+                        borderColor: "#FFD100",
+                      },
                     }}
-                  >
-                    {commentAuthor}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "#ddd" }}>
-                    {comment.content}
-                  </Typography>
-                </Box>
-              );
-            })}
+                  />
 
-            {hasMoreComments && (
-              <Button
-                variant="text"
-                onClick={onLoadMoreComments}
-                disabled={loadingMoreComments}
-                sx={{
-                  alignSelf: "flex-start",
-                  textTransform: "none",
-                  color: "#FFD100",
-                  px: 0,
-                }}
-              >
-                {loadingMoreComments ? (
-                  <CircularProgress size={16} sx={{ color: "#FFD100" }} />
-                ) : (
-                  "Load more comments"
-                )}
-              </Button>
-            )}
-          </Stack>
-        )}
+                  <Stack direction="row" justifyContent="flex-end">
+                    <Button
+                      variant="contained"
+                      onClick={onAddComment}
+                      disabled={commentLoading}
+                      sx={{
+                        textTransform: "none",
+                        borderRadius: "999px",
+                        fontWeight: 700,
+                        bgcolor: "#FFD100",
+                        color: "#111",
+                        px: 2,
+                        minHeight: 40,
+                        boxShadow: "none",
+                        "&:hover": { bgcolor: "#f5c400", boxShadow: "none" },
+                      }}
+                    >
+                      {commentLoading ? (
+                        <CircularProgress size={18} sx={{ color: "#111" }} />
+                      ) : (
+                        "Comment"
+                      )}
+                    </Button>
+                  </Stack>
 
-        {isJoined ? (
-          <Stack spacing={1.25}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Write a comment..."
-              value={commentValue}
-              onChange={(e) => onCommentChange(e.target.value)}
-              sx={{
-                "& .MuiInputBase-root": {
-                  bgcolor: "#000",
-                  color: "#fff",
-                },
-                "& fieldset": { borderColor: "#333" },
-              }}
-            />
-
-            <Stack direction="row" justifyContent="flex-end">
-              <Button
-                variant="contained"
-                onClick={onAddComment}
-                disabled={commentLoading}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: "999px",
-                  bgcolor: "#FFD100",
-                  color: "#111",
-                  "&:hover": { bgcolor: "#f5c400" },
-                }}
-              >
-                {commentLoading ? (
-                  <CircularProgress size={18} sx={{ color: "#111" }} />
-                ) : (
-                  "Comment"
-                )}
-              </Button>
+                  {commentError && (
+                    <Typography variant="caption" color="error.main">
+                      {commentError}
+                    </Typography>
+                  )}
+                </Stack>
+              ) : (
+                <Typography variant="body2" sx={{ color: "#7f848c" }}>
+                  Join the group to like, comment, and take part in the conversation.
+                </Typography>
+              )}
             </Stack>
-
-            {commentError && (
-              <Typography variant="caption" color="error.main">
-                {commentError}
-              </Typography>
-            )}
-          </Stack>
-        ) : (
-          <Typography variant="body2" sx={{ color: "#777" }}>
-            Join to interact
-          </Typography>
+          </Box>
         )}
       </Stack>
     </Box>

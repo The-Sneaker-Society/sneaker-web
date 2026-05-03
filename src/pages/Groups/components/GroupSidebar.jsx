@@ -7,24 +7,37 @@ import {
 } from "@mui/material";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import GroupAboutSection from "./GroupAboutSection";
-import GroupMembersPanel from "./GroupMembersPanel";
+
+const sectionCardSx = {
+  bgcolor: "#111",
+  border: "1px solid #2b2b2b",
+  borderRadius: 3,
+  p: 2,
+};
+
+const memberChipSx = {
+  bgcolor: "rgba(255,255,255,0.08)",
+  color: "#fff",
+  fontWeight: 600,
+};
+
+const adminChipSx = {
+  bgcolor: "rgba(255,209,0,0.12)",
+  color: "#FFD100",
+  border: "1px solid rgba(255,209,0,0.30)",
+  fontWeight: 700,
+};
 
 const GroupSidebar = ({ group, memberCount = 0, adminIds = new Set() }) => {
-  const previewMembers = (group?.members || []).slice(0, 6);
+  const members = group?.members || [];
+  const previewMembers = members.slice(0, 6);
   const adminCount = group?.admins?.length || 0;
 
   return (
     <Stack spacing={2} useFlexGap>
       <GroupAboutSection group={group} memberCount={memberCount} />
 
-      <Box
-        sx={{
-          bgcolor: "#111",
-          border: "1px solid #2b2b2b",
-          borderRadius: 3,
-          p: 2,
-        }}
-      >
+      <Box sx={sectionCardSx}>
         <Typography sx={{ color: "#fff", fontWeight: 700, mb: 0.5 }}>
           Roles
         </Typography>
@@ -36,30 +49,18 @@ const GroupSidebar = ({ group, memberCount = 0, adminIds = new Set() }) => {
           <Chip
             size="small"
             label={`${memberCount} ${memberCount === 1 ? "member" : "members"}`}
-            sx={{ bgcolor: "rgba(255,255,255,0.08)", color: "#fff" }}
+            sx={memberChipSx}
           />
           <Chip
             size="small"
             icon={<AdminPanelSettingsIcon sx={{ color: "#FFD100 !important" }} />}
             label={`${adminCount} ${adminCount === 1 ? "admin" : "admins"}`}
-            sx={{
-              bgcolor: "rgba(255,209,0,0.12)",
-              color: "#FFD100",
-              border: "1px solid rgba(255,209,0,0.30)",
-              fontWeight: 700,
-            }}
+            sx={adminChipSx}
           />
         </Stack>
       </Box>
 
-      <Box
-        sx={{
-          bgcolor: "#111",
-          border: "1px solid #2b2b2b",
-          borderRadius: 3,
-          p: 2,
-        }}
-      >
+      <Box sx={sectionCardSx}>
         <Typography sx={{ color: "#fff", fontWeight: 700, mb: 0.5 }}>
           Members preview
         </Typography>
@@ -70,7 +71,7 @@ const GroupSidebar = ({ group, memberCount = 0, adminIds = new Set() }) => {
         <Stack spacing={1.25}>
           {previewMembers.length === 0 ? (
             <Typography variant="body2" sx={{ color: "#8f8f8f" }}>
-              No members found.
+              No members to display yet.
             </Typography>
           ) : (
             previewMembers.map((member) => {
@@ -126,21 +127,13 @@ const GroupSidebar = ({ group, memberCount = 0, adminIds = new Set() }) => {
                     <Typography sx={{ color: "#f2f2f2", fontWeight: 600 }} noWrap>
                       {fullName}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: "#8f8f8f" }} noWrap>
-                      {member?.email || "No email available"}
-                    </Typography>
                   </Box>
 
                   {isAdmin && (
                     <Chip
                       size="small"
                       label="Admin"
-                      sx={{
-                        bgcolor: "rgba(255,209,0,0.12)",
-                        color: "#FFD100",
-                        border: "1px solid rgba(255,209,0,0.30)",
-                        fontWeight: 700,
-                      }}
+                      sx={adminChipSx}
                     />
                   )}
                 </Stack>
@@ -149,8 +142,6 @@ const GroupSidebar = ({ group, memberCount = 0, adminIds = new Set() }) => {
           )}
         </Stack>
       </Box>
-
-      <GroupMembersPanel members={group?.members || []} adminIds={adminIds} />
     </Stack>
   );
 };

@@ -2,6 +2,9 @@ import { Box, Typography, Button, Stack, Chip } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
+import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 
 const pillChipSx = {
   height: 28,
@@ -32,6 +35,18 @@ const actionButtonBaseSx = {
   boxShadow: "none",
 };
 
+const statPillSx = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 0.9,
+  px: 1.35,
+  py: 0.95,
+  borderRadius: "999px",
+  bgcolor: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  color: "#d8dbe0",
+};
+
 const GroupHeaderBanner = ({
   group,
   memberCount,
@@ -49,6 +64,33 @@ const GroupHeaderBanner = ({
 }) => {
   const title = group?.name || "Group";
   const description = group?.description || "No description provided.";
+  const postCount = group?.postCount ?? group?.postsCount ?? null;
+
+  const stats = [
+    {
+      key: "members",
+      icon: <GroupOutlinedIcon sx={{ fontSize: 17, color: "#FFD100" }} />,
+      label: `${memberCount || 0} member${memberCount === 1 ? "" : "s"}`,
+    },
+    ...(postCount !== null
+      ? [
+          {
+            key: "posts",
+            icon: <ForumOutlinedIcon sx={{ fontSize: 17, color: "#FFD100" }} />,
+            label: `${postCount} post${postCount === 1 ? "" : "s"}`,
+          },
+        ]
+      : []),
+    {
+      key: "access",
+      icon: <ShieldOutlinedIcon sx={{ fontSize: 17, color: "#FFD100" }} />,
+      label: canManageGroup
+        ? "Admin access"
+        : isJoined
+          ? "Member access"
+          : "View only",
+    },
+  ];
 
   return (
     <Box
@@ -76,7 +118,7 @@ const GroupHeaderBanner = ({
         sx={{
           position: "relative",
           px: { xs: 2, md: 3 },
-          pt: { xs: 9, md: 12 },
+          pt: { xs: 8, md: 10 },
           pb: { xs: 3, md: 4 },
         }}
       >
@@ -106,13 +148,14 @@ const GroupHeaderBanner = ({
 
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography
-              variant="h2"
+              variant="h1"
               sx={{
-                fontSize: { xs: "2rem", md: "3.1rem" },
-                lineHeight: 1.05,
+                fontSize: { xs: "2rem", md: "2.65rem" },
+                lineHeight: 1.06,
                 fontWeight: 800,
                 letterSpacing: "-0.03em",
-                mb: 1.25,
+                mb: 1.1,
+                color: "#fff",
               }}
             >
               {title}
@@ -123,7 +166,7 @@ const GroupHeaderBanner = ({
               spacing={1}
               flexWrap="wrap"
               useFlexGap
-              sx={{ mb: 2 }}
+              sx={{ mb: 1.75 }}
             >
               <Chip
                 label={`${memberCount || 0} member${memberCount === 1 ? "" : "s"}`}
@@ -143,13 +186,37 @@ const GroupHeaderBanner = ({
               variant="body1"
               sx={{
                 color: "#c7c9ce",
-                maxWidth: 760,
-                lineHeight: 1.65,
-                mb: 2.5,
+                maxWidth: 680,
+                lineHeight: 1.7,
+                mb: 2.25,
               }}
             >
               {description}
             </Typography>
+
+            <Stack
+              direction="row"
+              spacing={1}
+              flexWrap="wrap"
+              useFlexGap
+              sx={{ mb: 2.5 }}
+            >
+              {stats.map((stat) => (
+                <Box key={stat.key} sx={statPillSx}>
+                  {stat.icon}
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "inherit",
+                      fontWeight: 800,
+                      letterSpacing: "0.01em",
+                    }}
+                  >
+                    {stat.label}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
 
             <Stack
               direction={{ xs: "column", sm: "row" }}
@@ -172,7 +239,7 @@ const GroupHeaderBanner = ({
                       },
                     }}
                   >
-                    Edit Group
+                    Edit group
                   </Button>
 
                   <Button
@@ -189,7 +256,7 @@ const GroupHeaderBanner = ({
                       },
                     }}
                   >
-                    Delete Group
+                    Delete group
                   </Button>
                 </>
               ) : isJoined ? (
@@ -214,7 +281,7 @@ const GroupHeaderBanner = ({
                     },
                   }}
                 >
-                  {leaving ? "Leaving..." : "Leave Group"}
+                  {leaving ? "Leaving..." : "Leave group"}
                 </Button>
               ) : (
                 <Button
@@ -231,7 +298,7 @@ const GroupHeaderBanner = ({
                     },
                   }}
                 >
-                  {joining ? "Joining..." : "Join Group"}
+                  {joining ? "Joining..." : "Join group"}
                 </Button>
               )}
             </Stack>
