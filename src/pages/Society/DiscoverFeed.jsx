@@ -1,10 +1,14 @@
-import React, { useState } from "react";
-import { Box, Typography, Skeleton, Alert } from "@mui/material";
+import React, { useState, useCallback } from "react";
+import { Box, Typography, Skeleton, Alert, Snackbar } from "@mui/material";
 import { ExploreOutlined } from "@mui/icons-material";
-import { useQuery } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import { useColors } from "../../theme/colors";
 import { useSneakerMember } from "../../context/MemberContext";
-import { GET_DISCOVER_MEMBERS } from "../../context/graphql/getMembers";
+import {
+  GET_DISCOVER_MEMBERS,
+  FOLLOW_MEMBER,
+  UNFOLLOW_MEMBER,
+} from "../../context/graphql/getMembers";
 import AccountCard from "./AccountCard";
 
 const AccountCardSkeleton = ({ colors }) => (
@@ -33,15 +37,47 @@ const DiscoverFeed = () => {
   const colors = useColors();
   const { member: currentMember } = useSneakerMember();
 
-  // Local follow state — mutations wired up in follow/unfollow ticket
+  // Optimistic follow state keyed by memberId
   const [following, setFollowing] = useState({});
+  // Track which member IDs have an in-flight mutation
+  const [pendingIds, setPendingIds] = useState({});
+  // Error snackbar for follow/unfollow failures
+  const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 
   const { data, loading, error } = useQuery(GET_DISCOVER_MEMBERS);
 
-  const handleFollow = (memberId) => {
-    setFollowing((prev) => ({ ...prev, [memberId]: !prev[memberId] }));
-    // TODO: call followMember / unfollowMember mutation (follow/unfollow ticket)
-  };
+  const [followMember] = useMutation(FOLLOW_MEMBER);
+  const [unfollowMember] = useMutation(UNFOLLOW_MEMBER);
+
+  const handleFollow = useCallback(
+    async (memberId) => {
+      const currentlyFollowing = !!following[memberId];
+
+      // Optimistic update — flip state immediately
+      setFollowing((prev) => ({ ...prev, [memberId]: !currentlyFollowing }));
+      setPendingIds((prev) => ({ ...prev, [memberId]: true }));
+
+      try {
+        if (currentlyFollowing) {
+          await unfollowMember({ variables: { memberId } });
+        } else {
+          await followMember({ variables: { memberId } });
+        }
+      } catch {
+        // Revert optimistic update on failure
+        setFollowing((prev) => ({ ...prev, [memberId]: currentlyFollowing }));
+        setSnackbar({
+          open: true,
+          message: currentlyFollowing
+            ? "Failed to unfollow. Please try again."
+            : "Failed to follow. Please try again.",
+        });
+      } finally {
+        setPendingIds((prev) => ({ ...prev, [memberId]: false }));
+      }
+    },
+    [following, followMember, unfollowMember]
+  );
 
   // Filter out the current logged-in member
   const accounts = (data?.members || []).filter(
@@ -93,6 +129,7 @@ const DiscoverFeed = () => {
             key={member.id}
             member={member}
             isFollowing={!!following[member.id]}
+            isPending={!!pendingIds[member.id]}
             onFollow={handleFollow}
           />
         ))}
@@ -125,6 +162,22 @@ const DiscoverFeed = () => {
           </Typography>
         </Box>
       )}
+
+      {/* Error snackbar for follow/unfollow failures */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ open: false, message: "" })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ open: false, message: "" })}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
