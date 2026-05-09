@@ -44,33 +44,14 @@ export const GET_GROUP = gql`
 `;
 
 export const GET_POSTS_BY_GROUP = gql`
-  query GetPostsByGroup(
-    $groupId: ID!
-    $limit: Int = 10
-    $offset: Int = 0
-    $commentLimit: Int = 3
-  ) {
+  query GetPostsByGroup($groupId: ID!, $limit: Int = 10, $offset: Int = 0) {
     getPostsByGroup(groupId: $groupId, limit: $limit, offset: $offset) {
       items {
         id
-        groupId
         content
-        images
         createdAt
-        commentCount
         author {
-          ...GroupMemberFields
-        }
-        likes {
           id
-        }
-        commentsPage(limit: $commentLimit, offset: 0) {
-          items {
-            ...PostCommentFields
-          }
-          totalCount
-          hasMore
-          nextOffset
         }
       }
       totalCount
@@ -78,8 +59,6 @@ export const GET_POSTS_BY_GROUP = gql`
       nextOffset
     }
   }
-  ${GROUP_MEMBER_FIELDS}
-  ${POST_COMMENT_FIELDS}
 `;
 
 export const JOIN_GROUP = gql`
