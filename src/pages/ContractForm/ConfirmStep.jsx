@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -10,11 +10,15 @@ import {
   Card,
   CardMedia,
   CardContent,
+  IconButton,
 } from "@mui/material";
+import { FiZoomIn } from "react-icons/fi";
 import { useFormikContext } from "formik";
+import ImagePreviewDialog from "../../components/ImagePreviewDialog";
 
 const ConfirmationStep = () => {
   const { values } = useFormikContext();
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   return (
     <Box sx={{ height: "100%" }}>
@@ -67,13 +71,28 @@ const ConfirmationStep = () => {
                   {section}
                 </Typography>
                 {photos.map((photo, idx) => (
-                  <Card key={idx} sx={{ mb: 1 }}>
+                  <Card key={idx} sx={{ mb: 1, position: "relative" }}>
                     <CardMedia
                       component="img"
                       height="140"
                       image={photo.url}
                       alt={`${section} ${idx + 1}`}
                     />
+                    <IconButton
+                      onClick={() => setPreviewUrl(photo.url)}
+                      sx={{
+                        position: "absolute",
+                        top: 4,
+                        left: 4,
+                        bgcolor: "rgba(0,0,0,0.5)",
+                        color: "white",
+                        borderRadius: "50%",
+                        p: 0.5,
+                        "&:hover": { bgcolor: "rgba(0,0,0,0.7)" },
+                      }}
+                    >
+                      <FiZoomIn size={16} />
+                    </IconButton>
                     <CardContent>
                       {photo.note && (
                         <Typography variant="body2" color="text.secondary">
@@ -92,6 +111,11 @@ const ConfirmationStep = () => {
             )
         )}
       </Grid>
+      <ImagePreviewDialog
+        open={!!previewUrl}
+        url={previewUrl}
+        onClose={() => setPreviewUrl(null)}
+      />
     </Box>
   );
 };

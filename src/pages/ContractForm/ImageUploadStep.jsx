@@ -9,8 +9,9 @@ import {
   IconButton,
   TextField,
 } from "@mui/material";
-import { FiUpload, FiX } from "react-icons/fi";
+import { FiUpload, FiX, FiZoomIn } from "react-icons/fi";
 import { useFormikContext } from "formik";
+import ImagePreviewDialog from "../../components/ImagePreviewDialog";
 
 // Placeholder function for image upload (replace with your actual upload logic)
 const uploadImage = async (file) => {
@@ -28,6 +29,7 @@ const uploadImage = async (file) => {
 const ImageUploadStep = () => {
   const { setFieldValue, values } = useFormikContext();
   const [loading, setLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [localImages, setLocalImages] = useState({
     leftSide: [],
     rightSide: [],
@@ -172,6 +174,12 @@ const ImageUploadStep = () => {
                   style={imagePreviewStyle}
                 />
                 <IconButton
+                  onClick={() => setPreviewUrl(photo.url)}
+                  sx={viewButtonStyle}
+                >
+                  <FiZoomIn size={16} />
+                </IconButton>
+                <IconButton
                   onClick={() => handleRemoveImage(section, 0)}
                   sx={removeButtonStyle}
                 >
@@ -230,6 +238,12 @@ const ImageUploadStep = () => {
                   style={thumbnailStyle}
                 />
                 <IconButton
+                  onClick={() => setPreviewUrl(photo.url)}
+                  sx={viewButtonStyle}
+                >
+                  <FiZoomIn size={16} />
+                </IconButton>
+                <IconButton
                   onClick={() => handleRemoveImage(section, index)}
                   sx={removeButtonStyle}
                 >
@@ -280,6 +294,19 @@ const ImageUploadStep = () => {
     borderRadius: (theme) => theme.shape.borderRadius,
   };
 
+  const viewButtonStyle = {
+    position: "absolute",
+    top: 2,
+    left: 2,
+    bgcolor: "rgba(0,0,0,0.5)",
+    color: "white",
+    borderRadius: "50%",
+    p: 0.5,
+    "&:hover": {
+      bgcolor: "rgba(0,0,0,0.7)",
+    },
+  };
+
   const removeButtonStyle = {
     position: "absolute",
     top: 2,
@@ -309,6 +336,11 @@ const ImageUploadStep = () => {
         {renderSingleImageSection("Back View", "backView")}
         {renderMultipleImageSection("Other Areas", "other")}
       </Grid>
+      <ImagePreviewDialog
+        open={!!previewUrl}
+        url={previewUrl}
+        onClose={() => setPreviewUrl(null)}
+      />
     </Box>
   );
 };
