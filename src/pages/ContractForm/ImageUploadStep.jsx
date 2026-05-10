@@ -3,32 +3,21 @@ import {
   Box,
   Grid,
   Typography,
-  ImageList,
-  ImageListItem,
   CircularProgress,
   IconButton,
   TextField,
+  Alert,
 } from "@mui/material";
 import { FiUpload, FiX, FiZoomIn } from "react-icons/fi";
 import { useFormikContext } from "formik";
 import ImagePreviewDialog from "../../components/ImagePreviewDialog";
-
-// Placeholder function for image upload (replace with your actual upload logic)
-const uploadImage = async (file) => {
-  // Simulate an upload delay (replace with actual API call)
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  // In a real application, you would:
-  // 1. Send the file to your server (e.g., using fetch or axios)
-  // 2. Your server would store the image and return a URL
-  // For this example, we'll generate a placeholder URL
-  const placeholderUrl = `https://picsum.photos/200/300`;
-  return placeholderUrl;
-};
+import { useImageUploader } from "../../hooks/useImageUploader";
 
 const ImageUploadStep = () => {
   const { setFieldValue, values } = useFormikContext();
+  const { upload, loading: uploading } = useImageUploader();
   const [loading, setLoading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [localImages, setLocalImages] = useState({
     leftSide: [],
@@ -50,23 +39,22 @@ const ImageUploadStep = () => {
   const handleSingleImageUpload = useCallback(
     async (section, files) => {
       setLoading(true);
+      setUploadError(null);
       const imageFiles = Array.from(files);
 
       if (imageFiles.length > 0) {
         try {
           const file = imageFiles[0];
-          const imageUrl = await uploadImage(file); // Await the upload
+          const confirmed = await upload(file);
 
-          const photoObj = { url: imageUrl, note: "" };
+          const photoObj = { key: confirmed.key, url: confirmed.url, note: "" };
           setLocalImages((prevImages) => ({
             ...prevImages,
             [section]: [photoObj],
           }));
           setFieldValue(`shoeDetails.photos.${section}`, [photoObj]);
-          console.log(`Image uploaded to ${section}:`, imageUrl);
         } catch (error) {
-          console.error("Image upload failed:", error);
-          // Handle upload error (e.g., show an error message)
+          setUploadError(error.message || "Image upload failed");
         } finally {
           setLoading(false);
         }
@@ -74,21 +62,22 @@ const ImageUploadStep = () => {
         setLoading(false);
       }
     },
-    [setFieldValue]
+    [setFieldValue, upload]
   );
 
   const handleMultipleImageUpload = useCallback(
     async (section, files) => {
       setLoading(true);
+      setUploadError(null);
       const imageFiles = Array.from(files);
 
       try {
-        const imageUrls = await Promise.all(
+        const confirmedImages = await Promise.all(
           imageFiles.map(async (file) => {
-            return await uploadImage(file);
+            return await upload(file);
           })
         );
-        const newPhotos = imageUrls.map((url) => ({ url, note: "" }));
+        const newPhotos = confirmedImages.map((img) => ({ key: img.key, url: img.url, note: "" }));
 
         setLocalImages((prevImages) => ({
           ...prevImages,
@@ -98,15 +87,13 @@ const ImageUploadStep = () => {
           `shoeDetails.photos.${section}`,
           [...localImages[section], ...newPhotos].slice(0, 5)
         );
-        console.log(`Images uploaded to ${section}:`, imageUrls);
       } catch (error) {
-        console.error("Image uploads failed:", error);
-        // Handle upload error (e.g., show an error message)
+        setUploadError(error.message || "Image uploads failed");
       } finally {
         setLoading(false);
       }
     },
-    [setFieldValue, localImages]
+    [setFieldValue, localImages, upload]
   );
 
   const handleRemoveImage = useCallback(
@@ -322,10 +309,15 @@ const ImageUploadStep = () => {
 
   return (
     <Box>
-      {loading && (
+      {(loading || uploading) && (
         <Box display="flex" justifyContent="center" mb={2}>
           <CircularProgress />
         </Box>
+      )}
+      {uploadError && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setUploadError(null)}>
+          {uploadError}
+        </Alert>
       )}
       <Grid container spacing={3}>
         {renderSingleImageSection("Left Side", "leftSide")}
