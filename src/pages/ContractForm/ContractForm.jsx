@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Stepper, Step, StepLabel, Button } from "@mui/material";
+import { Box, Stepper, Step, StepLabel, Button, Alert, Typography } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
@@ -60,20 +60,29 @@ const initialValues = {
   },
 };
 
-export const ContractForm = () => {
+export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const [activeStep, setActiveStep] = useState(0);
-  const { memberId } = useParams();
+  const { memberId: memberIdParam } = useParams();
   const [createContract] = useMutation(CREATE_CONTRACT);
+
+  const memberId = isPreview ? memberIdProp : memberIdParam;
 
   const {
     loading: statusLoading,
     error: statusError,
     data: statusData,
-  } = useQuery(GET_MEMBER_CONTRACT_STATUS, { variables: { memberId } });
+  } = useQuery(GET_MEMBER_CONTRACT_STATUS, {
+    variables: { memberId },
+    skip: isPreview,
+  });
 
-  if (statusLoading) return <LoadingCircle />;
-  if (statusError) return <div>Error: {statusError.message}</div>;
-  if (statusData?.member?.contractsDisabled) return <NotAcceptingContracts />;
+  if (isPreview && !memberIdProp) return <div>Unauthorized preview access</div>;
+
+  if (!isPreview) {
+    if (statusLoading) return <LoadingCircle />;
+    if (statusError) return <div>Error: {statusError.message}</div>;
+    if (statusData?.member?.contractsDisabled) return <NotAcceptingContracts />;
+  };
 
   const steps = ["Shoe Information", "Image Upload", "Confirmation"];
 
@@ -136,7 +145,12 @@ export const ContractForm = () => {
   };
 
   return (
-    <Box sx={{ width: "100%", height: "100%" }}>
+    <Box sx={{ width: "100%", height: "100%", px: { xs: 2, sm: 4 } }}>
+      {isPreview && (
+        <Alert severity="warning" sx={{ mb: 2, fontWeight: "bold", fontSize: "1rem" }}>
+          DRAFT PREVIEW — This form is in preview mode. No data will be submitted.
+        </Alert>
+      )}
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label) => (
           <Step key={label}>
@@ -153,18 +167,25 @@ export const ContractForm = () => {
           {(formik) => (
             <Form>
               {getStepContent(activeStep, formik)}
-              <Box mt={4} display="flex" justifyContent="space-between">
+              <Box mt={4} display="flex" justifyContent="space-between" alignItems="center">
                 <Button disabled={activeStep === 0} onClick={handleBack}>
                   Back
                 </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  disabled={formik.isSubmitting}
-                >
-                  {activeStep === steps.length - 1 ? "Submit" : "Next"}
-                </Button>
+                <Box display="flex" flexDirection="column" alignItems="center">
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={formik.isSubmitting || (isPreview && activeStep === steps.length - 1)}
+                  >
+                    {activeStep === steps.length - 1 ? "Submit" : "Next"}
+                  </Button>
+                  {isPreview && activeStep === steps.length - 1 && (
+                    <Typography variant="body2" sx={{ color: "text.secondary", mt: 1, fontStyle: "italic" }}>
+                      This is a preview — you cannot submit
+                    </Typography>
+                  )}
+                </Box>
               </Box>
             </Form>
           )}

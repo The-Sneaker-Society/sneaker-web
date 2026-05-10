@@ -17,6 +17,7 @@ import Discover from "../pages/Dashboard/Discover";
 import TheVault from "../pages/Vault/TheVault";
 import ChatSidebar from "../pages/Chats/ChatSidebar";
 import MemberSettings from "../pages/membersettings";
+import PreviewContractPage from "../pages/ContractForm/PreviewContractPage";
 
 const MemberRoutes = () => {
   return (
@@ -125,6 +126,14 @@ const MemberRoutes = () => {
           element={
             <Layout>
               <MemberSettings />
+            </Layout>
+          }
+        />
+        <Route
+          path="preview-contract"
+          element={
+            <Layout>
+              <PreviewContractPage />
             </Layout>
           }
         />
