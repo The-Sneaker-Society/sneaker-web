@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -19,10 +19,6 @@ import ImagePreviewDialog from "../../components/ImagePreviewDialog";
 const ConfirmationStep = () => {
   const { values } = useFormikContext();
   const [previewUrl, setPreviewUrl] = useState(null);
-
-  useEffect(() => {
-    console.log("ConfirmStep form values:", JSON.stringify(values, null, 2));
-  }, [values]);
 
   return (
     <Box sx={{ height: "100%" }}>
