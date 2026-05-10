@@ -7,6 +7,7 @@ import {
   ImageListItem,
   CircularProgress,
   IconButton,
+  TextField,
 } from "@mui/material";
 import { FiUpload, FiX } from "react-icons/fi";
 import { useFormikContext } from "formik";
@@ -54,11 +55,12 @@ const ImageUploadStep = () => {
           const file = imageFiles[0];
           const imageUrl = await uploadImage(file); // Await the upload
 
+          const photoObj = { url: imageUrl, note: "" };
           setLocalImages((prevImages) => ({
             ...prevImages,
-            [section]: [imageUrl],
+            [section]: [photoObj],
           }));
-          setFieldValue(`shoeDetails.photos.${section}`, [imageUrl]);
+          setFieldValue(`shoeDetails.photos.${section}`, [photoObj]);
           console.log(`Image uploaded to ${section}:`, imageUrl);
         } catch (error) {
           console.error("Image upload failed:", error);
@@ -81,17 +83,18 @@ const ImageUploadStep = () => {
       try {
         const imageUrls = await Promise.all(
           imageFiles.map(async (file) => {
-            return await uploadImage(file); // Await each upload
+            return await uploadImage(file);
           })
         );
+        const newPhotos = imageUrls.map((url) => ({ url, note: "" }));
 
         setLocalImages((prevImages) => ({
           ...prevImages,
-          [section]: [...prevImages[section], ...imageUrls].slice(0, 5),
+          [section]: [...prevImages[section], ...newPhotos].slice(0, 5),
         }));
         setFieldValue(
           `shoeDetails.photos.${section}`,
-          [...localImages[section], ...imageUrls].slice(0, 5)
+          [...localImages[section], ...newPhotos].slice(0, 5)
         );
         console.log(`Images uploaded to ${section}:`, imageUrls);
       } catch (error) {
@@ -120,14 +123,27 @@ const ImageUploadStep = () => {
     [setFieldValue, localImages]
   );
 
+  const handleNoteChange = useCallback(
+    (section, index, note) => {
+      setLocalImages((prevImages) => {
+        const updated = [...prevImages[section]];
+        updated[index] = { ...updated[index], note };
+        return { ...prevImages, [section]: updated };
+      });
+      setFieldValue(`shoeDetails.photos.${section}.${index}.note`, note);
+    },
+    [setFieldValue]
+  );
+
   const renderSingleImageSection = useCallback(
     (title, section) => {
+      const photo = localImages[section]?.[0];
       return (
         <Grid item xs={12} sm={6} md={4} key={section}>
           <Typography variant="h6" gutterBottom>
             {title}
           </Typography>
-          {localImages[section].length === 0 && (
+          {!photo && (
             <Box
               component="label"
               htmlFor={`upload-${section}`}
@@ -139,7 +155,7 @@ const ImageUploadStep = () => {
                 hidden
                 accept=".jpg,.jpeg,.png"
                 onChange={(e) => {
-                  e.preventDefault(); // Prevent the default behavior
+                  e.preventDefault();
                   handleSingleImageUpload(section, e.target.files);
                 }}
               />
@@ -147,29 +163,40 @@ const ImageUploadStep = () => {
               <Typography>Upload Image</Typography>
             </Box>
           )}
-          {localImages[section].length > 0 && (
-            <Box sx={{ position: "relative", mt: 1 }}>
-              <img
-                src={localImages[section][0]}
-                alt={title}
-                style={imagePreviewStyle}
+          {photo && (
+            <Box sx={{ mt: 1 }}>
+              <Box sx={{ position: "relative" }}>
+                <img
+                  src={photo.url}
+                  alt={title}
+                  style={imagePreviewStyle}
+                />
+                <IconButton
+                  onClick={() => handleRemoveImage(section, 0)}
+                  sx={removeButtonStyle}
+                >
+                  <FiX size={16} />
+                </IconButton>
+              </Box>
+              <TextField
+                fullWidth
+                size="small"
+                label="Add a note about this area"
+                value={photo.note || ""}
+                onChange={(e) => handleNoteChange(section, 0, e.target.value)}
+                sx={{ mt: 1 }}
               />
-              <IconButton
-                onClick={() => handleRemoveImage(section, 0)}
-                sx={removeButtonStyle}
-              >
-                <FiX size={16} />
-              </IconButton>
             </Box>
           )}
         </Grid>
       );
     },
-    [handleSingleImageUpload, localImages, handleRemoveImage]
+    [handleSingleImageUpload, localImages, handleRemoveImage, handleNoteChange]
   );
 
   const renderMultipleImageSection = useCallback(
     (title, section) => {
+      const images = localImages[section] || [];
       return (
         <Grid item xs={12} sm={6} md={4} key={section}>
           <Typography variant="h6" gutterBottom>
@@ -187,41 +214,42 @@ const ImageUploadStep = () => {
               multiple
               accept=".jpg,.jpeg,.png"
               onChange={(e) => {
-                e.preventDefault(); // Prevent the default behavior
+                e.preventDefault();
                 handleMultipleImageUpload(section, e.target.files);
               }}
             />
             <FiUpload size={24} />
             <Typography>Upload Images (Max 5)</Typography>
           </Box>
-          <ImageList
-            sx={{ width: "100%", height: "auto", mt: 1 }}
-            cols={3}
-            rowHeight={100}
-          >
-            {localImages[section].map((image, index) => (
-              <ImageListItem key={index}>
-                <Box sx={{ position: "relative" }}>
-                  <img
-                    src={image}
-                    alt={`${title} ${index + 1}`}
-                    loading="lazy"
-                    style={thumbnailStyle}
-                  />
-                  <IconButton
-                    onClick={() => handleRemoveImage(section, index)}
-                    sx={removeButtonStyle}
-                  >
-                    <FiX size={16} />
-                  </IconButton>
-                </Box>
-              </ImageListItem>
-            ))}
-          </ImageList>
+          {images.map((photo, index) => (
+            <Box key={index} sx={{ mt: 2 }}>
+              <Box sx={{ position: "relative" }}>
+                <img
+                  src={photo.url}
+                  alt={`${title} ${index + 1}`}
+                  style={thumbnailStyle}
+                />
+                <IconButton
+                  onClick={() => handleRemoveImage(section, index)}
+                  sx={removeButtonStyle}
+                >
+                  <FiX size={16} />
+                </IconButton>
+              </Box>
+              <TextField
+                fullWidth
+                size="small"
+                label="Add a note about this area"
+                value={photo.note || ""}
+                onChange={(e) => handleNoteChange(section, index, e.target.value)}
+                sx={{ mt: 1 }}
+              />
+            </Box>
+          ))}
         </Grid>
       );
     },
-    [handleMultipleImageUpload, localImages, handleRemoveImage]
+    [handleMultipleImageUpload, localImages, handleRemoveImage, handleNoteChange]
   );
 
   const uploadBoxStyle = {
@@ -256,12 +284,12 @@ const ImageUploadStep = () => {
     position: "absolute",
     top: 2,
     right: 2,
-    bgcolor: "red",
+    bgcolor: "primary.main",
     color: "white",
     borderRadius: "50%",
     p: 0.5,
     "&:hover": {
-      bgcolor: "darkred",
+      bgcolor: "primary.dark",
     },
   };
 

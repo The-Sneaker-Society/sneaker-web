@@ -60,23 +60,34 @@ const ConfirmationStep = () => {
       </Typography>
       <Grid container spacing={2}>
         {Object.entries(values.shoeDetails.photos).map(
-          ([section, images]) =>
-            images.length > 0 && (
+          ([section, photos]) =>
+            photos.length > 0 && (
               <Grid item xs={12} sm={6} md={4} key={section}>
-                <Card>
-                  <CardMedia
-                    component="img"
-                    height="140"
-                    image={images[0]} // Display the first image
-                    alt={section}
-                  />
-                  <CardContent>
-                    <Typography variant="body2">
-                      {section}: {images.length} image
-                      {images.length > 1 ? "s" : ""}
-                    </Typography>
-                  </CardContent>
-                </Card>
+                <Typography variant="subtitle1" sx={{ mb: 1, textTransform: "capitalize" }}>
+                  {section}
+                </Typography>
+                {photos.map((photo, idx) => (
+                  <Card key={idx} sx={{ mb: 1 }}>
+                    <CardMedia
+                      component="img"
+                      height="140"
+                      image={photo.url}
+                      alt={`${section} ${idx + 1}`}
+                    />
+                    <CardContent>
+                      {photo.note && (
+                        <Typography variant="body2" color="text.secondary">
+                          Note: {photo.note}
+                        </Typography>
+                      )}
+                      {photos.length > 1 && (
+                        <Typography variant="caption" color="text.secondary">
+                          Image {idx + 1} of {photos.length}
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
               </Grid>
             )
         )}
