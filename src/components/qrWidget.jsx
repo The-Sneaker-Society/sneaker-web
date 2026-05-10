@@ -105,7 +105,7 @@ export const QrWidget = () => {
       sx={{
         display: "flex",
         flexDirection: { xs: "column", sm: "row" },
-        justifyContent: { xs: "center", sm: "space-between" },
+        justifyContent: "center",
         alignItems: "center",
         width: "100%",
         height: "100%",
@@ -137,17 +137,13 @@ export const QrWidget = () => {
 
       <Box
         sx={{
-          flex: { sm: 1 },
-          minWidth: 0,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          alignItems: { xs: "center", sm: "flex-start" },
-          paddingLeft: { xs: "0px", sm: "20px" },
-          width: { xs: "100%", sm: "auto" },
+          alignItems: "center",
         }}
       >
-        <Box sx={{ mb: 3, textAlign: { xs: "center", sm: "left" } }}>
+        <Box sx={{ mb: 3, textAlign: "center" }}>
           <Typography
             variant="h3"
             sx={{
@@ -172,9 +168,9 @@ export const QrWidget = () => {
           sx={{
             display: "flex",
             flexDirection: "column",
-            alignItems: { xs: "center", sm: "flex-start" },
+            alignItems: "center",
             width: "100%",
-            maxWidth: "200px",
+            maxWidth: "280px",
           }}
         >
           <QrActionButton
