@@ -35,19 +35,28 @@ const ShoeInfoSchema = Yup.object().shape({
     material: Yup.string().required("Material is required"),
     size: Yup.string().required("Size is required"),
     soleCondition: Yup.string().required("Sole condition is required"),
+    previousRepairsNotes: Yup.string().when("previousRepairs", {
+      is: true,
+      then: (schema) => schema.required("Please describe the previous repairs"),
+    }),
     clientNotes: Yup.string().required("Please explain your repair request"),
   }),
 });
 
 const initialValues = {
   shoeDetails: {
-    brand: "nike",
-    model: "dfhad",
-    color: "dbhad",
-    material: "fdbad",
-    size: "12",
-    soleCondition: "none",
-    clientNotes: "zdjgvadf",
+    brand: "Jordan",
+    model: "Retro 4",
+    color: "Bred",
+    material: "Leather",
+    size: "10.5",
+    soleCondition: "Good - minimal wear",
+    year: "2024",
+    returnTimeframe: "standard",
+    odorLevel: "none",
+    previousRepairs: false,
+    previousRepairsNotes: "",
+    clientNotes: "Restoration and deep clean requested. Small scuff on right toe box.",
     photos: {
       leftSide: [],
       rightSide: [],
@@ -106,6 +115,11 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
       color,
       size,
       soleCondition,
+      year,
+      returnTimeframe,
+      odorLevel,
+      previousRepairs,
+      previousRepairsNotes,
       clientNotes,
       photos,
     } = values.shoeDetails;
@@ -124,6 +138,11 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
             size,
             soleCondition,
             material,
+            year,
+            returnTimeframe,
+            odorLevel,
+            previousRepairs,
+            previousRepairsNotes,
             photos: photos,
           },
         },
@@ -145,29 +164,36 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   };
 
   return (
-    <Box sx={{ width: "100%", height: "100%", px: { xs: 2, sm: 4 } }}>
+    <Box sx={{ width: "100%", height: "100vh", display: "flex", flexDirection: "column" }}>
       {isPreview && (
-        <Alert severity="warning" sx={{ mb: 2, fontWeight: "bold", fontSize: "1rem" }}>
+        <Alert severity="warning" sx={{ mx: { xs: 2, sm: 4 }, mt: 2, fontWeight: "bold", fontSize: "1rem" }}>
           DRAFT PREVIEW — This form is in preview mode. No data will be submitted.
         </Alert>
       )}
-      <Stepper activeStep={activeStep} alternativeLabel>
+      <Stepper sx={{ px: { xs: 2, sm: 4 }, pt: 2 }} activeStep={activeStep} alternativeLabel>
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
           </Step>
         ))}
       </Stepper>
-      <Box mt={4}>
+      <Box sx={{ flex: 1, overflowY: "auto", px: { xs: 2, sm: 4 }, mt: 4 }}>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchemas[activeStep]}
           onSubmit={activeStep === steps.length - 1 ? handleSubmit : handleNext}
         >
           {(formik) => (
-            <Form>
-              {getStepContent(activeStep, formik)}
-              <Box mt={4} display="flex" justifyContent="space-between" alignItems="center">
+            <Form style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
+              <Box sx={{ flex: 1 }}>
+                {getStepContent(activeStep, formik)}
+              </Box>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ py: 2, mt: 4, borderTop: 1, borderColor: "divider", bgcolor: "background.default" }}
+              >
                 <Button disabled={activeStep === 0} onClick={handleBack}>
                   Back
                 </Button>

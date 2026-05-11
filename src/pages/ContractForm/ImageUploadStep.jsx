@@ -309,6 +309,14 @@ const ImageUploadStep = () => {
 
   return (
     <Box>
+      <Box textAlign="center" mb={4}>
+        <Typography variant="h4" fontWeight={700}>
+          Upload Photos
+        </Typography>
+        <Typography variant="body1" color="text.secondary" mt={0.5}>
+          Take clear photos of each angle
+        </Typography>
+      </Box>
       {(loading || uploading) && (
         <Box display="flex" justifyContent="center" mb={2}>
           <CircularProgress />
