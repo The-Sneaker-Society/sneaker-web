@@ -6,7 +6,6 @@ import { Subscriptions } from "../PaymentStatus/Subscriptions";
 import { useSneakerMember } from "../../context/MemberContext";
 import { useNavigate } from "react-router-dom";
 import { LoadingCircle } from "../../components/LoadingCircle";
-import WelcomePage from "./WelcomePage";
 
 export const OnboardMember = () => {
   const [activePage, setActivePage] = useState(0);

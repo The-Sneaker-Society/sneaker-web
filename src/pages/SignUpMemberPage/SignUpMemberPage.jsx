@@ -1,9 +1,43 @@
-import { Box, Link } from "@mui/material";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Logo from "../../assets/ss-logo.svg";
-import { SignUp } from "@clerk/clerk-react";
+import GoogleIcon from "@mui/icons-material/Google";
+import { Button, Alert, Stack, Box, Typography } from "@mui/material";
+import { SignedOut, useClerk, useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
-export default function SignUpMemberPage() {
+const SignUpMember = () => {
+  const [error, setError] = useState("");
+  const { isSignedIn } = useUser();
+  const { openSignUp } = useClerk();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      navigate("/dashboard");
+    }
+  }, [isSignedIn, navigate]);
+
+  const handleGoogleSignUp = async () => {
+    try {
+      setError("");
+
+      await openSignUp({
+        strategy: "oauth_google",
+        unsafeMetadata: { role: "member" },
+        publicMetadata: { role: "member" },
+        forceRedirectUrl: "member/generate",
+        signInForceRedirectUrl: "/dashboard",
+        signInUrl: "/login",
+      });
+
+      if (!createdUserId) {
+        throw new Error("Signup failed, no user ID returned.");
+      }
+    } catch (err) {
+      setError(error.message);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -11,119 +45,45 @@ export default function SignUpMemberPage() {
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
-        bgcolor: "black",
         padding: "20px",
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: "100%",
-          maxWidth: "500px",
-          px: 2,
-        }}
+      <Stack
+        alignItems="center"
+        spacing={2}
+        sx={{ width: "100%", maxWidth: "360px", px: 2 }}
       >
-        <Link href="/" underline="none" sx={{ textAlign: "center", width: "100%" }}>
-          <Box
-            component="img"
-            src={Logo}
-            alt="Logo"
-            sx={{
-              width: "80%",
-              maxWidth: "300px",
-              height: "auto",
-              my: 4,
-              cursor: "pointer",
-            }}
-          />
-        </Link>
-        <SignUp
-          routing="path"
-          path="/member/signup"
-          signInUrl="/login"
-          afterSignInUrl="/dashboard"
-          afterSignUpUrl="/member/signup/callback"
-          unsafeMetadata={{ role: "member" }}
-          appearance={{
-            layout: {
-              logoPlacement: "none",
-              showOptionalFields: false,
-            },
-            variables: {
-              colorBackground: "#1a1a1a",
-              colorInputBackground: "#2a2a2a",
-              colorInputText: "#ffffff",
-              colorText: "#ffffff",
-              colorTextSecondary: "#888888",
-              colorPrimary: "#d4af37",
-              borderRadius: "8px",
-              fontFamily: "inherit",
-            },
-            elements: {
-              card: {
-                backgroundColor: "#1a1a1a",
-                boxShadow: "none",
-                border: "1px solid #333",
-              },
-              headerTitle: {
-                color: "#ffffff",
-                fontWeight: "600",
-              },
-              headerSubtitle: {
-                color: "#888888",
-              },
-              formButtonPrimary: {
-                backgroundColor: "#d4af37",
-                color: "#000000",
-                width: "100%",
-                "&:hover": {
-                  backgroundColor: "#c5a032",
-                },
-              },
-              socialButtonsBlockButton: {
-                width: "100%",
-                backgroundColor: "#2a2a2a",
-                color: "#ffffff",
-                border: "1px solid #444",
-                "&:hover": {
-                  backgroundColor: "#333",
-                },
-              },
-              dividerLine: {
-                backgroundColor: "#444",
-              },
-              dividerText: {
-                color: "#888888",
-              },
-              formFieldInput: {
-                backgroundColor: "#2a2a2a",
-                color: "#ffffff",
-                border: "1px solid #444",
-              },
-              formFieldLabel: {
-                color: "#888888",
-              },
-              footerActionText: {
-                color: "#888888",
-              },
-              footerActionLink: {
-                color: "#d4af37",
-                "&:hover": {
-                  color: "#c5a032",
-                },
-              },
-              identityPreviewText: {
-                color: "#888888",
-              },
-              identityPreviewEditButton: {
-                color: "#d4af37",
-              },
-            },
-          }}
+        <Box
+          component="img"
+          src={Logo}
+          alt="Logo"
+          sx={{ width: "80%", maxWidth: "300px", height: "auto", my: 4 }}
         />
-      </Box>
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: "bold", textAlign: "center" }}
+        >
+          Member Site
+        </Typography>
+        <SignedOut>
+          <Button
+            variant="contained"
+            aria-label="Sign Up With Google"
+            startIcon={<GoogleIcon />}
+            sx={{ mt: 2, color: "black", backgroundColor: "gold" }}
+            onClick={handleGoogleSignUp}
+          >
+            Sign up with Google
+          </Button>
+          {error && (
+            <Alert severity="error" color="error">
+              {error}
+            </Alert>
+          )}
+        </SignedOut>
+      </Stack>
     </Box>
   );
-}
+};
+
+export default SignUpMember;

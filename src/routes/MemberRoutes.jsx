@@ -11,7 +11,7 @@ import { ChatDashboardMember } from "../pages/Chats/ChatDashboardMember";
 import { GenerateMember } from "../pages/GenerateMember/GenerateMember";
 import { OnboardMember } from "../pages/OnboardMember/OnboardMember";
 import GroupsPage from "../pages/Groups/Groups";
-import NewGroupPage from "../pages/GroupsPage/NewGroupPage";
+import NewGroupPage from "../pages/Groups/NewGroupPage";
 import MySociety from "../pages/Dashboard/MySociety";
 import Discover from "../pages/Dashboard/Discover";
 import TheVault from "../pages/Vault/TheVault";
