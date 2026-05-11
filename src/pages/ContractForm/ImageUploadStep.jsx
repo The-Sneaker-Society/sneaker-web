@@ -124,19 +124,55 @@ const ImageUploadStep = () => {
     [setFieldValue]
   );
 
+  const uploadBoxSx = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 1,
+    width: "100%",
+    minHeight: 120,
+    py: 3,
+    borderRadius: 3,
+    cursor: "pointer",
+    bgcolor: "transparent",
+    border: "2px dashed",
+    borderColor: "grey.300",
+    transition: "all 0.2s ease",
+    "&:hover": {
+      bgcolor: "transparent",
+      borderColor: "primary.main",
+      transform: "scale(1.02)",
+    },
+  };
+
+  const uploadedImageSx = {
+    width: "100%",
+    height: 140,
+    objectFit: "cover",
+    borderRadius: 2,
+  };
+
+  const sectionTitleSx = {
+    fontSize: "0.8rem",
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    color: "text.secondary",
+    mb: 1,
+  };
+
   const renderSingleImageSection = useCallback(
     (title, section) => {
       const photo = localImages[section]?.[0];
       return (
         <Grid item xs={12} sm={6} md={4} key={section}>
-          <Typography variant="h6" gutterBottom>
-            {title}
-          </Typography>
+          <Typography sx={sectionTitleSx}>{title}</Typography>
           {!photo && (
             <Box
               component="label"
               htmlFor={`upload-${section}`}
-              sx={{ ...uploadBoxStyle }}
+              sx={uploadBoxSx}
             >
               <input
                 type="file"
@@ -148,38 +184,43 @@ const ImageUploadStep = () => {
                   handleSingleImageUpload(section, e.target.files);
                 }}
               />
-              <FiUpload size={24} />
-              <Typography>Upload Image</Typography>
+              <Box sx={{ color: "grey.400", lineHeight: 0 }}>
+                <FiUpload size={28} />
+              </Box>
+              <Typography fontSize="0.85rem" fontWeight={600} color="text.secondary">
+                Upload Image
+              </Typography>
             </Box>
           )}
           {photo && (
-            <Box sx={{ mt: 1 }}>
+            <Box>
               <Box sx={{ position: "relative" }}>
-                <img
+                <Box
+                  component="img"
                   src={photo.url}
                   alt={title}
-                  style={imagePreviewStyle}
+                  sx={uploadedImageSx}
                 />
                 <IconButton
                   onClick={() => setPreviewUrl(photo.url)}
-                  sx={viewButtonStyle}
+                  sx={{ position: "absolute", top: 4, left: 4, bgcolor: "rgba(0,0,0,0.45)", color: "white", borderRadius: "50%", p: 0.5, "&:hover": { bgcolor: "rgba(0,0,0,0.7)" } }}
                 >
-                  <FiZoomIn size={16} />
+                  <FiZoomIn size={15} />
                 </IconButton>
                 <IconButton
                   onClick={() => handleRemoveImage(section, 0)}
-                  sx={removeButtonStyle}
+                  sx={{ position: "absolute", top: 4, right: 4, bgcolor: "primary.main", color: "white", borderRadius: "50%", p: 0.5, "&:hover": { bgcolor: "primary.dark" } }}
                 >
-                  <FiX size={16} />
+                  <FiX size={15} />
                 </IconButton>
               </Box>
               <TextField
                 fullWidth
                 size="small"
-                label="Add a note about this area"
+                placeholder="Add a note..."
                 value={photo.note || ""}
                 onChange={(e) => handleNoteChange(section, 0, e.target.value)}
-                sx={{ mt: 1 }}
+                sx={{ mt: 1.5, "& .MuiOutlinedInput-root": { borderRadius: 2, fontSize: "0.85rem" } }}
               />
             </Box>
           )}
@@ -194,13 +235,11 @@ const ImageUploadStep = () => {
       const images = localImages[section] || [];
       return (
         <Grid item xs={12} sm={6} md={4} key={section}>
-          <Typography variant="h6" gutterBottom>
-            {title}
-          </Typography>
+          <Typography sx={sectionTitleSx}>{title}</Typography>
           <Box
             component="label"
             htmlFor={`upload-${section}`}
-            sx={{ ...uploadBoxStyle }}
+            sx={uploadBoxSx}
           >
             <input
               type="file"
@@ -213,37 +252,42 @@ const ImageUploadStep = () => {
                 handleMultipleImageUpload(section, e.target.files);
               }}
             />
-            <FiUpload size={24} />
-            <Typography>Upload Images (Max 5)</Typography>
+            <Box sx={{ color: "grey.400", lineHeight: 0 }}>
+              <FiUpload size={28} />
+            </Box>
+            <Typography fontSize="0.85rem" fontWeight={600} color="text.secondary">
+              Upload Images (Max 5)
+            </Typography>
           </Box>
           {images.map((photo, index) => (
             <Box key={index} sx={{ mt: 2 }}>
               <Box sx={{ position: "relative" }}>
-                <img
+                <Box
+                  component="img"
                   src={photo.url}
                   alt={`${title} ${index + 1}`}
-                  style={thumbnailStyle}
+                  sx={uploadedImageSx}
                 />
                 <IconButton
                   onClick={() => setPreviewUrl(photo.url)}
-                  sx={viewButtonStyle}
+                  sx={{ position: "absolute", top: 4, left: 4, bgcolor: "rgba(0,0,0,0.45)", color: "white", borderRadius: "50%", p: 0.5, "&:hover": { bgcolor: "rgba(0,0,0,0.7)" } }}
                 >
-                  <FiZoomIn size={16} />
+                  <FiZoomIn size={15} />
                 </IconButton>
                 <IconButton
                   onClick={() => handleRemoveImage(section, index)}
-                  sx={removeButtonStyle}
+                  sx={{ position: "absolute", top: 4, right: 4, bgcolor: "primary.main", color: "white", borderRadius: "50%", p: 0.5, "&:hover": { bgcolor: "primary.dark" } }}
                 >
-                  <FiX size={16} />
+                  <FiX size={15} />
                 </IconButton>
               </Box>
               <TextField
                 fullWidth
                 size="small"
-                label="Add a note about this area"
+                placeholder="Add a note..."
                 value={photo.note || ""}
                 onChange={(e) => handleNoteChange(section, index, e.target.value)}
-                sx={{ mt: 1 }}
+                sx={{ mt: 1.5, "& .MuiOutlinedInput-root": { borderRadius: 2, fontSize: "0.85rem" } }}
               />
             </Box>
           ))}
@@ -253,67 +297,13 @@ const ImageUploadStep = () => {
     [handleMultipleImageUpload, localImages, handleRemoveImage, handleNoteChange]
   );
 
-  const uploadBoxStyle = {
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    padding: (theme) => theme.spacing(3),
-    textAlign: "center",
-    cursor: "pointer",
-    border: (theme) => `2px dashed ${theme.palette.grey[400]}`,
-    borderRadius: (theme) => theme.shape.borderRadius,
-    "&:hover": {
-      borderColor: (theme) => theme.palette.primary.main,
-    },
-  };
-
-  const imagePreviewStyle = {
-    width: "100%",
-    height: 128,
-    objectFit: "cover",
-    borderRadius: (theme) => theme.shape.borderRadius,
-  };
-
-  const thumbnailStyle = {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    borderRadius: (theme) => theme.shape.borderRadius,
-  };
-
-  const viewButtonStyle = {
-    position: "absolute",
-    top: 2,
-    left: 2,
-    bgcolor: "rgba(0,0,0,0.5)",
-    color: "white",
-    borderRadius: "50%",
-    p: 0.5,
-    "&:hover": {
-      bgcolor: "rgba(0,0,0,0.7)",
-    },
-  };
-
-  const removeButtonStyle = {
-    position: "absolute",
-    top: 2,
-    right: 2,
-    bgcolor: "primary.main",
-    color: "white",
-    borderRadius: "50%",
-    p: 0.5,
-    "&:hover": {
-      bgcolor: "primary.dark",
-    },
-  };
-
   return (
     <Box>
       <Box textAlign="center" mb={4}>
-        <Typography variant="h4" fontWeight={700}>
+        <Typography variant="h4" fontWeight={700} fontSize="1.75rem">
           Upload Photos
         </Typography>
-        <Typography variant="body1" color="text.secondary" mt={0.5}>
+        <Typography variant="body1" color="text.secondary" mt={0.5} fontSize="0.95rem">
           Take clear photos of each angle
         </Typography>
       </Box>
@@ -323,11 +313,11 @@ const ImageUploadStep = () => {
         </Box>
       )}
       {uploadError && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setUploadError(null)}>
+        <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }} onClose={() => setUploadError(null)}>
           {uploadError}
         </Alert>
       )}
-      <Grid container spacing={3}>
+      <Grid container spacing={2.5}>
         {renderSingleImageSection("Left Side", "leftSide")}
         {renderSingleImageSection("Right Side", "rightSide")}
         {renderSingleImageSection("Top View", "topView")}
