@@ -129,14 +129,16 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     return (
       <Box sx={{ width: "100%", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", px: { xs: 2, sm: 4 } }}>
         <Paper variant="outlined" sx={{ p: 5, maxWidth: 640, textAlign: "center" }}>
-          <Box sx={{ position: "relative", fontSize: 72, mb: 2, width: 84, height: 84, mx: "auto" }}>
-            <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", animation: `${float} 3s ease-in-out infinite` }}>
-              👟
+            <Box sx={{ position: "relative", fontSize: 72, mb: 2, width: 84, height: 84, mx: "auto" }}>
+              <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", animation: `${float} 3s ease-in-out infinite` }}>
+                👟
+              </Box>
+              {!isPreview && (
+                <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", animation: `${float} 3s ease-in-out infinite, ${cleanOff} 3s ease-in-out forwards` }}>
+                  👟
+                </Box>
+              )}
             </Box>
-            <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", animation: `${float} 3s ease-in-out infinite, ${cleanOff} 3s ease-in-out forwards` }}>
-              👟
-            </Box>
-          </Box>
           <Typography variant="h3" fontWeight={700} mb={1}>
             Start Your Request
           </Typography>
