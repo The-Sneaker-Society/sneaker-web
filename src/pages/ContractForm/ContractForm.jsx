@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper, Divider } from "@mui/material";
-import { FiCheck, FiSend, FiMessageCircle, FiDollarSign, FiTruck, FiTool, FiPackage, FiSmile } from "react-icons/fi";
-import { keyframes } from "@mui/system";
+import React, { useState } from "react";
+import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
 import ShoeInfoStep from "./ShoeInfoStep";
 import ImageUploadStep from "./ImageUploadStep";
 import ConfirmationStep from "./ConfirmStep";
+import TimelineCarousel from "./TimelineCarousel";
+import ShoeAnimation from "./ShoeAnimation";
 import { useParams } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import NotAcceptingContracts from "../../components/NotAcceptingContracts";
@@ -71,44 +71,10 @@ const initialValues = {
   },
 };
 
-const float = keyframes`
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-`;
-
-const cleanOff = keyframes`
-  0%, 30% { opacity: 1; filter: sepia(0.7) saturate(2.5) brightness(0.65); }
-  100% { opacity: 0; filter: none; }
-`;
-
-const fadeStain = keyframes`
-  0%, 15% { opacity: 1; }
-  100% { opacity: 0; }
-`;
-
-const TIMELINE_STEPS = [
-  { icon: <FiSend size={24} />, label: "Submit request", desc: "Tell us about your sneakers and upload photos" },
-  { icon: <FiMessageCircle size={24} />, label: "Member reviews", desc: "A member reviews your request and details" },
-  { icon: <FiDollarSign size={24} />, label: "Agree on price", desc: "Discuss and agree on the service price" },
-  { icon: <FiTruck size={24} />, label: "Ship them off", desc: "Send your sneakers to the member" },
-  { icon: <FiTool size={24} />, label: "Work begins", desc: "The member works on your sneakers with progress updates" },
-  { icon: <FiCheck size={24} />, label: "Work completed", desc: "Repairs are finished and quality checked" },
-  { icon: <FiPackage size={24} />, label: "Shipped back", desc: "Your sneakers are on their way back to you" },
-  { icon: <FiSmile size={24} />, label: "Enjoy", desc: "Rock your fresh sneakers" },
-];
-
 export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
-  const [carouselIdx, setCarouselIdx] = useState(0);
   const { memberId: memberIdParam } = useParams();
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCarouselIdx((prev) => (prev + 1) % TIMELINE_STEPS.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, []);
 
   const [createContract] = useMutation(CREATE_CONTRACT);
 
@@ -129,56 +95,17 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     return (
       <Box sx={{ width: "100%", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", px: { xs: 2, sm: 4 } }}>
         <Paper variant="outlined" sx={{ p: 5, maxWidth: 640, textAlign: "center" }}>
-            <Box sx={{ position: "relative", fontSize: 72, mb: 2, width: 84, height: 84, mx: "auto" }}>
-              <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", animation: `${float} 3s ease-in-out infinite` }}>
-                👟
-              </Box>
-              {!isPreview && (
-                <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", animation: `${float} 3s ease-in-out infinite, ${cleanOff} 3s ease-in-out forwards` }}>
-                  👟
-                </Box>
-              )}
-            </Box>
+          <ShoeAnimation isPreview={isPreview} />
           <Typography variant="h3" fontWeight={700} mb={1}>
             Start Your Request
           </Typography>
           <Typography variant="body1" color="text.secondary" mb={4}>
             Tell us about your sneakers, upload photos, describe what you want done, and we'll take it from there.
           </Typography>
-
           <Box sx={{ width: "100%", mb: 4, mt: 5 }}>
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, minHeight: 140, position: "relative", overflow: "hidden" }}>
-              {TIMELINE_STEPS.map((item, i) => (
-                <Box
-                  key={i}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 1.5,
-                    position: "absolute",
-                    width: "100%",
-                    transition: "transform 0.4s ease, opacity 0.4s ease",
-                    transform: `translateX(${(i - carouselIdx) * 120}%)`,
-                    opacity: i === carouselIdx ? 1 : 0,
-                  }}
-                >
-                  <Box sx={{ width: 56, height: 56, borderRadius: "50%", bgcolor: "primary.main", display: "flex", alignItems: "center", justifyContent: "center", color: "common.white" }}>
-                    {item.icon}
-                  </Box>
-                  <Typography variant="h6" fontWeight={700}>
-                    {item.label}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 280 }}>
-                    {item.desc}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
+            <TimelineCarousel />
           </Box>
-
           <Box sx={{ mt: 5 }} />
-
           <Button variant="contained" color="primary" size="large" onClick={() => setShowIntro(false)}>
             Get Started
           </Button>
