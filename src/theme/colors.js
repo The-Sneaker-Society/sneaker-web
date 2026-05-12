@@ -29,7 +29,7 @@ export const getColors = (mode) => {
     },
 
     accent: palette,
-    primary: palette.redAccent[500],
+    primary: palette.yellowAccent[500],
     secondary: palette.greenAccent[500],
     warning: '#ffc31c',
   };

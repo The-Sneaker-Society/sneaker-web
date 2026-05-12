@@ -1,10 +1,11 @@
 import React from "react";
 import { Box, Icon, Typography, Skeleton } from "@mui/material";
 import ImageDownloadButton from "../pages/Dashboard/ImageDownloadButton";
+import QrActionButton from "./QrActionButton";
 import { useQuery, gql } from "@apollo/client";
 import { FaLink } from "react-icons/fa6";
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useColors } from "../theme/colors";
 
 const GET_MEMBER_QR_WIDGET_DATA = gql`
@@ -22,6 +23,7 @@ const GET_MEMBER_QR_WIDGET_DATA = gql`
 export const QrWidget = () => {
   const { loading, error, data } = useQuery(GET_MEMBER_QR_WIDGET_DATA);
   const colors = useColors();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -102,9 +104,11 @@ export const QrWidget = () => {
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-around",
+        flexDirection: { xs: "column", sm: "row" },
+        justifyContent: "center",
+        alignItems: "center",
         width: "100%",
+        height: "100%",
         borderRadius: 2,
         border: `4px solid ${colors.border}`,
         padding: "20px",
@@ -113,45 +117,51 @@ export const QrWidget = () => {
         color: colors.textPrimary,
       }}
     >
-      <Box>
-        <Typography
-          variant="h3"
-          sx={{
-            fontWeight: "bold",
-            color: colors.textPrimary,
-            marginBottom: "8px",
+      <Box
+        sx={{
+          flex: "0 0 auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <img
+          src={image}
+          alt="QR Code"
+          style={{
+            width: "200px",
+            height: "200px",
           }}
-        >
-          Custom Intake Link
-        </Typography>
-        <Typography
-          variant="h6"
-          sx={{
-            color: colors.textSecondary,
-          }}
-        >
-          Share you custom link to start getting intakes!
-        </Typography>
+        />
       </Box>
 
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-around",
+          flexDirection: "column",
+          justifyContent: "center",
           alignItems: "center",
-          flexWrap: "wrap",
-          gap: 4,
         }}
       >
-        <Box>
-          <img
-            src={image}
-            alt="QR Code"
-            style={{
-              width: "120px",
-              height: "120px",
+        <Box sx={{ mb: 3, textAlign: "center" }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: "bold",
+              color: colors.textPrimary,
+              marginBottom: "8px",
             }}
-          />
+          >
+            Custom Intake Link
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{
+              color: colors.textSecondary,
+            }}
+          >
+            Share your custom link to start getting intakes!
+          </Typography>
         </Box>
 
         <Box
@@ -159,29 +169,22 @@ export const QrWidget = () => {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            width: "100%",
+            maxWidth: "280px",
           }}
         >
-          <Link href="/contract/:memberId" target="_blank">
-            <Typography
-              component="a"
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                textDecoration: "none",
-                color: colors.textPrimary,
-                fontSize: "0.9rem",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Icon sx={{ display: "flex", alignItems: "center" }}>
-                <FaLink />
-              </Icon>
-              Link
-            </Typography>
-          </Link>
+          <QrActionButton
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            startIcon={<Icon sx={{ display: "flex", alignItems: "center" }}><FaLink /></Icon>}
+          >
+            Link
+          </QrActionButton>
           <ImageDownloadButton imageSrc={image} />
+          <QrActionButton onClick={() => navigate("/member/preview-contract")}>
+            Preview
+          </QrActionButton>
         </Box>
       </Box>
     </Box>
