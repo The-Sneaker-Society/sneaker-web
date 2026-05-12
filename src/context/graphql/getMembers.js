@@ -1,15 +1,20 @@
 import { gql } from "@apollo/client";
 
 export const GET_DISCOVER_MEMBERS = gql`
-  query GetDiscoverMembers {
-    members {
-      id
-      firstName
-      lastName
-      businessName
-      state
-      isActive
-      subscriptionStatus
+  query GetDiscoverMembers($limit: Int, $offset: Int) {
+    getDiscoverMembers(limit: $limit, offset: $offset) {
+      items {
+        id
+        firstName
+        lastName
+        businessName
+        state
+        isActive
+        subscriptionStatus
+      }
+      totalCount
+      hasMore
+      nextOffset
     }
   }
 `;

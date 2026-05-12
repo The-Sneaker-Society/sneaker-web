@@ -11,7 +11,6 @@ import {
 import { ExploreOutlined, RefreshOutlined } from "@mui/icons-material";
 import { useQuery, useMutation } from "@apollo/client";
 import { useColors } from "../../theme/colors";
-import { useSneakerMember } from "../../context/MemberContext";
 import {
   GET_DISCOVER_MEMBERS,
   FOLLOW_MEMBER,
@@ -21,7 +20,6 @@ import AccountCard from "./AccountCard";
 
 const PAGE_SIZE = 10;
 
-// Skeleton matches the two-row AccountCard layout (header + chip row)
 const AccountCardSkeleton = ({ colors }) => (
   <Box
     sx={{
@@ -40,7 +38,6 @@ const AccountCardSkeleton = ({ colors }) => (
       </Box>
       <Skeleton variant="rounded" width={80} height={34} sx={{ borderRadius: "20px", flexShrink: 0 }} />
     </Box>
-    {/* Chip row skeleton */}
     <Box sx={{ display: "flex", gap: 1, mt: 1.5 }}>
       <Skeleton variant="rounded" width={72} height={24} sx={{ borderRadius: "12px" }} />
       <Skeleton variant="rounded" width={56} height={24} sx={{ borderRadius: "12px" }} />
@@ -48,120 +45,32 @@ const AccountCardSkeleton = ({ colors }) => (
   </Box>
 );
 
-// Full-page error state with retry
 const ErrorState = ({ colors, onRetry }) => (
-  <Box
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      py: 8,
-      gap: 2,
-    }}
-  >
-    <Box
-      sx={{
-        width: 64,
-        height: 64,
-        borderRadius: "50%",
-        backgroundColor: colors.isDark ? "#2a1010" : "#fdecea",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", py: 8, gap: 2 }}>
+    <Box sx={{ width: 64, height: 64, borderRadius: "50%", backgroundColor: colors.isDark ? "#2a1010" : "#fdecea", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <RefreshOutlined sx={{ fontSize: 32, color: "#e74c3c" }} />
     </Box>
-    <Typography
-      sx={{
-        fontFamily: "Montserrat, sans-serif",
-        fontWeight: 600,
-        fontSize: "1rem",
-        color: colors.textPrimary,
-        textAlign: "center",
-      }}
-    >
+    <Typography sx={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: "1rem", color: colors.textPrimary, textAlign: "center" }}>
       Couldn't load accounts
     </Typography>
-    <Typography
-      sx={{
-        fontFamily: "Montserrat, sans-serif",
-        fontSize: "0.85rem",
-        color: colors.textSecondary,
-        textAlign: "center",
-        maxWidth: 280,
-      }}
-    >
+    <Typography sx={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: colors.textSecondary, textAlign: "center", maxWidth: 280 }}>
       Something went wrong fetching the community. Check your connection and try again.
     </Typography>
-    <Button
-      onClick={onRetry}
-      startIcon={<RefreshOutlined />}
-      sx={{
-        fontFamily: "Montserrat, sans-serif",
-        fontWeight: 600,
-        fontSize: "0.85rem",
-        textTransform: "none",
-        borderRadius: "20px",
-        px: 3,
-        mt: 1,
-        backgroundColor: "#FFD100",
-        color: "#000",
-        "&:hover": { backgroundColor: "#E6BC00" },
-      }}
-    >
+    <Button onClick={onRetry} startIcon={<RefreshOutlined />} sx={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: "0.85rem", textTransform: "none", borderRadius: "20px", px: 3, mt: 1, backgroundColor: "#FFD100", color: "#000", "&:hover": { backgroundColor: "#E6BC00" } }}>
       Try again
     </Button>
   </Box>
 );
 
-// Empty state — no members left to discover
 const EmptyState = ({ colors }) => (
-  <Box
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      py: 8,
-      gap: 2,
-    }}
-  >
-    <Box
-      sx={{
-        width: 80,
-        height: 80,
-        borderRadius: "50%",
-        backgroundColor: colors.isDark ? "#1a1a1a" : "#f0f0f0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", py: 8, gap: 2 }}>
+    <Box sx={{ width: 80, height: 80, borderRadius: "50%", backgroundColor: colors.isDark ? "#1a1a1a" : "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <ExploreOutlined sx={{ fontSize: 40, color: "#FFD100" }} />
     </Box>
-    <Typography
-      sx={{
-        fontFamily: "Montserrat, sans-serif",
-        fontWeight: 700,
-        fontSize: "1.1rem",
-        color: colors.textPrimary,
-        textAlign: "center",
-      }}
-    >
+    <Typography sx={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: "1.1rem", color: colors.textPrimary, textAlign: "center" }}>
       You've discovered everyone for now
     </Typography>
-    <Typography
-      sx={{
-        fontFamily: "Montserrat, sans-serif",
-        fontSize: "0.85rem",
-        color: colors.textSecondary,
-        textAlign: "center",
-        maxWidth: 300,
-        lineHeight: 1.6,
-      }}
-    >
+    <Typography sx={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: colors.textSecondary, textAlign: "center", maxWidth: 300, lineHeight: 1.6 }}>
       New members join the Sneaker Society community all the time. Check back soon to find more people to follow.
     </Typography>
   </Box>
@@ -169,40 +78,66 @@ const EmptyState = ({ colors }) => (
 
 const DiscoverFeed = () => {
   const colors = useColors();
-  const { member: currentMember } = useSneakerMember();
 
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  // Accumulated accounts across all loaded pages
+  const [allAccounts, setAllAccounts] = useState([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextOffset, setNextOffset] = useState(null);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
   const [following, setFollowing] = useState({});
   const [pendingIds, setPendingIds] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 
   const sentinelRef = useRef(null);
 
-  const { data, loading, error, refetch } = useQuery(GET_DISCOVER_MEMBERS);
+  const { loading, error, fetchMore, refetch } = useQuery(GET_DISCOVER_MEMBERS, {
+    variables: { limit: PAGE_SIZE, offset: 0 },
+    onCompleted: (data) => {
+      const page = data?.getDiscoverMembers;
+      if (!page) return;
+      setAllAccounts(page.items);
+      setHasMore(page.hasMore);
+      setNextOffset(page.nextOffset);
+    },
+  });
 
   const [followMember] = useMutation(FOLLOW_MEMBER);
   const [unfollowMember] = useMutation(UNFOLLOW_MEMBER);
 
-  const allAccounts = (data?.members || []).filter(
-    (m) => m.id !== currentMember?.id
-  );
-
-  const visibleAccounts = allAccounts.slice(0, visibleCount);
-  const hasMore = visibleCount < allAccounts.length;
-
+  // IntersectionObserver — fires fetchMore when sentinel enters viewport
   useEffect(() => {
-    if (!sentinelRef.current || !hasMore) return;
+    if (!sentinelRef.current || !hasMore || isFetchingMore) return;
+
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount((prev) => prev + PAGE_SIZE);
+      async (entries) => {
+        if (!entries[0].isIntersecting) return;
+        setIsFetchingMore(true);
+        try {
+          const result = await fetchMore({
+            variables: { limit: PAGE_SIZE, offset: nextOffset },
+          });
+          const page = result.data?.getDiscoverMembers;
+          if (!page) return;
+          setAllAccounts((prev) => {
+            const existingIds = new Set(prev.map((m) => m.id));
+            const fresh = page.items.filter((m) => !existingIds.has(m.id));
+            return [...prev, ...fresh];
+          });
+          setHasMore(page.hasMore);
+          setNextOffset(page.nextOffset);
+        } catch {
+          // fetchMore error — leave list as-is, user can scroll up and back
+        } finally {
+          setIsFetchingMore(false);
         }
       },
       { threshold: 0.1 }
     );
+
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
-  }, [hasMore, visibleAccounts.length]);
+  }, [hasMore, isFetchingMore, nextOffset, fetchMore]);
 
   const handleFollow = useCallback(
     async (memberId) => {
@@ -231,39 +166,26 @@ const DiscoverFeed = () => {
   );
 
   const handleRetry = () => {
-    setVisibleCount(PAGE_SIZE);
-    refetch();
+    setAllAccounts([]);
+    setHasMore(false);
+    setNextOffset(null);
+    refetch({ limit: PAGE_SIZE, offset: 0 });
   };
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Typography
-        sx={{
-          fontFamily: "Montserrat, sans-serif",
-          fontWeight: 600,
-          fontSize: { xs: "1.3rem", sm: "1.6rem" },
-          color: colors.textPrimary,
-          mb: 0.5,
-        }}
-      >
+      <Typography sx={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: { xs: "1.3rem", sm: "1.6rem" }, color: colors.textPrimary, mb: 0.5 }}>
         Recommended Accounts
       </Typography>
-      <Typography
-        sx={{
-          fontFamily: "Montserrat, sans-serif",
-          fontSize: "0.9rem",
-          color: colors.textSecondary,
-          mb: 3,
-        }}
-      >
+      <Typography sx={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.9rem", color: colors.textSecondary, mb: 3 }}>
         Discover members and creators in the Sneaker Society community.
       </Typography>
 
-      {/* Loading skeletons */}
-      {loading &&
-        [...Array(5)].map((_, i) => (
-          <AccountCardSkeleton key={i} colors={colors} />
-        ))}
+      {/* Initial loading skeletons */}
+      {loading && [...Array(5)].map((_, i) => <AccountCardSkeleton key={i} colors={colors} />)}
+
+      {/* Error state */}
+      {!loading && error && <ErrorState colors={colors} onRetry={handleRetry} />}
 
       {/* Error state with retry */}
       {!loading && error && (
@@ -271,22 +193,18 @@ const DiscoverFeed = () => {
       )}
 
       {/* Account cards */}
-      {!loading &&
-        !error &&
-        visibleAccounts.map((member) => (
-          <AccountCard
-            key={member.id}
-            member={member}
-            isFollowing={!!following[member.id]}
-            isPending={!!pendingIds[member.id]}
-            onFollow={handleFollow}
-          />
-        ))}
+      {!loading && !error && allAccounts.map((member) => (
+        <AccountCard
+          key={member.id}
+          member={member}
+          isFollowing={!!following[member.id]}
+          isPending={!!pendingIds[member.id]}
+          onFollow={handleFollow}
+        />
+      ))}
 
       {/* Empty state */}
-      {!loading && !error && allAccounts.length === 0 && (
-        <EmptyState colors={colors} />
-      )}
+      {!loading && !error && allAccounts.length === 0 && <EmptyState colors={colors} />}
 
       {/* Infinite scroll sentinel */}
       {!loading && !error && hasMore && (
@@ -295,34 +213,16 @@ const DiscoverFeed = () => {
         </Box>
       )}
 
-      {/* End-of-list message */}
+      {/* End-of-list */}
       {!loading && !error && !hasMore && allAccounts.length > PAGE_SIZE && (
-        <Typography
-          sx={{
-            fontFamily: "Montserrat, sans-serif",
-            fontSize: "0.8rem",
-            color: colors.textSecondary,
-            textAlign: "center",
-            py: 3,
-            opacity: 0.6,
-          }}
-        >
+        <Typography sx={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.8rem", color: colors.textSecondary, textAlign: "center", py: 3, opacity: 0.6 }}>
           You've seen all {allAccounts.length} members
         </Typography>
       )}
 
       {/* Follow/unfollow error snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ open: false, message: "" })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbar({ open: false, message: "" })}
-          severity="error"
-          sx={{ width: "100%" }}
-        >
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ open: false, message: "" })} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+        <Alert onClose={() => setSnackbar({ open: false, message: "" })} severity="error" sx={{ width: "100%" }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
