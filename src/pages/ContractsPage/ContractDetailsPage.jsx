@@ -7,6 +7,9 @@ import {
   useMediaQuery,
   useTheme,
   Grid2,
+  Card,
+  CardMedia,
+  CardContent,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client";
@@ -335,6 +338,55 @@ export const ContractDetailsPage = () => {
             </Grid2>
           </Grid2>
         </Box>
+
+        {/* Photos Section */}
+        {contract.shoeDetails?.photos && (
+          <Box sx={{ mb: isMobile ? 4 : 6 }}>
+            <Typography
+              variant="h5"
+              sx={{
+                mb: isMobile ? 2 : 3,
+                fontSize: isMobile ? "1.5rem" : "1.75rem",
+                fontWeight: "normal",
+              }}
+            >
+              Photos
+            </Typography>
+            <Grid2 container spacing={2}>
+              {Object.entries(contract.shoeDetails.photos).map(
+                ([section, photos]) =>
+                  photos?.length > 0 && (
+                    <Grid2 xs={12} sm={6} md={4} key={section}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ mb: 1, textTransform: "capitalize", color: "grey.400" }}
+                      >
+                        {section.replace(/([A-Z])/g, " $1").trim()}
+                      </Typography>
+                      {photos.map((photo, idx) => (
+                        <Card key={idx} sx={{ mb: 1, bgcolor: "grey.900" }}>
+                          <CardMedia
+                            component="img"
+                            height="160"
+                            image={photo.url}
+                            alt={`${section} ${idx + 1}`}
+                            sx={{ objectFit: "cover" }}
+                          />
+                          {photo.note && (
+                            <CardContent sx={{ py: 1, "&:last-child": { pb: 1 } }}>
+                              <Typography variant="body2" color="grey.400">
+                                {photo.note}
+                              </Typography>
+                            </CardContent>
+                          )}
+                        </Card>
+                      ))}
+                    </Grid2>
+                  )
+              )}
+            </Grid2>
+          </Box>
+        )}
 
         {/* Repair Details Section */}
         <Box sx={{ mb: isMobile ? 4 : 6 }}>
