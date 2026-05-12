@@ -56,6 +56,15 @@ export const GET_CONTRACT_BY_ID = gql`
         model
         color
         size
+        photos {
+          leftSide { url note }
+          rightSide { url note }
+          topView { url note }
+          bottomView { url note }
+          frontView { url note }
+          backView { url note }
+          other { url note }
+        }
       }
       repairDetails {
         clientNotes
