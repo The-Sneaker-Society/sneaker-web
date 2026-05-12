@@ -1,6 +1,14 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { Box, Typography, Skeleton, Alert, Snackbar, CircularProgress } from "@mui/material";
-import { ExploreOutlined } from "@mui/icons-material";
+import {
+  Box,
+  Typography,
+  Skeleton,
+  Snackbar,
+  Alert,
+  Button,
+  CircularProgress,
+} from "@mui/material";
+import { ExploreOutlined, RefreshOutlined } from "@mui/icons-material";
 import { useQuery, useMutation } from "@apollo/client";
 import { useColors } from "../../theme/colors";
 import { useSneakerMember } from "../../context/MemberContext";
@@ -13,12 +21,10 @@ import AccountCard from "./AccountCard";
 
 const PAGE_SIZE = 10;
 
+// Skeleton matches the two-row AccountCard layout (header + chip row)
 const AccountCardSkeleton = ({ colors }) => (
   <Box
     sx={{
-      display: "flex",
-      alignItems: "center",
-      gap: 2,
       p: { xs: 2, sm: 2.5 },
       borderRadius: "16px",
       backgroundColor: colors.isDark ? "#1a1a1a" : "#f0f0f0",
@@ -26,12 +32,138 @@ const AccountCardSkeleton = ({ colors }) => (
       mb: 2,
     }}
   >
-    <Skeleton variant="circular" width={52} height={52} sx={{ flexShrink: 0 }} />
-    <Box sx={{ flex: 1 }}>
-      <Skeleton variant="text" width="45%" height={20} />
-      <Skeleton variant="text" width="65%" height={16} sx={{ mt: 0.5 }} />
+    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+      <Skeleton variant="circular" width={52} height={52} sx={{ flexShrink: 0 }} />
+      <Box sx={{ flex: 1 }}>
+        <Skeleton variant="text" width="45%" height={20} />
+        <Skeleton variant="text" width="60%" height={16} sx={{ mt: 0.5 }} />
+      </Box>
+      <Skeleton variant="rounded" width={80} height={34} sx={{ borderRadius: "20px", flexShrink: 0 }} />
     </Box>
-    <Skeleton variant="rounded" width={76} height={34} sx={{ borderRadius: "20px", flexShrink: 0 }} />
+    {/* Chip row skeleton */}
+    <Box sx={{ display: "flex", gap: 1, mt: 1.5 }}>
+      <Skeleton variant="rounded" width={72} height={24} sx={{ borderRadius: "12px" }} />
+      <Skeleton variant="rounded" width={56} height={24} sx={{ borderRadius: "12px" }} />
+    </Box>
+  </Box>
+);
+
+// Full-page error state with retry
+const ErrorState = ({ colors, onRetry }) => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      py: 8,
+      gap: 2,
+    }}
+  >
+    <Box
+      sx={{
+        width: 64,
+        height: 64,
+        borderRadius: "50%",
+        backgroundColor: colors.isDark ? "#2a1010" : "#fdecea",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <RefreshOutlined sx={{ fontSize: 32, color: "#e74c3c" }} />
+    </Box>
+    <Typography
+      sx={{
+        fontFamily: "Montserrat, sans-serif",
+        fontWeight: 600,
+        fontSize: "1rem",
+        color: colors.textPrimary,
+        textAlign: "center",
+      }}
+    >
+      Couldn't load accounts
+    </Typography>
+    <Typography
+      sx={{
+        fontFamily: "Montserrat, sans-serif",
+        fontSize: "0.85rem",
+        color: colors.textSecondary,
+        textAlign: "center",
+        maxWidth: 280,
+      }}
+    >
+      Something went wrong fetching the community. Check your connection and try again.
+    </Typography>
+    <Button
+      onClick={onRetry}
+      startIcon={<RefreshOutlined />}
+      sx={{
+        fontFamily: "Montserrat, sans-serif",
+        fontWeight: 600,
+        fontSize: "0.85rem",
+        textTransform: "none",
+        borderRadius: "20px",
+        px: 3,
+        mt: 1,
+        backgroundColor: "#FFD100",
+        color: "#000",
+        "&:hover": { backgroundColor: "#E6BC00" },
+      }}
+    >
+      Try again
+    </Button>
+  </Box>
+);
+
+// Empty state — no members left to discover
+const EmptyState = ({ colors }) => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      py: 8,
+      gap: 2,
+    }}
+  >
+    <Box
+      sx={{
+        width: 80,
+        height: 80,
+        borderRadius: "50%",
+        backgroundColor: colors.isDark ? "#1a1a1a" : "#f0f0f0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <ExploreOutlined sx={{ fontSize: 40, color: "#FFD100" }} />
+    </Box>
+    <Typography
+      sx={{
+        fontFamily: "Montserrat, sans-serif",
+        fontWeight: 700,
+        fontSize: "1.1rem",
+        color: colors.textPrimary,
+        textAlign: "center",
+      }}
+    >
+      You've discovered everyone for now
+    </Typography>
+    <Typography
+      sx={{
+        fontFamily: "Montserrat, sans-serif",
+        fontSize: "0.85rem",
+        color: colors.textSecondary,
+        textAlign: "center",
+        maxWidth: 300,
+        lineHeight: 1.6,
+      }}
+    >
+      New members join the Sneaker Society community all the time. Check back soon to find more people to follow.
+    </Typography>
   </Box>
 );
 
@@ -39,25 +171,18 @@ const DiscoverFeed = () => {
   const colors = useColors();
   const { member: currentMember } = useSneakerMember();
 
-  // How many accounts are currently visible
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-
-  // Optimistic follow state keyed by memberId
   const [following, setFollowing] = useState({});
-  // Track which member IDs have an in-flight mutation
   const [pendingIds, setPendingIds] = useState({});
-  // Error snackbar for follow/unfollow failures
   const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 
-  // Sentinel ref for IntersectionObserver
   const sentinelRef = useRef(null);
 
-  const { data, loading, error } = useQuery(GET_DISCOVER_MEMBERS);
+  const { data, loading, error, refetch } = useQuery(GET_DISCOVER_MEMBERS);
 
   const [followMember] = useMutation(FOLLOW_MEMBER);
   const [unfollowMember] = useMutation(UNFOLLOW_MEMBER);
 
-  // Filter out the current logged-in member
   const allAccounts = (data?.members || []).filter(
     (m) => m.id !== currentMember?.id
   );
@@ -65,10 +190,8 @@ const DiscoverFeed = () => {
   const visibleAccounts = allAccounts.slice(0, visibleCount);
   const hasMore = visibleCount < allAccounts.length;
 
-  // IntersectionObserver — load next page when sentinel enters viewport
   useEffect(() => {
     if (!sentinelRef.current || !hasMore) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -77,7 +200,6 @@ const DiscoverFeed = () => {
       },
       { threshold: 0.1 }
     );
-
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [hasMore, visibleAccounts.length]);
@@ -85,11 +207,8 @@ const DiscoverFeed = () => {
   const handleFollow = useCallback(
     async (memberId) => {
       const currentlyFollowing = !!following[memberId];
-
-      // Optimistic update — flip state immediately
       setFollowing((prev) => ({ ...prev, [memberId]: !currentlyFollowing }));
       setPendingIds((prev) => ({ ...prev, [memberId]: true }));
-
       try {
         if (currentlyFollowing) {
           await unfollowMember({ variables: { memberId } });
@@ -97,7 +216,6 @@ const DiscoverFeed = () => {
           await followMember({ variables: { memberId } });
         }
       } catch {
-        // Revert optimistic update on failure
         setFollowing((prev) => ({ ...prev, [memberId]: currentlyFollowing }));
         setSnackbar({
           open: true,
@@ -111,6 +229,11 @@ const DiscoverFeed = () => {
     },
     [following, followMember, unfollowMember]
   );
+
+  const handleRetry = () => {
+    setVisibleCount(PAGE_SIZE);
+    refetch();
+  };
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -136,18 +259,16 @@ const DiscoverFeed = () => {
         Discover members and creators in the Sneaker Society community.
       </Typography>
 
-      {/* Error state */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          Failed to load accounts. Please refresh and try again.
-        </Alert>
-      )}
-
-      {/* Initial loading skeletons */}
+      {/* Loading skeletons */}
       {loading &&
         [...Array(5)].map((_, i) => (
           <AccountCardSkeleton key={i} colors={colors} />
         ))}
+
+      {/* Error state with retry */}
+      {!loading && error && (
+        <ErrorState colors={colors} onRetry={handleRetry} />
+      )}
 
       {/* Account cards */}
       {!loading &&
@@ -164,48 +285,17 @@ const DiscoverFeed = () => {
 
       {/* Empty state */}
       {!loading && !error && allAccounts.length === 0 && (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            py: 8,
-            gap: 2,
-          }}
-        >
-          <ExploreOutlined
-            sx={{ fontSize: 64, color: colors.textSecondary, opacity: 0.4 }}
-          />
-          <Typography
-            sx={{
-              fontFamily: "Montserrat, sans-serif",
-              color: colors.textSecondary,
-              fontSize: "1rem",
-              textAlign: "center",
-              maxWidth: 300,
-            }}
-          >
-            No accounts to discover yet. Check back soon!
-          </Typography>
-        </Box>
+        <EmptyState colors={colors} />
       )}
 
-      {/* Infinite scroll sentinel — triggers next page load */}
+      {/* Infinite scroll sentinel */}
       {!loading && !error && hasMore && (
-        <Box
-          ref={sentinelRef}
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            py: 3,
-          }}
-        >
+        <Box ref={sentinelRef} sx={{ display: "flex", justifyContent: "center", py: 3 }}>
           <CircularProgress size={28} sx={{ color: "#FFD100" }} />
         </Box>
       )}
 
-      {/* End-of-list indicator */}
+      {/* End-of-list message */}
       {!loading && !error && !hasMore && allAccounts.length > PAGE_SIZE && (
         <Typography
           sx={{
@@ -221,7 +311,7 @@ const DiscoverFeed = () => {
         </Typography>
       )}
 
-      {/* Error snackbar for follow/unfollow failures */}
+      {/* Follow/unfollow error snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
