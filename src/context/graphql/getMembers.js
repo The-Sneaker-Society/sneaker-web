@@ -8,6 +8,8 @@ export const GET_DISCOVER_MEMBERS = gql`
       lastName
       businessName
       state
+      isActive
+      subscriptionStatus
     }
   }
 `;
