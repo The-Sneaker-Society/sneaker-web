@@ -187,6 +187,11 @@ const DiscoverFeed = () => {
       {/* Error state */}
       {!loading && error && <ErrorState colors={colors} onRetry={handleRetry} />}
 
+      {/* Error state with retry */}
+      {!loading && error && (
+        <ErrorState colors={colors} onRetry={handleRetry} />
+      )}
+
       {/* Account cards */}
       {!loading && !error && allAccounts.map((member) => (
         <AccountCard
