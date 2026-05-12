@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
 import { useEffect, useState } from "react";
+import { Box, CircularProgress, Alert } from "@mui/material";
 import Chat from "../MemberChat/Chat";
 import { useSneakerMember } from "../../context/MemberContext";
 
@@ -96,10 +97,13 @@ export const ChatDashboardMember = () => {
   useEffect(() => {
     if (data?.getChatById?.messages) {
       setMessages((prevMessages) => {
-        const uniqueMessages = data.getChatById.messages.filter(
-          (newMessage) => !prevMessages.some((msg) => msg.id === newMessage.id)
-        );
-        return [...prevMessages, ...uniqueMessages];
+        const merged = [...prevMessages];
+        for (const msg of data.getChatById.messages) {
+          if (!merged.some((m) => m.id === msg.id)) {
+            merged.push(msg);
+          }
+        }
+        return merged.sort((a, b) => Number(a.createdAt) - Number(b.createdAt));
       });
     }
   }, [data]);
@@ -119,11 +123,27 @@ export const ChatDashboardMember = () => {
   }, [subscriptionData]);
 
   if (!id) {
-    return <div>Chat ID is required</div>;
+    return (
+      <Box sx={{ p: 4 }}>
+        <Alert severity="error">Chat ID is required.</Alert>
+      </Box>
+    );
   }
 
   if (loading || userLoading) {
-    return <div>Loading...</div>;
+    return (
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "50vh" }}>
+        <CircularProgress sx={{ color: "#FFD100" }} />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Alert severity="error">Failed to load chat. Please refresh and try again.</Alert>
+      </Box>
+    );
   }
 
   const otherUserName = data?.getChatById?.user?.email || "Chat";
