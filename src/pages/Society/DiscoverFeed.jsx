@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import { Box, Typography, Skeleton, Alert, Snackbar } from "@mui/material";
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import { Box, Typography, Skeleton, Alert, Snackbar, CircularProgress } from "@mui/material";
 import { ExploreOutlined } from "@mui/icons-material";
 import { useQuery, useMutation } from "@apollo/client";
 import { useColors } from "../../theme/colors";
@@ -10,6 +10,8 @@ import {
   UNFOLLOW_MEMBER,
 } from "../../context/graphql/getMembers";
 import AccountCard from "./AccountCard";
+
+const PAGE_SIZE = 10;
 
 const AccountCardSkeleton = ({ colors }) => (
   <Box
@@ -37,6 +39,9 @@ const DiscoverFeed = () => {
   const colors = useColors();
   const { member: currentMember } = useSneakerMember();
 
+  // How many accounts are currently visible
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
   // Optimistic follow state keyed by memberId
   const [following, setFollowing] = useState({});
   // Track which member IDs have an in-flight mutation
@@ -44,10 +49,38 @@ const DiscoverFeed = () => {
   // Error snackbar for follow/unfollow failures
   const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 
+  // Sentinel ref for IntersectionObserver
+  const sentinelRef = useRef(null);
+
   const { data, loading, error } = useQuery(GET_DISCOVER_MEMBERS);
 
   const [followMember] = useMutation(FOLLOW_MEMBER);
   const [unfollowMember] = useMutation(UNFOLLOW_MEMBER);
+
+  // Filter out the current logged-in member
+  const allAccounts = (data?.members || []).filter(
+    (m) => m.id !== currentMember?.id
+  );
+
+  const visibleAccounts = allAccounts.slice(0, visibleCount);
+  const hasMore = visibleCount < allAccounts.length;
+
+  // IntersectionObserver — load next page when sentinel enters viewport
+  useEffect(() => {
+    if (!sentinelRef.current || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + PAGE_SIZE);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, visibleAccounts.length]);
 
   const handleFollow = useCallback(
     async (memberId) => {
@@ -77,11 +110,6 @@ const DiscoverFeed = () => {
       }
     },
     [following, followMember, unfollowMember]
-  );
-
-  // Filter out the current logged-in member
-  const accounts = (data?.members || []).filter(
-    (m) => m.id !== currentMember?.id
   );
 
   return (
@@ -115,7 +143,7 @@ const DiscoverFeed = () => {
         </Alert>
       )}
 
-      {/* Loading skeletons */}
+      {/* Initial loading skeletons */}
       {loading &&
         [...Array(5)].map((_, i) => (
           <AccountCardSkeleton key={i} colors={colors} />
@@ -124,7 +152,7 @@ const DiscoverFeed = () => {
       {/* Account cards */}
       {!loading &&
         !error &&
-        accounts.map((member) => (
+        visibleAccounts.map((member) => (
           <AccountCard
             key={member.id}
             member={member}
@@ -135,7 +163,7 @@ const DiscoverFeed = () => {
         ))}
 
       {/* Empty state */}
-      {!loading && !error && accounts.length === 0 && (
+      {!loading && !error && allAccounts.length === 0 && (
         <Box
           sx={{
             display: "flex",
@@ -161,6 +189,36 @@ const DiscoverFeed = () => {
             No accounts to discover yet. Check back soon!
           </Typography>
         </Box>
+      )}
+
+      {/* Infinite scroll sentinel — triggers next page load */}
+      {!loading && !error && hasMore && (
+        <Box
+          ref={sentinelRef}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            py: 3,
+          }}
+        >
+          <CircularProgress size={28} sx={{ color: "#FFD100" }} />
+        </Box>
+      )}
+
+      {/* End-of-list indicator */}
+      {!loading && !error && !hasMore && allAccounts.length > PAGE_SIZE && (
+        <Typography
+          sx={{
+            fontFamily: "Montserrat, sans-serif",
+            fontSize: "0.8rem",
+            color: colors.textSecondary,
+            textAlign: "center",
+            py: 3,
+            opacity: 0.6,
+          }}
+        >
+          You've seen all {allAccounts.length} members
+        </Typography>
       )}
 
       {/* Error snackbar for follow/unfollow failures */}
