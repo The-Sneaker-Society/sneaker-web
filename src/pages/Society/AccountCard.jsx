@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, CircularProgress } from "@mui/material";
 import { useColors } from "../../theme/colors";
 
 // Generates initials avatar background color from a string
@@ -15,7 +15,7 @@ const stringToColor = (str = "") => {
 const getInitials = (firstName = "", lastName = "") =>
   `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 
-const AccountCard = ({ member, isFollowing, onFollow }) => {
+const AccountCard = ({ member, isFollowing, isPending, onFollow }) => {
   const colors = useColors();
   const { firstName, lastName, businessName, state } = member;
   const initials = getInitials(firstName, lastName);
@@ -103,10 +103,11 @@ const AccountCard = ({ member, isFollowing, onFollow }) => {
         )}
       </Box>
 
-      {/* Follow button — wired up in follow/unfollow ticket */}
+      {/* Follow / Unfollow button */}
       <Button
-        onClick={() => onFollow(member.id)}
+        onClick={() => !isPending && onFollow(member.id)}
         variant={isFollowing ? "outlined" : "contained"}
+        disabled={isPending}
         sx={{
           fontFamily: "Montserrat, sans-serif",
           fontWeight: 600,
@@ -114,22 +115,34 @@ const AccountCard = ({ member, isFollowing, onFollow }) => {
           textTransform: "none",
           borderRadius: "20px",
           px: 2,
+          minWidth: 88,
           flexShrink: 0,
           ...(isFollowing
             ? {
                 borderColor: colors.isDark ? "#555" : "#bbb",
                 color: colors.textSecondary,
                 "&:hover": { borderColor: "#e74c3c", color: "#e74c3c" },
+                "&.Mui-disabled": { borderColor: colors.isDark ? "#333" : "#ddd", color: colors.textSecondary },
               }
             : {
                 backgroundColor: "#FFD100",
                 color: "#000",
                 border: "none",
                 "&:hover": { backgroundColor: "#E6BC00" },
+                "&.Mui-disabled": { backgroundColor: "#FFD100", color: "#000", opacity: 0.7 },
               }),
         }}
       >
-        {isFollowing ? "Following" : "Follow"}
+        {isPending ? (
+          <CircularProgress
+            size={16}
+            sx={{ color: isFollowing ? colors.textSecondary : "#000" }}
+          />
+        ) : isFollowing ? (
+          "Following"
+        ) : (
+          "Follow"
+        )}
       </Button>
     </Box>
   );
