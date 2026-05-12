@@ -1,34 +1,52 @@
-import React from "react";
-import { Box, Typography, Skeleton } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Typography, Skeleton, Alert } from "@mui/material";
 import { ExploreOutlined } from "@mui/icons-material";
+import { useQuery } from "@apollo/client";
 import { useColors } from "../../theme/colors";
+import { useSneakerMember } from "../../context/MemberContext";
+import { GET_DISCOVER_MEMBERS } from "../../context/graphql/getMembers";
+import AccountCard from "./AccountCard";
 
-// Layout shell for the Discover tab.
-// Data fetching (GraphQL accounts, follow/unfollow) is wired up in follow-up tickets.
-
-const AccountCardSkeleton = () => (
+const AccountCardSkeleton = ({ colors }) => (
   <Box
     sx={{
       display: "flex",
       alignItems: "center",
       gap: 2,
-      p: 2,
+      p: { xs: 2, sm: 2.5 },
       borderRadius: "16px",
-      backgroundColor: "#D9D9D9",
+      backgroundColor: colors.isDark ? "#1a1a1a" : "#f0f0f0",
+      border: `1px solid ${colors.isDark ? "#2a2a2a" : "#e0e0e0"}`,
       mb: 2,
     }}
   >
-    <Skeleton variant="circular" width={48} height={48} />
+    <Skeleton variant="circular" width={52} height={52} sx={{ flexShrink: 0 }} />
     <Box sx={{ flex: 1 }}>
-      <Skeleton variant="text" width="40%" height={20} />
-      <Skeleton variant="text" width="70%" height={16} />
+      <Skeleton variant="text" width="45%" height={20} />
+      <Skeleton variant="text" width="65%" height={16} sx={{ mt: 0.5 }} />
     </Box>
-    <Skeleton variant="rounded" width={80} height={34} sx={{ borderRadius: "20px" }} />
+    <Skeleton variant="rounded" width={76} height={34} sx={{ borderRadius: "20px", flexShrink: 0 }} />
   </Box>
 );
 
 const DiscoverFeed = () => {
   const colors = useColors();
+  const { member: currentMember } = useSneakerMember();
+
+  // Local follow state — mutations wired up in follow/unfollow ticket
+  const [following, setFollowing] = useState({});
+
+  const { data, loading, error } = useQuery(GET_DISCOVER_MEMBERS);
+
+  const handleFollow = (memberId) => {
+    setFollowing((prev) => ({ ...prev, [memberId]: !prev[memberId] }));
+    // TODO: call followMember / unfollowMember mutation (follow/unfollow ticket)
+  };
+
+  // Filter out the current logged-in member
+  const accounts = (data?.members || []).filter(
+    (m) => m.id !== currentMember?.id
+  );
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -38,7 +56,7 @@ const DiscoverFeed = () => {
           fontWeight: 600,
           fontSize: { xs: "1.3rem", sm: "1.6rem" },
           color: colors.textPrimary,
-          mb: 1,
+          mb: 0.5,
         }}
       >
         Recommended Accounts
@@ -54,35 +72,59 @@ const DiscoverFeed = () => {
         Discover members and creators in the Sneaker Society community.
       </Typography>
 
-      {/* Skeleton placeholders — replaced by real data in the GraphQL fetch ticket */}
-      {[...Array(4)].map((_, i) => (
-        <AccountCardSkeleton key={i} />
-      ))}
+      {/* Error state */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          Failed to load accounts. Please refresh and try again.
+        </Alert>
+      )}
 
-      {/* Empty state icon — visible once real data loads and returns empty */}
-      <Box
-        sx={{
-          display: "none", // toggled on when data is empty
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          py: 8,
-          gap: 2,
-        }}
-        id="discover-empty-state"
-      >
-        <ExploreOutlined sx={{ fontSize: 64, color: colors.textSecondary, opacity: 0.5 }} />
-        <Typography
+      {/* Loading skeletons */}
+      {loading &&
+        [...Array(5)].map((_, i) => (
+          <AccountCardSkeleton key={i} colors={colors} />
+        ))}
+
+      {/* Account cards */}
+      {!loading &&
+        !error &&
+        accounts.map((member) => (
+          <AccountCard
+            key={member.id}
+            member={member}
+            isFollowing={!!following[member.id]}
+            onFollow={handleFollow}
+          />
+        ))}
+
+      {/* Empty state */}
+      {!loading && !error && accounts.length === 0 && (
+        <Box
           sx={{
-            fontFamily: "Montserrat, sans-serif",
-            color: colors.textSecondary,
-            fontSize: "1rem",
-            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            py: 8,
+            gap: 2,
           }}
         >
-          No accounts to discover yet. Check back soon!
-        </Typography>
-      </Box>
+          <ExploreOutlined
+            sx={{ fontSize: 64, color: colors.textSecondary, opacity: 0.4 }}
+          />
+          <Typography
+            sx={{
+              fontFamily: "Montserrat, sans-serif",
+              color: colors.textSecondary,
+              fontSize: "1rem",
+              textAlign: "center",
+              maxWidth: 300,
+            }}
+          >
+            No accounts to discover yet. Check back soon!
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };
