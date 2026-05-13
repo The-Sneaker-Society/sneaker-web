@@ -12,6 +12,7 @@ const SubscribeModal = ({ isSubscribed }) => {
   return (
     <Modal
       open={!isSubscribed}
+      disableEscapeKeyDown
       aria-labelledby="subscribe-modal-title"
       aria-describedby="subscribe-modal-description"
     >

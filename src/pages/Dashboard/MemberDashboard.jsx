@@ -62,7 +62,7 @@ export const MemberDashboard = () => {
       }}
     >
       <OnboardModal isOnboarded={isOnboarded} />
-      <SubscribeModal isSubscribed={isSubscribed} />
+      {isOnboarded && <SubscribeModal isSubscribed={isSubscribed} />}
       <Box
         sx={{
           flexShrink: 0,

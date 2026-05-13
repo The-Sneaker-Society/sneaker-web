@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -10,12 +10,34 @@ import {
   Card,
   CardMedia,
   CardContent,
+  IconButton,
+  Paper,
+  Chip,
 } from "@mui/material";
+import { FiZoomIn } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { GET_CONTRACT_BY_ID } from "../../context/graphql/getContractDetails";
 import StyledButton from "../../pages/HomePage/StyledButton";
 import ShippingInfoModal from "../../components/ShippingInfoModal";
+import ImagePreviewDialog from "../../components/ImagePreviewDialog";
+
+const SECTION_LABELS = {
+  leftSide: "Left Side",
+  rightSide: "Right Side",
+  topView: "Top View",
+  bottomView: "Bottom View",
+  frontView: "Front View",
+  backView: "Back View",
+  other: "Other Areas",
+};
+
+const SHOE_FIELDS = [
+  { label: "Brand", key: "brand" },
+  { label: "Model", key: "model" },
+  { label: "Color", key: "color" },
+  { label: "Size (US)", key: "size" },
+];
 
 export const ContractDetailsPage = () => {
   const { id } = useParams();
@@ -23,9 +45,9 @@ export const ContractDetailsPage = () => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [isModalOpen, setModalOpen] = React.useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
-  // Fetch contract data using GraphQL
   const { loading, error, data } = useQuery(GET_CONTRACT_BY_ID, {
     variables: { id },
     fetchPolicy: "cache-and-network",
@@ -33,51 +55,31 @@ export const ContractDetailsPage = () => {
 
   const contract = data?.contractById;
 
-  // Function to handle adding tracking information
-  const handleAddTracking = () => {
-    setModalOpen(true);
-  };
+  const handleAddTracking = () => setModalOpen(true);
+  const handleModalClose = () => setModalOpen(false);
 
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
-
-  // Function to handle adding member notes
-  const handleAddMemberNotes = () => {
-    console.log("Add member note");
-    // Future implementation will open a modal or form to add member notes
-  };
-
-  // Function to handle message button click
-  const handleMessageClick = () => {
-    // Navigate to the chat with this client
-    navigate(`/member/chat/${id}`);
-  };
-
-  // Function to handle support button click
+  const handleMessageClick = () => navigate(`/member/chat/${id}`);
   const handleSupportClick = () => {
-    // Open mailto link
     window.location.href = "mailto:support@thesneakersociety.com";
   };
 
-  // Renders the status badge with appropriate color
   const renderStatusBadge = (status) => {
     let backgroundColor = "";
     switch (status) {
       case "IN_PROGRESS":
-        backgroundColor = "#D4AC0D"; // Golden yellow
+        backgroundColor = "#D4AC0D";
         break;
       case "PENDING":
-        backgroundColor = "#2ECC71"; // Green
+        backgroundColor = "#2ECC71";
         break;
       case "COMPLETED":
-        backgroundColor = "#3498DB"; // Blue
+        backgroundColor = "#3498DB";
         break;
       case "NOT_STARTED":
-        backgroundColor = "#E67E22"; // Orange
+        backgroundColor = "#E67E22";
         break;
       default:
-        backgroundColor = "#E0E0E0"; // Light gray for unknown statuses
+        backgroundColor = "#E0E0E0";
     }
 
     return (
@@ -97,7 +99,6 @@ export const ContractDetailsPage = () => {
     );
   };
 
-  // Show loading state
   if (loading) {
     return (
       <Box
@@ -114,7 +115,6 @@ export const ContractDetailsPage = () => {
     );
   }
 
-  // Show error state
   if (error) {
     return (
       <Box sx={{ p: 3, color: "white", height: "100%", width: "100%" }}>
@@ -125,7 +125,6 @@ export const ContractDetailsPage = () => {
     );
   }
 
-  // If no contract data is available
   if (!contract) {
     return (
       <Box sx={{ p: 3, color: "white", height: "100%", width: "100%" }}>
@@ -137,118 +136,60 @@ export const ContractDetailsPage = () => {
   }
 
   return (
-    <Box
-      sx={{
-        p: isMobile ? 2 : 4,
-        color: "white",
-        height: "100%",
-        width: "100%",
-      }}
-    >
-      <Box
-        sx={{
-          border: "2px solid white",
-          borderRadius: "12px",
-          p: isMobile ? 3 : 4,
-          position: "relative", // Added for absolute positioning of the action buttons
-        }}
-      >
-        {/* Header Section */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            justifyContent: "space-between",
-            alignItems: isMobile ? "flex-start" : "center",
-            mb: isMobile ? 4 : 6,
-            gap: isMobile ? 2 : 0,
-          }}
-        >
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: "normal",
-              fontSize: isMobile ? "2rem" : "2.5rem",
-            }}
-          >
-            {`${contract.client?.firstName || ""} ${
-              contract.client?.lastName || ""
-            }`}
+    <Box sx={{ p: isMobile ? 2 : 4, height: "100%", width: "100%" }}>
+      <Box textAlign="center" mb={4}>
+        <Typography variant="h4" fontWeight={700}>
+          {`${contract.client?.firstName || ""} ${contract.client?.lastName || ""}`}
+        </Typography>
+        <Box mt={1}>{renderStatusBadge(contract.status)}</Box>
+      </Box>
+
+      {contract.proposedPrice !== null && (
+        <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h4" fontWeight={600} mb={2}>
+            Proposed Price
           </Typography>
-          {renderStatusBadge(contract.status)}
-        </Box>
+          <Typography variant="h4" fontWeight={600}>
+            ${parseFloat(contract.proposedPrice).toFixed(2)}
+          </Typography>
+        </Paper>
+      )}
 
-        {/* Price Section */}
-        {contract.proposedPrice !== null && (
-          <Box sx={{ mb: isMobile ? 4 : 6 }}>
-            <Typography
-              variant="h5"
-              sx={{
-                mb: 2,
-                fontSize: isMobile ? "1.5rem" : "1.75rem",
-                fontWeight: "normal",
-              }}
-            >
-              Proposed Price
-            </Typography>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: "normal",
-                fontSize: isMobile ? "1.75rem" : "2rem",
-              }}
-            >
-              ${parseFloat(contract.proposedPrice).toFixed(2)}
-            </Typography>
-          </Box>
-        )}
-
-        {/* Address and Shipping Section */}
-        <Grid2
-          container
-          spacing={isMobile ? 4 : 6}
-          sx={{ mb: isMobile ? 4 : 6 }}
-        >
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Grid2 container spacing={isMobile ? 3 : 6}>
           <Grid2 xs={12} md={6}>
-            <Typography
-              variant="h5"
-              sx={{
-                mb: 2,
-                fontSize: isMobile ? "1.5rem" : "1.75rem",
-                fontWeight: "normal",
-              }}
-            >
+            <Typography variant="h4" fontWeight={600} mb={2}>
               Client
             </Typography>
-            <Typography variant="body1" sx={{ fontSize: "1.1rem", mb: 1 }}>
-              Name:{" "}
-              {`${contract.client?.firstName || ""} ${
-                contract.client?.lastName || ""
-              }`}
+            <Typography variant="body1" fontWeight={700} color="text.secondary">
+              Name
             </Typography>
-            <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-              Email: {contract.client?.email || "N/A"}
+            <Typography variant="h6" fontWeight={600} mb={1.5}>
+              {`${contract.client?.firstName || ""} ${contract.client?.lastName || ""}`}
+            </Typography>
+            <Typography variant="body1" fontWeight={700} color="text.secondary">
+              Email
+            </Typography>
+            <Typography variant="h6" fontWeight={600}>
+              {contract.client?.email || "N/A"}
             </Typography>
           </Grid2>
-
           <Grid2 xs={12} md={6}>
-            <Typography
-              variant="h5"
-              sx={{
-                mb: 2,
-                fontSize: isMobile ? "1.5rem" : "1.75rem",
-                fontWeight: "normal",
-              }}
-            >
+            <Typography variant="h4" fontWeight={600} mb={2}>
               Shipping
             </Typography>
             {contract.trackingNumber ? (
               <>
-                <Typography variant="body1" sx={{ fontSize: "1.1rem", mb: 1 }}>
-                  Tracking: {contract.trackingNumber.trackingNumber}
+                <Typography variant="body1" fontWeight={700} color="text.secondary">
+                  Tracking
                 </Typography>
-                <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                  Carrier:{" "}
+                <Typography variant="h6" fontWeight={600} mb={1.5}>
+                  {contract.trackingNumber.trackingNumber}
+                </Typography>
+                <Typography variant="body1" fontWeight={700} color="text.secondary">
+                  Carrier
+                </Typography>
+                <Typography variant="h6" fontWeight={600}>
                   {contract.trackingNumber.carrier || contract.shippingCarrier}
                 </Typography>
               </>
@@ -274,82 +215,30 @@ export const ContractDetailsPage = () => {
             )}
           </Grid2>
         </Grid2>
+      </Paper>
 
-        {/* Sneaker Details Section */}
-        <Box sx={{ mb: isMobile ? 4 : 6 }}>
-          <Typography
-            variant="h5"
-            sx={{
-              mb: isMobile ? 2 : 3,
-              fontSize: isMobile ? "1.5rem" : "1.75rem",
-              fontWeight: "normal",
-            }}
-          >
-            Details
-          </Typography>
-          <Grid2 container spacing={2}>
-            <Grid2 xs={12} sm={6}>
-              <Box sx={{ display: "flex", mb: 2 }}>
-                <Typography
-                  variant="body1"
-                  sx={{ fontWeight: "bold", mr: 1, fontSize: "1.1rem" }}
-                >
-                  Brand:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                  {contract.shoeDetails?.brand || "N/A"}
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", mb: 2 }}>
-                <Typography
-                  variant="body1"
-                  sx={{ fontWeight: "bold", mr: 1, fontSize: "1.1rem" }}
-                >
-                  Model:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                  {contract.shoeDetails?.model || "N/A"}
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", mb: 2 }}>
-                <Typography
-                  variant="body1"
-                  sx={{ fontWeight: "bold", mr: 1, fontSize: "1.1rem" }}
-                >
-                  Color:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                  {contract.shoeDetails?.color || "N/A"}
-                </Typography>
-              </Box>
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h4" fontWeight={600} mb={2}>
+          Shoe Details
+        </Typography>
+        <Grid2 container spacing={2}>
+          {SHOE_FIELDS.map(({ label, key }) => (
+            <Grid2 xs={6} sm={4} key={key}>
+              <Typography variant="body1" fontWeight={700} color="text.secondary">
+                {label}
+              </Typography>
+              <Typography variant="h6" fontWeight={600}>
+                {contract.shoeDetails?.[key] || "\u2014"}
+              </Typography>
             </Grid2>
-            <Grid2 xs={12} sm={6}>
-              <Box sx={{ display: "flex", mb: 2 }}>
-                <Typography
-                  variant="body1"
-                  sx={{ fontWeight: "bold", mr: 1, fontSize: "1.1rem" }}
-                >
-                  Size:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                  {contract.shoeDetails?.size || "N/A"}
-                </Typography>
-              </Box>
-            </Grid2>
-          </Grid2>
-        </Box>
+          ))}
+        </Grid2>
+      </Paper>
 
-        {/* Photos Section */}
-        {contract.shoeDetails?.photos && (
-          <Box sx={{ mb: isMobile ? 4 : 6 }}>
-            <Typography
-              variant="h5"
-              sx={{
-                mb: isMobile ? 2 : 3,
-                fontSize: isMobile ? "1.5rem" : "1.75rem",
-                fontWeight: "normal",
-              }}
-            >
+      {contract.shoeDetails?.photos &&
+        Object.entries(contract.shoeDetails.photos).some(([, photos]) => photos?.length > 0) && (
+          <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h4" fontWeight={600} mb={2}>
               Photos
             </Typography>
             <Grid2 container spacing={2}>
@@ -358,26 +247,62 @@ export const ContractDetailsPage = () => {
                   photos?.length > 0 && (
                     <Grid2 xs={12} sm={6} md={4} key={section}>
                       <Typography
-                        variant="subtitle1"
-                        sx={{ mb: 1, textTransform: "capitalize", color: "grey.400" }}
+                        variant="body1"
+                        fontWeight={600}
+                        color="text.secondary"
+                        mb={1}
                       >
-                        {section.replace(/([A-Z])/g, " $1").trim()}
+                        {SECTION_LABELS[section] || section.replace(/([A-Z])/g, " $1").trim()}
                       </Typography>
                       {photos.map((photo, idx) => (
-                        <Card key={idx} sx={{ mb: 1, bgcolor: "grey.900" }}>
+                        <Card
+                          key={idx}
+                          sx={{
+                            mb: 1.5,
+                            position: "relative",
+                            "&:last-child": { mb: 0 },
+                          }}
+                        >
                           <CardMedia
                             component="img"
                             height="160"
                             image={photo.url}
-                            alt={`${section} ${idx + 1}`}
+                            alt={`${SECTION_LABELS[section] || section} ${idx + 1}`}
                             sx={{ objectFit: "cover" }}
                           />
+                          <IconButton
+                            onClick={() => setPreviewUrl(photo.url)}
+                            size="small"
+                            sx={{
+                              position: "absolute",
+                              top: 4,
+                              left: 4,
+                              bgcolor: "rgba(0,0,0,0.45)",
+                              color: "common.white",
+                              "&:hover": { bgcolor: "rgba(0,0,0,0.7)" },
+                            }}
+                          >
+                            <FiZoomIn size={14} />
+                          </IconButton>
                           {photo.note && (
-                            <CardContent sx={{ py: 1, "&:last-child": { pb: 1 } }}>
-                              <Typography variant="body2" color="grey.400">
+                            <CardContent sx={{ py: 1, px: 1.5, "&:last-child": { pb: 1 } }}>
+                              <Typography variant="body2" color="text.secondary">
                                 {photo.note}
                               </Typography>
                             </CardContent>
+                          )}
+                          {photos.length > 1 && (
+                            <Chip
+                              label={`${idx + 1} of ${photos.length}`}
+                              size="small"
+                              sx={{
+                                position: "absolute",
+                                bottom: 6,
+                                right: 6,
+                                bgcolor: "rgba(0,0,0,0.55)",
+                                color: "common.white",
+                              }}
+                            />
                           )}
                         </Card>
                       ))}
@@ -385,89 +310,63 @@ export const ContractDetailsPage = () => {
                   )
               )}
             </Grid2>
-          </Box>
+          </Paper>
         )}
 
-        {/* Repair Details Section */}
-        <Box sx={{ mb: isMobile ? 4 : 6 }}>
-          <Typography
-            variant="h5"
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h4" fontWeight={600} mb={1}>
+          Client Notes
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          {contract.repairDetails?.clientNotes || "No client notes provided"}
+        </Typography>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h4" fontWeight={600} mb={1}>
+          Member Notes
+        </Typography>
+        {contract.repairDetails?.memberNotes ? (
+          <Typography variant="body1" color="text.secondary">
+            {contract.repairDetails.memberNotes}
+          </Typography>
+        ) : (
+          <Button
+            variant="outlined"
+            onClick={() => console.log("Add member note")}
             sx={{
-              mb: 2,
-              fontSize: isMobile ? "1.5rem" : "1.75rem",
-              fontWeight: "normal",
+              color: "white",
+              borderColor: "white",
+              borderRadius: "4px",
+              textTransform: "none",
+              fontSize: "1rem",
+              px: 3,
+              py: 1,
+              "&:hover": {
+                borderColor: "grey.400",
+              },
             }}
           >
-            Repair Details
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: "bold", mb: 1, fontSize: "1.2rem" }}
-          >
-            Client Notes
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-            {contract.repairDetails?.clientNotes || "No client notes provided"}
-          </Typography>
-        </Box>
+            Add Notes
+          </Button>
+        )}
+      </Paper>
 
-        {/* Member Notes Section */}
-        <Box sx={{ mb: isMobile ? 8 : 10 }}>
-          <Typography
-            variant="h5"
-            sx={{
-              mb: 2,
-              fontSize: isMobile ? "1.5rem" : "1.75rem",
-              fontWeight: "normal",
-            }}
-          >
-            Member Notes
-          </Typography>
-          {contract.repairDetails?.memberNotes ? (
-            <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-              {contract.repairDetails.memberNotes}
-            </Typography>
-          ) : (
-            <Button
-              variant="outlined"
-              onClick={handleAddMemberNotes}
-              sx={{
-                color: "white",
-                borderColor: "white",
-                borderRadius: "4px",
-                textTransform: "none",
-                fontSize: "1rem",
-                px: 3,
-                py: 1,
-                "&:hover": {
-                  borderColor: "grey.400",
-                },
-              }}
-            >
-              Add Notes
-            </Button>
-          )}
-        </Box>
-
-        {/* Action Buttons - Message and Support */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: isMobile ? 16 : 24,
-            right: isMobile ? 16 : 24,
-            display: "flex",
-            gap: 2,
-            flexDirection: isMobile ? "column" : "row",
-          }}
-        >
-          <StyledButton onClick={handleMessageClick}>Message</StyledButton>
-          <StyledButton onClick={handleSupportClick}>Support</StyledButton>
-        </Box>
+      <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+        <StyledButton onClick={handleMessageClick}>Message</StyledButton>
+        <StyledButton onClick={handleSupportClick}>Support</StyledButton>
       </Box>
+
       <ShippingInfoModal
         open={isModalOpen}
         onClose={handleModalClose}
         contractId={id}
+      />
+
+      <ImagePreviewDialog
+        open={!!previewUrl}
+        url={previewUrl}
+        onClose={() => setPreviewUrl(null)}
       />
     </Box>
   );

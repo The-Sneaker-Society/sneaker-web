@@ -12,7 +12,7 @@ export default function SignUpCallback() {
 
     const role = user?.unsafeMetadata?.role;
     if (role === "member") {
-      window.location.href = "/member/onboarding";
+      window.location.href = "/member/generate";
     } else if (role === "client") {
       window.location.href = "/user/onboarding";
     } else {

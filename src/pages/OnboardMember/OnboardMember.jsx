@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import MemberSignupPage from "../SignupPage/SignupPage";
 import { StripeOnobarding } from "./StripeOnboarding";
 import { Subscriptions } from "../PaymentStatus/Subscriptions";
@@ -22,8 +22,10 @@ export const OnboardMember = () => {
 
   useEffect(() => {
     if (!memberLoading && member) {
-      console.log(member);
       let determinedPage = 0;
+
+      const hasSeenWelcome = localStorage.getItem("ss_hasSeenWelcome");
+
       if (member.firstName) {
         determinedPage = 1;
         if (!member.isOnboardedWithStripe) {
@@ -31,10 +33,11 @@ export const OnboardMember = () => {
         } else if (!member.isSubscribed) {
           determinedPage = 3;
         } else {
-          determinedPage = 4; // All onboarding complete
+          determinedPage = 4;
         }
+      } else if (hasSeenWelcome) {
+        determinedPage = 1;
       }
-      console.log(determinedPage);
 
       if (determinedPage === 4) {
         navigate("/member/dashboard", { replace: true });
@@ -42,21 +45,28 @@ export const OnboardMember = () => {
         setActivePage(determinedPage);
       }
       setIsLoadingInitialState(false);
-    } else if (!memberLoading && (memberError || !member)) {
-      console.error(
-        "OnboardMember: Error loading member data or member is null.",
-        { memberError, member }
-      );
-
-      setActivePage(0);
+    } else if (!memberLoading && memberError) {
+      console.error("OnboardMember: Error loading member data.", {
+        memberError,
+        member,
+      });
       setIsLoadingInitialState(false);
+    } else if (!memberLoading && !member) {
+      navigate("/member/generate", { replace: true });
     }
   }, [member, memberLoading, memberError, navigate]);
 
   const renderPageContent = () => {
     switch (activePage) {
       case 0:
-        return <WelcomePage onContinue={() => setActivePage(1)} />;
+        return (
+          <WelcomePage
+            onContinue={() => {
+              localStorage.setItem("ss_hasSeenWelcome", "true");
+              setActivePage(1);
+            }}
+          />
+        );
       case 1:
         return (
           <MemberSignupPage
@@ -104,6 +114,28 @@ export const OnboardMember = () => {
         minHeight="200px"
       >
         <LoadingCircle />
+      </Box>
+    );
+  }
+
+  if (memberError) {
+    return (
+      <Box
+        sx={{
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 2,
+        }}
+      >
+        <Typography variant="h6">
+          Something went wrong loading your account.
+        </Typography>
+        <Button variant="contained" onClick={() => refetch()}>
+          Try Again
+        </Button>
       </Box>
     );
   }
