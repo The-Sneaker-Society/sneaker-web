@@ -12,8 +12,7 @@ import { GenerateMember } from "../pages/GenerateMember/GenerateMember";
 import { OnboardMember } from "../pages/OnboardMember/OnboardMember";
 import GroupsPage from "../pages/Groups/Groups";
 import NewGroupPage from "../pages/GroupsPage/NewGroupPage";
-import MySociety from "../pages/Dashboard/MySociety";
-import Discover from "../pages/Dashboard/Discover";
+import SocietyPage from "../pages/Society/SocietyPage";
 import TheVault from "../pages/Vault/TheVault";
 import ChatSidebar from "../pages/Chats/ChatSidebar";
 import MemberSettings from "../pages/membersettings";
@@ -95,7 +94,7 @@ const MemberRoutes = () => {
             path="my-society"
             element={
               <Layout>
-                <MySociety />
+                <SocietyPage defaultTab="my-society" />
               </Layout>
             }
           />
@@ -103,7 +102,7 @@ const MemberRoutes = () => {
             path="discover"
             element={
               <Layout>
-                <Discover />
+                <SocietyPage defaultTab="discover" />
               </Layout>
             }
           />
