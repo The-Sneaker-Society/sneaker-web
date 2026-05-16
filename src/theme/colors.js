@@ -19,6 +19,7 @@ export const getColors = (mode) => {
 
     border: isDark ? '#fff' : '#000',
     borderSecondary: isDark ? '#666' : '#999',
+    borderSubtle: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
 
     status: {
       notStarted: '#E67E22',

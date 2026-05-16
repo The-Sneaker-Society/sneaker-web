@@ -1,11 +1,12 @@
 import { gql } from "@apollo/client";
 
-// Query to get subscription details
 export const GET_SUBSCRIPTION_DETAILS = gql`
   query GetSubscriptionDetails {
     subscriptionDetails {
       status
       currentPeriodEnd
+      cancelAtPeriodEnd
+      isPaused
       paymentMethod {
         brand
         last4
@@ -40,4 +41,4 @@ export const REACTIVATE_SUBSCRIPTION = gql`
   mutation ReactivateSubscription {
     reactivateSubscription
   }
-`; 
+`;
