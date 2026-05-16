@@ -2,22 +2,25 @@ import React from "react";
 import { Button } from "@mui/material";
 import { useColors } from "../theme/colors";
 
-const QrActionButton = ({ children, onClick, href, target, rel, startIcon }) => {
+const QrActionButton = ({ children, onClick, href, target, rel, startIcon, sx: sxProp = {} }) => {
   const colors = useColors();
 
   return (
     <Button
-      fullWidth
       variant="outlined"
-      style={{ marginTop: "10px" }}
       sx={{
+        flex: 1,
         color: colors.textPrimary,
-        borderColor: colors.border,
-        borderRadius: "5px",
+        borderColor: colors.borderSecondary,
+        borderRadius: 1.5,
+        textTransform: "none",
+        fontSize: "0.8rem",
+        fontWeight: 500,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: startIcon ? 1 : 0,
+        "&:hover": { bgcolor: `${colors.textPrimary}08`, borderColor: colors.textPrimary },
+        ...sxProp,
       }}
       onClick={onClick}
       component={href ? "a" : undefined}

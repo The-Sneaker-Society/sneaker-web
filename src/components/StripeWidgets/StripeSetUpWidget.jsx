@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Box, Typography, Button, Stack, Skeleton } from "@mui/material";
+import { Box, Typography, Button, Skeleton } from "@mui/material";
 import { gql, useMutation } from "@apollo/client";
-import { GoAlertFill } from "react-icons/go";
+import { FiCreditCard, FiAlertCircle } from "react-icons/fi";
 import { useSneakerMember } from "../../context/MemberContext";
 import { useColors } from "../../theme/colors";
 
@@ -63,119 +63,77 @@ export const StripeSetUpWidget = () => {
 
   if (memberLoading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100%",
-          width: "100%",
-          bgcolor: colors.widgetBg,
-          color: colors.textPrimary,
-          borderRadius: 2,
-          border: `4px solid ${colors.border}`,
-          padding: "50px",
-        }}
-      >
-        <Skeleton variant="text" width={200} height={30} sx={{ mb: 2 }} />
-        <Skeleton variant="rectangular" width={150} height={40} />
+      <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "100%", bgcolor: colors.widgetBg, borderRadius: 3, border: `1px solid ${colors.borderSubtle}`, p: 5 }}>
+        <Skeleton variant="text" width={200} height={28} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" width={160} height={40} sx={{ borderRadius: 1 }} />
       </Box>
     );
   }
 
-  let buttonText = "Set up Stripe";
-  let alertMessage = "Please set up Stripe to begin";
+  const isFullyOnboarded = member.stripeConnectAccountId && member.isOnboardedWithStripe === true;
+  const isIncomplete = member.stripeConnectAccountId && member.isOnboardedWithStripe === false;
+  const isUnclear = member.stripeConnectAccountId && member.isOnboardedWithStripe !== true && member.isOnboardedWithStripe !== false;
 
-  if (member.stripeConnectAccountId) {
-    if (member.isOnboardedWithStripe === true) {
-      alertMessage = "Your Stripe account is connected.";
-      buttonText = "Manage Stripe Account";
-    } else if (member.isOnboardedWithStripe === false) {
-      alertMessage = "Your Stripe onboarding is incomplete.";
-      buttonText = "Resume Onboarding";
-    } else {
-      alertMessage = "Stripe status is unclear. Attempt to resume or setup.";
-      buttonText = "Configure Stripe";
-    }
+  let title, description, buttonLabel;
+
+  if (isFullyOnboarded) {
+    title = "Stripe Connected";
+    description = "Your payout account is all set.";
+    buttonLabel = "Manage Stripe Account";
+  } else if (isIncomplete) {
+    title = "Onboarding Incomplete";
+    description = "Finish setting up your Stripe account to receive payouts.";
+    buttonLabel = "Resume Onboarding";
+  } else if (isUnclear) {
+    title = "Stripe Setup";
+    description = "Your Stripe status needs attention.";
+    buttonLabel = "Configure Stripe";
+  } else {
+    title = "Connect Stripe";
+    description = "Set up payouts to receive payments from clients.";
+    buttonLabel = "Set up Stripe";
   }
 
+  const isLoading = onboardLoading || resumeOnboardLoading || isRedirecting;
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100%",
-        width: "100%",
-        bgcolor: colors.widgetBg,
-        color: colors.textPrimary,
-        borderRadius: 2,
-        border: `4px solid ${colors.border}`,
-        padding: "50px",
-        textAlign: "center",
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          marginBottom: "16px",
-        }}
-      >
-        <GoAlertFill style={{ color: colors.textPrimary, fontSize: "24px" }} />
-        <Typography variant="body1" sx={{ fontSize: "24px" }}>
-          {alertMessage}
+    <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "100%", bgcolor: colors.widgetBg, borderRadius: 3, border: `1px solid ${colors.borderSubtle}`, p: 5, textAlign: "center" }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+        {!isFullyOnboarded ? (
+          <FiAlertCircle size={22} color={colors.textPrimary} />
+        ) : (
+          <FiCreditCard size={22} color={colors.status.completed} />
+        )}
+        <Typography sx={{ fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" }, fontWeight: 600, color: colors.textPrimary }}>
+          {title}
         </Typography>
       </Box>
-      {!(
-        member.stripeConnectAccountId && member.isOnboardedWithStripe === true
-      ) && (
-        <Button
-          variant="outlined"
-          size="small"
-          disabled={onboardLoading || resumeOnboardLoading || isRedirecting}
-          sx={{
-            color: colors.textPrimary,
-            borderColor: colors.border,
-            textTransform: "none",
-            fontSize: "20px",
-            padding: "5px 15px",
-            mt: 1,
-          }}
-          onClick={handleStripeAccountClick}
-        >
-          {buttonText}
-        </Button>
-      )}
-      {member.stripeConnectAccountId &&
-        member.isOnboardedWithStripe === true && (
-          <Button
-            variant="outlined"
-            size="small"
-            sx={{
-              color: colors.textPrimary,
-              borderColor: colors.border,
-              textTransform: "none",
-              fontSize: "20px",
-              padding: "5px 15px",
-              mt: 1,
-            }}
-            onClick={() => {
-              if (member.stripeDashboardLink) {
-                window.location.href = member.stripeDashboardLink;
-              } else {
-                console.log("Stripe dashboard link not available.");
-                handleStripeAccountClick();
-              }
-            }}
-          >
-            Manage Stripe Account
-          </Button>
-        )}
+      <Typography sx={{ fontSize: "0.875rem", color: "text.secondary", mb: 2.5, maxWidth: 280 }}>
+        {description}
+      </Typography>
+      <Button
+        variant="outlined"
+        disabled={isLoading}
+        sx={{
+          color: colors.textPrimary,
+          borderColor: colors.border,
+          textTransform: "none",
+          fontSize: "0.9rem",
+          fontWeight: 500,
+          px: 3,
+          py: 0.75,
+          "&:hover": { bgcolor: `${colors.textPrimary}08` },
+        }}
+        onClick={isFullyOnboarded ? () => {
+          if (member.stripeDashboardLink) {
+            window.location.href = member.stripeDashboardLink;
+          } else {
+            handleStripeAccountClick();
+          }
+        } : handleStripeAccountClick}
+      >
+        {buttonLabel}
+      </Button>
     </Box>
   );
 };

@@ -21,10 +21,8 @@ const ImageDownloadButton = ({ imageSrc }) => {
 
   return (
     <>
-      {error && <div style={{ color: colors.status.error, marginTop: "10px" }}>An error occurred: {error}</div>}
-      <QrActionButton onClick={downloadImage}>
-        Download
-      </QrActionButton>
+      {error && <div style={{ color: colors.status.error, marginTop: "8px", fontSize: "0.75rem" }}>An error occurred: {error}</div>}
+      <QrActionButton onClick={downloadImage}>Download</QrActionButton>
     </>
   );
 };

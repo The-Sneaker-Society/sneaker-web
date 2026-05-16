@@ -12,7 +12,7 @@ export const ProtectedRoute = ({
   const { user: clerkUser, isSignedIn, isLoaded } = useUser();
 
   if (!isLoaded) {
-    return <LoadingCircle />;
+    return <Box sx={{ width: "100%", height: "100vh", display: "flex" }}><LoadingCircle /></Box>;
   }
 
   if (!isSignedIn) {
