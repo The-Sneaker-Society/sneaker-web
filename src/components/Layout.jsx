@@ -1,48 +1,51 @@
-import React, { useState, useEffect } from "react";
-import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
+import React, { useState, createContext, useContext } from "react";
+import { Box } from "@mui/material";
 import Sidebar from "./Sidebar";
 
-const Layout = ({ children }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+export const LayoutContext = createContext({ openMobileNav: () => {} });
+export const useLayout = () => useContext(LayoutContext);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+const Layout = ({ children }) => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <Box
-        sx={{
-          width: 250,
-          height: "100vh",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          display: { xs: "none", sm: "block" },
-        }}
-      >
-        <Sidebar />
-      </Box>
+    <LayoutContext.Provider value={{ openMobileNav: () => setDrawerOpen(true) }}>
+      <Box sx={{ display: "flex" }}>
+        {/* Desktop sticky sidebar — hidden on mobile */}
+        <Box
+          sx={{
+            width: 250,
+            height: "100vh",
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+            display: { xs: "none", sm: "block" },
+          }}
+        >
+          <Sidebar />
+        </Box>
 
-      <Box
-        sx={{
-          flexGrow: 1,
-          overflowY: "auto",
-          height: "100vh",
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "flex-start",
-        }}
-      >
-        {isLoading ? <CircularProgress /> : children}
+        {/* Main content */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+            height: "100vh",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          {children}
+        </Box>
+
+        {/* Mobile drawer — controlled by context; no rogue hamburger */}
+        <Sidebar
+          mobileOnly
+          mobileDrawerOpen={drawerOpen}
+          onMobileDrawerClose={() => setDrawerOpen(false)}
+        />
       </Box>
-      {isMobile && <Sidebar />}
-    </Box>
+    </LayoutContext.Provider>
   );
 };
 

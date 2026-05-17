@@ -43,5 +43,5 @@ export const Subscriptions = () => {
     return <LoadingCircle />;
   }
 
-  return <Box>{renderSubscriptionContent(subscriptionState)}</Box>;
+  return renderSubscriptionContent(subscriptionState);
 };
