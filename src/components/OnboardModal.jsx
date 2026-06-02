@@ -12,6 +12,7 @@ const OnboardModal = ({ isOnboarded }) => {
   return (
     <Modal
       open={!isOnboarded}
+      disableEscapeKeyDown
       aria-labelledby="subscribe-modal-title"
       aria-describedby="subscribe-modal-description"
     >

@@ -9,7 +9,6 @@ import { Box, TextField, Typography, useTheme } from "@mui/material";
 import Form from "../../membersettingsform";
 import PricingCard from "../../pricing";
 import ChangeUsername from "../../updateusername";
-import ChangePasswordPage from "../../changepassword";
 
 const MemberSettings = () => {
   const theme = useTheme();
@@ -59,20 +58,7 @@ const MemberSettings = () => {
           />
         </AccordionDetails>
       </Accordion>
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography
-            variant="h3"
-            color={colors.grey[100]}
-            sx={{ m: "15px 0 5px 20px", fontWeight: "bold" }}
-          >
-            Update Password
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <ChangePasswordPage />
-        </AccordionDetails>
-      </Accordion>
+
     </Box>
   );
 };

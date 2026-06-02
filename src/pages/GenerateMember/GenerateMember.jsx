@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-import { gql, useMutation } from "@apollo/client"; // Make sure to import useMutation
-import { CircularProgress, Box, Typography, Alert } from "@mui/material"; // For UI feedback
+import { gql, useMutation } from "@apollo/client";
+import { CircularProgress, Box, Typography, Alert } from "@mui/material";
+import { useSneakerMember } from "../../context/MemberContext";
 
 // This GraphQL mutation should be designed on your backend
 // to accept at least clerkId and email for initial member creation.
@@ -19,10 +20,14 @@ export const GenerateMember = () => {
   const { user, isLoaded: isClerkLoaded } = useUser();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState(null);
+  const { refetch: refetchMember } = useSneakerMember();
+
+  const hasRun = useRef(false);
 
   const [createMember, { loading: mutationLoading, error: mutationError }] =
     useMutation(CREATE_MEMBER_MUTATION, {
-      onCompleted: () => {
+      onCompleted: async () => {
+        await refetchMember();
         navigate("/member/onboarding", { replace: true });
       },
       onError: (err) => {
@@ -36,6 +41,7 @@ export const GenerateMember = () => {
           console.warn(
             "Member likely already exists. Navigating to signup-info."
           );
+          refetchMember();
           navigate("/member/onboarding", { replace: true }); 
         } else {
           setErrorMessage(
@@ -52,6 +58,8 @@ export const GenerateMember = () => {
       user.id &&
       user.primaryEmailAddress?.emailAddress
     ) {
+      if (hasRun.current) return;
+      hasRun.current = true;
       // Prepare the minimal data for initial member creation
       const initialMemberData = {
         clerkId: user.id,
