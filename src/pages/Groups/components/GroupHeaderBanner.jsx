@@ -5,47 +5,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-
-const pillChipSx = {
-  height: 28,
-  borderRadius: "999px",
-  bgcolor: "rgba(255,255,255,0.10)",
-  color: "#f3f3f3",
-  fontWeight: 700,
-  border: "1px solid rgba(255,255,255,0.08)",
-  "& .MuiChip-label": {
-    px: 1.25,
-    fontWeight: 700,
-  },
-};
-
-const creatorChipSx = {
-  ...pillChipSx,
-  bgcolor: "#FFD100",
-  color: "#111",
-  border: "none",
-};
-
-const actionButtonBaseSx = {
-  textTransform: "none",
-  fontWeight: 700,
-  borderRadius: "999px",
-  minHeight: 44,
-  px: 2.25,
-  boxShadow: "none",
-};
-
-const statPillSx = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 0.9,
-  px: 1.35,
-  py: 0.95,
-  borderRadius: "999px",
-  bgcolor: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  color: "#d8dbe0",
-};
+import { useGroupPageStyles } from "../styles/groupPageStyles";
 
 const GroupHeaderBanner = ({
   group,
@@ -62,28 +22,74 @@ const GroupHeaderBanner = ({
   onEditGroup,
   onDeleteGroup,
 }) => {
+  const { colors, isDark, primaryButtonSx, destructiveButtonSx } =
+    useGroupPageStyles();
+
   const title = group?.name || "Group";
   const description = group?.description || "No description provided.";
   const postCount = group?.postCount ?? group?.postsCount ?? null;
 
+  const pillChipSx = {
+    height: 28,
+    borderRadius: "999px",
+    bgcolor: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)",
+    color: colors.textPrimary,
+    fontWeight: 700,
+    border: `1px solid ${colors.borderSubtle}`,
+    "& .MuiChip-label": {
+      px: 1.25,
+      fontWeight: 700,
+    },
+  };
+
+  const creatorChipSx = {
+    ...pillChipSx,
+    bgcolor: colors.primary,
+    color: colors.textInverse,
+    border: "none",
+  };
+
+  const actionButtonBaseSx = {
+    textTransform: "none",
+    fontWeight: 700,
+    borderRadius: "999px",
+    minHeight: 44,
+    px: 2.25,
+    boxShadow: "none",
+  };
+
+  const statPillSx = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 0.9,
+    px: 1.35,
+    py: 0.95,
+    borderRadius: "999px",
+    bgcolor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+    border: `1px solid ${colors.borderSubtle}`,
+    color: colors.textPrimary,
+  };
+
   const stats = [
     {
       key: "members",
-      icon: <GroupOutlinedIcon sx={{ fontSize: 17, color: "#FFD100" }} />,
+      icon: <GroupOutlinedIcon sx={{ fontSize: 17, color: colors.primary }} />,
       label: `${memberCount || 0} member${memberCount === 1 ? "" : "s"}`,
     },
     ...(postCount !== null
       ? [
           {
             key: "posts",
-            icon: <ForumOutlinedIcon sx={{ fontSize: 17, color: "#FFD100" }} />,
+            icon: (
+              <ForumOutlinedIcon sx={{ fontSize: 17, color: colors.primary }} />
+            ),
             label: `${postCount} post${postCount === 1 ? "" : "s"}`,
           },
         ]
       : []),
     {
       key: "access",
-      icon: <ShieldOutlinedIcon sx={{ fontSize: 17, color: "#FFD100" }} />,
+      icon: <ShieldOutlinedIcon sx={{ fontSize: 17, color: colors.primary }} />,
       label: canManageGroup
         ? "Admin access"
         : isJoined
@@ -98,18 +104,22 @@ const GroupHeaderBanner = ({
         position: "relative",
         overflow: "hidden",
         borderRadius: 4,
-        border: "1px solid rgba(255,255,255,0.08)",
-        background:
-          "linear-gradient(180deg, rgba(255,209,0,0.10) 0%, rgba(7,7,8,1) 34%, rgba(10,11,14,1) 100%)",
-        boxShadow: "0 24px 60px rgba(0,0,0,0.28)",
+        border: `1px solid ${colors.borderSubtle}`,
+        background: isDark
+          ? "linear-gradient(180deg, rgba(255,209,0,0.10) 0%, rgba(7,7,8,1) 34%, rgba(10,11,14,1) 100%)"
+          : "linear-gradient(180deg, rgba(255,195,28,0.18) 0%, rgba(255,255,255,1) 38%, rgba(248,248,250,1) 100%)",
+        boxShadow: isDark
+          ? "0 24px 60px rgba(0,0,0,0.28)"
+          : "0 12px 30px rgba(0,0,0,0.08)",
       }}
     >
       <Box
         sx={{
           position: "absolute",
           inset: 0,
-          background:
-            "radial-gradient(circle at top left, rgba(255,209,0,0.14), transparent 28%)",
+          background: isDark
+            ? "radial-gradient(circle at top left, rgba(255,209,0,0.14), transparent 28%)"
+            : "radial-gradient(circle at top left, rgba(255,195,28,0.18), transparent 28%)",
           pointerEvents: "none",
         }}
       />
@@ -134,12 +144,14 @@ const GroupHeaderBanner = ({
               borderRadius: "50%",
               display: "grid",
               placeItems: "center",
-              bgcolor: "#1b1d22",
-              color: "#FFD100",
+              bgcolor: isDark ? "#1b1d22" : "#f0f2f5",
+              color: colors.primary,
               fontWeight: 800,
               fontSize: { xs: "1.9rem", md: "2.2rem" },
-              border: "2px solid rgba(255,255,255,0.08)",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+              border: `2px solid ${colors.borderSubtle}`,
+              boxShadow: isDark
+                ? "0 10px 30px rgba(0,0,0,0.35)"
+                : "0 10px 20px rgba(0,0,0,0.08)",
               flexShrink: 0,
             }}
           >
@@ -155,7 +167,7 @@ const GroupHeaderBanner = ({
                 fontWeight: 800,
                 letterSpacing: "-0.03em",
                 mb: 1.1,
-                color: "#fff",
+                color: colors.textPrimary,
               }}
             >
               {title}
@@ -175,7 +187,11 @@ const GroupHeaderBanner = ({
               {isJoined && <Chip label="Member" sx={pillChipSx} />}
               {isCreator && (
                 <Chip
-                  icon={<CheckCircleIcon sx={{ color: "#111 !important" }} />}
+                  icon={
+                    <CheckCircleIcon
+                      sx={{ color: `${colors.textInverse} !important` }}
+                    />
+                  }
                   label="Creator"
                   sx={creatorChipSx}
                 />
@@ -185,7 +201,7 @@ const GroupHeaderBanner = ({
             <Typography
               variant="body1"
               sx={{
-                color: "#c7c9ce",
+                color: colors.textSecondary,
                 maxWidth: 680,
                 lineHeight: 1.7,
                 mb: 2.25,
@@ -231,12 +247,7 @@ const GroupHeaderBanner = ({
                     onClick={onEditGroup}
                     sx={{
                       ...actionButtonBaseSx,
-                      bgcolor: "#FFD100",
-                      color: "#111",
-                      "&:hover": {
-                        bgcolor: "#f5c400",
-                        boxShadow: "none",
-                      },
+                      ...primaryButtonSx,
                     }}
                   >
                     Edit group
@@ -248,11 +259,15 @@ const GroupHeaderBanner = ({
                     onClick={onDeleteGroup}
                     sx={{
                       ...actionButtonBaseSx,
-                      color: "#ff8e8e",
-                      borderColor: "rgba(255,107,107,0.45)",
+                      color: colors.status.error,
+                      borderColor: isDark
+                        ? "rgba(255,107,107,0.45)"
+                        : "rgba(217,67,67,0.35)",
                       "&:hover": {
-                        borderColor: "#ff6b6b",
-                        bgcolor: "rgba(255,107,107,0.08)",
+                        borderColor: colors.status.error,
+                        bgcolor: isDark
+                          ? "rgba(255,107,107,0.08)"
+                          : "rgba(217,67,67,0.08)",
                       },
                     }}
                   >
@@ -268,16 +283,20 @@ const GroupHeaderBanner = ({
                   disabled={leaving}
                   sx={{
                     ...actionButtonBaseSx,
-                    color: isHovering ? "#fff" : "#FFD100",
+                    color: isHovering ? "#fff" : colors.primary,
                     borderColor: isHovering
-                      ? "rgba(255,107,107,0.7)"
-                      : "rgba(255,209,0,0.55)",
+                      ? colors.status.error
+                      : colors.primary,
                     bgcolor: isHovering
-                      ? "rgba(255,107,107,0.14)"
+                      ? isDark
+                        ? "rgba(255,107,107,0.14)"
+                        : "rgba(217,67,67,0.12)"
                       : "transparent",
                     "&:hover": {
-                      borderColor: "#ff6b6b",
-                      bgcolor: "rgba(255,107,107,0.14)",
+                      borderColor: colors.status.error,
+                      bgcolor: isDark
+                        ? "rgba(255,107,107,0.14)"
+                        : "rgba(217,67,67,0.12)",
                     },
                   }}
                 >
@@ -290,12 +309,7 @@ const GroupHeaderBanner = ({
                   disabled={joining}
                   sx={{
                     ...actionButtonBaseSx,
-                    bgcolor: "#FFD100",
-                    color: "#111",
-                    "&:hover": {
-                      bgcolor: "#f5c400",
-                      boxShadow: "none",
-                    },
+                    ...primaryButtonSx,
                   }}
                 >
                   {joining ? "Joining..." : "Join group"}

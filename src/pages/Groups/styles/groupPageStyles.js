@@ -1,125 +1,152 @@
-export const cardSx = {
-  p: { xs: 2, md: 2.5 },
-  bgcolor: "#151618",
-  borderRadius: 3,
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
-};
+import { useColors } from "../../../theme/colors";
 
-export const pageContainerSx = {
-  minHeight: "100vh",
-  bgcolor: "#0b0b0c",
-  color: "#fff",
-};
+export const useGroupPageStyles = () => {
+  const colors = useColors();
+  const isDark = colors.isDark;
 
-export const stateCardSx = {
-  ...cardSx,
-  py: { xs: 4, md: 5 },
-  px: { xs: 2.5, md: 4 },
-  textAlign: "center",
-};
+  const cardSx = {
+    p: { xs: 2, md: 2.5 },
+    bgcolor: colors.widgetBg,
+    color: colors.textPrimary,
+    borderRadius: 3,
+    border: `1px solid ${colors.borderSubtle}`,
+    boxShadow: isDark
+      ? "0 10px 30px rgba(0,0,0,0.18)"
+      : "0 6px 20px rgba(0,0,0,0.06)",
+  };
 
-export const modalCardSx = {
-  bgcolor: "#151618",
-  color: "#fff",
-  p: 3,
-  borderRadius: 3,
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 24px 60px rgba(0,0,0,0.34)",
-  width: "min(440px, calc(100vw - 32px))",
-  mx: "auto",
-  mt: { xs: "12vh", sm: "16vh" },
-};
+  const pageContainerSx = {
+    minHeight: "100vh",
+    bgcolor: isDark ? colors.accent.primary[900] : colors.accent.primary[400],
+    color: colors.textPrimary,
+  };
 
-export const modalFieldSx = {
-  "& .MuiInputBase-root": {
-    bgcolor: "#0d0e10",
+  const stateCardSx = {
+    ...cardSx,
+    py: { xs: 4, md: 5 },
+    px: { xs: 2.5, md: 4 },
+    textAlign: "center",
+  };
+
+  const modalCardSx = {
+    bgcolor: colors.widgetBg,
+    color: colors.textPrimary,
+    p: 3,
+    borderRadius: 3,
+    border: `1px solid ${colors.borderSubtle}`,
+    boxShadow: isDark
+      ? "0 24px 60px rgba(0,0,0,0.34)"
+      : "0 18px 40px rgba(0,0,0,0.12)",
+    width: "min(440px, calc(100vw - 32px))",
+    mx: "auto",
+    mt: { xs: "12vh", sm: "16vh" },
+  };
+
+  const modalFieldSx = {
+    "& .MuiInputBase-root": {
+      bgcolor: isDark ? "#0d0e10" : "#f5f5f7",
+      color: colors.textPrimary,
+      borderRadius: 2,
+    },
+    "& .MuiInputLabel-root": {
+      color: colors.textSecondary,
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: colors.primary,
+    },
+    "& fieldset": {
+      borderColor: colors.borderSubtle,
+    },
+    "& .MuiOutlinedInput-root:hover fieldset": {
+      borderColor: colors.primary,
+    },
+    "& .MuiOutlinedInput-root.Mui-focused fieldset": {
+      borderColor: colors.primary,
+    },
+  };
+
+  const secondaryButtonSx = {
+    color: colors.textSecondary,
+    borderColor: colors.borderSecondary,
+    textTransform: "none",
+    fontWeight: 700,
+    borderRadius: "999px",
+    px: 2,
+    minHeight: 44,
+    "&:hover": {
+      borderColor: colors.primary,
+      bgcolor: colors.borderSubtle,
+    },
+  };
+
+  const primaryButtonSx = {
+    bgcolor: colors.primary,
+    color: colors.textInverse,
+    textTransform: "none",
+    fontWeight: 700,
+    borderRadius: "999px",
+    boxShadow: "none",
+    px: 2,
+    minHeight: 44,
+    "&:hover": {
+      bgcolor: colors.accent.yellowAccent[600],
+      boxShadow: "none",
+    },
+  };
+
+  const destructiveButtonSx = {
+    bgcolor: colors.status.error,
     color: "#fff",
-    borderRadius: 2,
-  },
-  "& .MuiInputLabel-root": {
-    color: "#9ea3ab",
-  },
-  "& .MuiInputLabel-root.Mui-focused": {
-    color: "#FFD100",
-  },
-  "& fieldset": {
-    borderColor: "rgba(255,255,255,0.10)",
-  },
-  "& .MuiOutlinedInput-root:hover fieldset": {
-    borderColor: "rgba(255,209,0,0.35)",
-  },
-  "& .MuiOutlinedInput-root.Mui-focused fieldset": {
-    borderColor: "#FFD100",
-  },
-};
-
-export const secondaryButtonSx = {
-  color: "#c2c6cc",
-  borderColor: "rgba(255,255,255,0.14)",
-  textTransform: "none",
-  fontWeight: 700,
-  borderRadius: "999px",
-  px: 2,
-  minHeight: 44,
-  "&:hover": {
-    borderColor: "rgba(255,209,0,0.35)",
-    bgcolor: "rgba(255,255,255,0.02)",
-  },
-};
-
-export const primaryButtonSx = {
-  bgcolor: "#FFD100",
-  color: "#111",
-  textTransform: "none",
-  fontWeight: 700,
-  borderRadius: "999px",
-  boxShadow: "none",
-  px: 2,
-  minHeight: 44,
-  "&:hover": {
-    bgcolor: "#f5c400",
+    textTransform: "none",
+    fontWeight: 700,
+    borderRadius: "999px",
     boxShadow: "none",
-  },
-};
+    px: 2,
+    minHeight: 44,
+    "&:hover": {
+      bgcolor: isDark ? "#ff5252" : "#d94343",
+      boxShadow: "none",
+    },
+  };
 
-export const destructiveButtonSx = {
-  bgcolor: "#ff6b6b",
-  color: "#fff",
-  textTransform: "none",
-  fontWeight: 700,
-  borderRadius: "999px",
-  boxShadow: "none",
-  px: 2,
-  minHeight: 44,
-  "&:hover": {
-    bgcolor: "#ff5252",
+  const filledUtilityButtonSx = {
+    textTransform: "none",
+    fontWeight: 700,
+    borderRadius: "999px",
+    alignSelf: "flex-start",
+    minHeight: 42,
+    px: 1.75,
+    bgcolor: isDark ? "#23252a" : "#f3f4f6",
+    color: colors.textPrimary,
     boxShadow: "none",
-  },
-};
+    border: `1px solid ${colors.borderSubtle}`,
+    "&:hover": {
+      bgcolor: isDark ? "#2c2f35" : "#e9ebef",
+      boxShadow: "none",
+      borderColor: colors.primary,
+    },
+  };
 
-export const filledUtilityButtonSx = {
-  textTransform: "none",
-  fontWeight: 700,
-  borderRadius: "999px",
-  alignSelf: "flex-start",
-  minHeight: 42,
-  px: 1.75,
-  bgcolor: "#23252a",
-  color: "#fff",
-  boxShadow: "none",
-  border: "1px solid rgba(255,255,255,0.10)",
-  "&:hover": {
-    bgcolor: "#2c2f35",
-    boxShadow: "none",
-    borderColor: "rgba(255,209,0,0.35)",
-  },
-};
+  const feedSectionLabelSx = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 2,
+    px: { xs: 0.25, sm: 0.5 },
+  };
 
-export const feedSectionLabelSx = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 2,
-  px: { xs: 0.25, sm: 0.5 },
+  return {
+    colors,
+    isDark,
+    cardSx,
+    pageContainerSx,
+    stateCardSx,
+    modalCardSx,
+    modalFieldSx,
+    secondaryButtonSx,
+    primaryButtonSx,
+    destructiveButtonSx,
+    filledUtilityButtonSx,
+    feedSectionLabelSx,
+  };
 };

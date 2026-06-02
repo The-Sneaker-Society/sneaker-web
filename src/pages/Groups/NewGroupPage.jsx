@@ -14,9 +14,11 @@ import {
   PageLoadingState,
   StatePanel,
 } from "./components/GroupPageStates";
-import { pageContainerSx, primaryButtonSx } from "./styles/groupPageStyles";
+import { useGroupPageStyles } from "./styles/groupPageStyles";
 
 const NewGroupPage = () => {
+  const { colors, pageContainerSx, primaryButtonSx } = useGroupPageStyles();
+
   const {
     loading,
     error,
@@ -188,7 +190,7 @@ const NewGroupPage = () => {
         />
 
         {joinLeaveError && !modalOpen && !isCreator && (
-          <Typography variant="caption" color="error.main">
+          <Typography variant="caption" sx={{ color: colors.status.error }}>
             {joinLeaveError}
           </Typography>
         )}

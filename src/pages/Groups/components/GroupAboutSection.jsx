@@ -2,34 +2,29 @@ import { Box, Typography, Stack } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
-
-const cardSx = {
-  p: { xs: 2, md: 2.25 },
-  bgcolor: "#0b0d12",
-  borderRadius: 3,
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
-};
-
-const rowSx = {
-  display: "grid",
-  gridTemplateColumns: "16px minmax(0, 1fr)",
-  gap: 1.5,
-  alignItems: "start",
-};
-
-const iconSx = {
-  color: "#FFD100",
-  fontSize: 16,
-  mt: "2px",
-};
+import { useGroupPageStyles } from "../styles/groupPageStyles";
 
 const GroupAboutSection = ({ group, memberCount }) => {
+  const { colors, cardSx } = useGroupPageStyles();
+
   const createdBy =
     group?.createdBy?.name ||
     group?.createdBy?.fullName ||
     group?.creator?.name ||
     "Unknown";
+
+  const rowSx = {
+    display: "grid",
+    gridTemplateColumns: "16px minmax(0, 1fr)",
+    gap: 1.5,
+    alignItems: "start",
+  };
+
+  const iconSx = {
+    color: colors.primary,
+    fontSize: 16,
+    mt: "2px",
+  };
 
   return (
     <Box sx={cardSx}>
@@ -37,13 +32,13 @@ const GroupAboutSection = ({ group, memberCount }) => {
         <Box>
           <Typography
             variant="h6"
-            sx={{ color: "#fff", fontWeight: 800, mb: 0.5 }}
+            sx={{ color: colors.textPrimary, fontWeight: 800, mb: 0.5 }}
           >
             About
           </Typography>
           <Typography
             variant="body2"
-            sx={{ color: "#8f949c", lineHeight: 1.6 }}
+            sx={{ color: colors.textSecondary, lineHeight: 1.6 }}
           >
             Community details and background.
           </Typography>
@@ -55,13 +50,18 @@ const GroupAboutSection = ({ group, memberCount }) => {
             <Box>
               <Typography
                 variant="caption"
-                sx={{ color: "#8f949c", fontWeight: 700, display: "block", mb: 0.5 }}
+                sx={{
+                  color: colors.textSecondary,
+                  fontWeight: 700,
+                  display: "block",
+                  mb: 0.5,
+                }}
               >
                 Description
               </Typography>
               <Typography
                 variant="body2"
-                sx={{ color: "#f5f5f5", lineHeight: 1.65 }}
+                sx={{ color: colors.textPrimary, lineHeight: 1.65 }}
               >
                 {group?.description || "No description provided."}
               </Typography>
@@ -73,11 +73,19 @@ const GroupAboutSection = ({ group, memberCount }) => {
             <Box>
               <Typography
                 variant="caption"
-                sx={{ color: "#8f949c", fontWeight: 700, display: "block", mb: 0.5 }}
+                sx={{
+                  color: colors.textSecondary,
+                  fontWeight: 700,
+                  display: "block",
+                  mb: 0.5,
+                }}
               >
                 Created by
               </Typography>
-              <Typography variant="body2" sx={{ color: "#f5f5f5", fontWeight: 600 }}>
+              <Typography
+                variant="body2"
+                sx={{ color: colors.textPrimary, fontWeight: 600 }}
+              >
                 {createdBy}
               </Typography>
             </Box>
@@ -88,11 +96,19 @@ const GroupAboutSection = ({ group, memberCount }) => {
             <Box>
               <Typography
                 variant="caption"
-                sx={{ color: "#8f949c", fontWeight: 700, display: "block", mb: 0.5 }}
+                sx={{
+                  color: colors.textSecondary,
+                  fontWeight: 700,
+                  display: "block",
+                  mb: 0.5,
+                }}
               >
                 Community size
               </Typography>
-              <Typography variant="body2" sx={{ color: "#f5f5f5", fontWeight: 600 }}>
+              <Typography
+                variant="body2"
+                sx={{ color: colors.textPrimary, fontWeight: 600 }}
+              >
                 {memberCount || 0} member{memberCount === 1 ? "" : "s"}
               </Typography>
             </Box>

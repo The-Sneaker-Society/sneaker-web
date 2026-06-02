@@ -4,7 +4,7 @@ import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import PostCard from "../PostCard";
 import { FeedLoadingSkeleton, StatePanel } from "./GroupPageStates";
-import { secondaryButtonSx, primaryButtonSx } from "../styles/groupPageStyles";
+import { useGroupPageStyles } from "../styles/groupPageStyles";
 
 const GroupFeedSection = ({
   posts,
@@ -33,6 +33,8 @@ const GroupFeedSection = ({
   openDeletePostModal,
   handleLoadMorePosts,
 }) => {
+  const { colors, secondaryButtonSx, primaryButtonSx } = useGroupPageStyles();
+
   if (postsLoading && posts.length === 0) {
     return <FeedLoadingSkeleton />;
   }
@@ -50,11 +52,11 @@ const GroupFeedSection = ({
             onClick={() => refetchPosts?.()}
             sx={{
               ...secondaryButtonSx,
-              color: "#FFD100",
-              borderColor: "#FFD100",
+              color: colors.primary,
+              borderColor: colors.primary,
               "&:hover": {
-                borderColor: "#FFD100",
-                bgcolor: "rgba(255,209,0,0.05)",
+                borderColor: colors.primary,
+                bgcolor: colors.borderSubtle,
               },
             }}
           >
@@ -92,7 +94,10 @@ const GroupFeedSection = ({
               sx={primaryButtonSx}
             >
               {joining ? (
-                <CircularProgress size={18} sx={{ color: "#111" }} />
+                <CircularProgress
+                  size={18}
+                  sx={{ color: colors.textInverse }}
+                />
               ) : (
                 "Join Group"
               )}
@@ -135,16 +140,16 @@ const GroupFeedSection = ({
             disabled={loadingMorePosts}
             sx={{
               ...secondaryButtonSx,
-              color: "#FFD100",
-              borderColor: "#FFD100",
+              color: colors.primary,
+              borderColor: colors.primary,
               "&:hover": {
-                borderColor: "#FFD100",
-                bgcolor: "rgba(255,209,0,0.05)",
+                borderColor: colors.primary,
+                bgcolor: colors.borderSubtle,
               },
             }}
           >
             {loadingMorePosts ? (
-              <CircularProgress size={18} sx={{ color: "#FFD100" }} />
+              <CircularProgress size={18} sx={{ color: colors.primary }} />
             ) : (
               "Load more posts"
             )}

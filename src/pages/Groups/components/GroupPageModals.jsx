@@ -7,13 +7,7 @@ import {
   Stack,
   CircularProgress,
 } from "@mui/material";
-import {
-  modalCardSx,
-  modalFieldSx,
-  secondaryButtonSx,
-  primaryButtonSx,
-  destructiveButtonSx,
-} from "../styles/groupPageStyles";
+import { useGroupPageStyles } from "../styles/groupPageStyles";
 
 const GroupPageModals = ({
   editModalOpen,
@@ -38,6 +32,15 @@ const GroupPageModals = ({
   handleDeleteGroup,
   handleLeaveGroup,
 }) => {
+  const {
+    colors,
+    modalCardSx,
+    modalFieldSx,
+    secondaryButtonSx,
+    primaryButtonSx,
+    destructiveButtonSx,
+  } = useGroupPageStyles();
+
   return (
     <>
       <Modal
@@ -52,7 +55,7 @@ const GroupPageModals = ({
               <Typography
                 id="edit-group-title"
                 variant="h6"
-                sx={{ fontWeight: 700 }}
+                sx={{ fontWeight: 700, color: colors.textPrimary }}
               >
                 Edit group details
               </Typography>
@@ -60,7 +63,7 @@ const GroupPageModals = ({
               <Typography
                 id="edit-group-description"
                 variant="body2"
-                sx={{ color: "#aaa" }}
+                sx={{ color: colors.textSecondary }}
               >
                 Update this group’s basic information.
               </Typography>
@@ -96,7 +99,10 @@ const GroupPageModals = ({
               />
 
               {editGroupError && (
-                <Typography variant="caption" color="error.main">
+                <Typography
+                  variant="caption"
+                  sx={{ color: colors.status.error }}
+                >
                   {editGroupError}
                 </Typography>
               )}
@@ -120,7 +126,10 @@ const GroupPageModals = ({
                   sx={primaryButtonSx}
                 >
                   {updatingGroup ? (
-                    <CircularProgress size={18} sx={{ color: "#111" }} />
+                    <CircularProgress
+                      size={18}
+                      sx={{ color: colors.textInverse }}
+                    />
                   ) : (
                     "Save changes"
                   )}
@@ -142,7 +151,7 @@ const GroupPageModals = ({
             <Typography
               id="delete-group-title"
               variant="h6"
-              sx={{ fontWeight: 700 }}
+              sx={{ fontWeight: 700, color: colors.textPrimary }}
             >
               Delete this group?
             </Typography>
@@ -150,14 +159,14 @@ const GroupPageModals = ({
             <Typography
               id="delete-group-description"
               variant="body2"
-              sx={{ color: "#aaa", lineHeight: 1.6 }}
+              sx={{ color: colors.textSecondary, lineHeight: 1.6 }}
             >
               This will remove the group and all of its posts for all members.
               This action cannot be undone.
             </Typography>
 
             {deleteGroupError && (
-              <Typography variant="caption" color="error.main">
+              <Typography variant="caption" sx={{ color: colors.status.error }}>
                 {deleteGroupError}
               </Typography>
             )}
@@ -202,7 +211,7 @@ const GroupPageModals = ({
             <Typography
               id="leave-group-title"
               variant="h6"
-              sx={{ fontWeight: 700 }}
+              sx={{ fontWeight: 700, color: colors.textPrimary }}
             >
               Leave this group?
             </Typography>
@@ -210,13 +219,13 @@ const GroupPageModals = ({
             <Typography
               id="leave-group-description"
               variant="body2"
-              sx={{ color: "#aaa", lineHeight: 1.6 }}
+              sx={{ color: colors.textSecondary, lineHeight: 1.6 }}
             >
               You will need to join again to post, like, or comment.
             </Typography>
 
             {joinLeaveError && (
-              <Typography variant="caption" color="error.main">
+              <Typography variant="caption" sx={{ color: colors.status.error }}>
                 {joinLeaveError}
               </Typography>
             )}

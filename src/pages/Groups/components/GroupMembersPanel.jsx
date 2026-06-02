@@ -1,63 +1,57 @@
 import { Box, Typography, Stack, Chip } from "@mui/material";
 import VerifiedIcon from "@mui/icons-material/Verified";
-
-const cardSx = {
-  p: { xs: 2, md: 2.25 },
-  bgcolor: "#0b0d12",
-  borderRadius: 3,
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
-};
-
-const pillSx = {
-  height: 28,
-  borderRadius: "999px",
-  bgcolor: "rgba(255,255,255,0.08)",
-  color: "#e5e7eb",
-  border: "1px solid rgba(255,255,255,0.08)",
-  "& .MuiChip-label": {
-    px: 1.25,
-    fontWeight: 700,
-  },
-};
-
-const adminPillSx = {
-  ...pillSx,
-  bgcolor: "rgba(255,209,0,0.14)",
-  color: "#FFD100",
-  border: "1px solid rgba(255,209,0,0.22)",
-};
-
-const avatarSx = {
-  width: 42,
-  height: 42,
-  borderRadius: "50%",
-  display: "grid",
-  placeItems: "center",
-  bgcolor: "#1b1d22",
-  color: "#FFD100",
-  fontWeight: 800,
-  fontSize: "1.1rem",
-  border: "1px solid rgba(255,255,255,0.08)",
-  flexShrink: 0,
-};
-
-const memberRowSx = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 1.25,
-  p: 1.25,
-  borderRadius: 2.5,
-  bgcolor: "rgba(255,255,255,0.02)",
-  border: "1px solid rgba(255,255,255,0.05)",
-};
+import { useGroupPageStyles } from "../styles/groupPageStyles";
 
 const GroupMembersPanel = ({ group, adminIds = [] }) => {
+  const { colors, isDark, cardSx } = useGroupPageStyles();
+
   const members = Array.isArray(group?.members) ? group.members : [];
   const admins = members.filter((member) => adminIds.includes(member?.id));
-
   const previewMembers = members.slice(0, 3);
+
+  const pillSx = {
+    height: 28,
+    borderRadius: "999px",
+    bgcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+    color: colors.textPrimary,
+    border: `1px solid ${colors.borderSubtle}`,
+    "& .MuiChip-label": {
+      px: 1.25,
+      fontWeight: 700,
+    },
+  };
+
+  const adminPillSx = {
+    ...pillSx,
+    bgcolor: isDark ? "rgba(255,209,0,0.14)" : "rgba(255,195,28,0.16)",
+    color: colors.primary,
+    border: `1px solid ${isDark ? "rgba(255,209,0,0.22)" : "rgba(255,195,28,0.28)"}`,
+  };
+
+  const avatarSx = {
+    width: 42,
+    height: 42,
+    borderRadius: "50%",
+    display: "grid",
+    placeItems: "center",
+    bgcolor: isDark ? "#1b1d22" : "#f0f2f5",
+    color: colors.primary,
+    fontWeight: 800,
+    fontSize: "1.1rem",
+    border: `1px solid ${colors.borderSubtle}`,
+    flexShrink: 0,
+  };
+
+  const memberRowSx = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 1.25,
+    p: 1.25,
+    borderRadius: 2.5,
+    bgcolor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.03)",
+    border: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
+  };
 
   const getName = (member) =>
     member?.name || member?.fullName || member?.username || "Member";
@@ -69,14 +63,19 @@ const GroupMembersPanel = ({ group, adminIds = [] }) => {
 
     return (
       <Box key={member?.id || getName(member)} sx={memberRowSx}>
-        <Stack direction="row" spacing={1.25} alignItems="center" sx={{ minWidth: 0 }}>
+        <Stack
+          direction="row"
+          spacing={1.25}
+          alignItems="center"
+          sx={{ minWidth: 0 }}
+        >
           <Box sx={avatarSx}>{getInitial(member)}</Box>
 
           <Box sx={{ minWidth: 0 }}>
             <Typography
               variant="body2"
               sx={{
-                color: "#fff",
+                color: colors.textPrimary,
                 fontWeight: 700,
                 lineHeight: 1.3,
                 whiteSpace: "nowrap",
@@ -91,7 +90,11 @@ const GroupMembersPanel = ({ group, adminIds = [] }) => {
 
         {isAdmin && (
           <Chip
-            icon={<VerifiedIcon sx={{ color: "#FFD100 !important", fontSize: 16 }} />}
+            icon={
+              <VerifiedIcon
+                sx={{ color: `${colors.primary} !important`, fontSize: 16 }}
+              />
+            }
             label="Admin"
             sx={adminPillSx}
           />
@@ -107,13 +110,13 @@ const GroupMembersPanel = ({ group, adminIds = [] }) => {
           <Box>
             <Typography
               variant="h6"
-              sx={{ color: "#fff", fontWeight: 800, mb: 0.5 }}
+              sx={{ color: colors.textPrimary, fontWeight: 800, mb: 0.5 }}
             >
               Roles
             </Typography>
             <Typography
               variant="body2"
-              sx={{ color: "#8f949c", lineHeight: 1.6 }}
+              sx={{ color: colors.textSecondary, lineHeight: 1.6 }}
             >
               Group membership and admin overview.
             </Typography>
@@ -137,13 +140,13 @@ const GroupMembersPanel = ({ group, adminIds = [] }) => {
           <Box>
             <Typography
               variant="h6"
-              sx={{ color: "#fff", fontWeight: 800, mb: 0.5 }}
+              sx={{ color: colors.textPrimary, fontWeight: 800, mb: 0.5 }}
             >
               Members preview
             </Typography>
             <Typography
               variant="body2"
-              sx={{ color: "#8f949c", lineHeight: 1.6 }}
+              sx={{ color: colors.textSecondary, lineHeight: 1.6 }}
             >
               A quick look at people in this group.
             </Typography>
@@ -153,7 +156,7 @@ const GroupMembersPanel = ({ group, adminIds = [] }) => {
             {previewMembers.length > 0 ? (
               previewMembers.map(renderMemberRow)
             ) : (
-              <Typography variant="body2" sx={{ color: "#aaa" }}>
+              <Typography variant="body2" sx={{ color: colors.textSecondary }}>
                 No members to display yet.
               </Typography>
             )}
@@ -166,13 +169,13 @@ const GroupMembersPanel = ({ group, adminIds = [] }) => {
           <Box>
             <Typography
               variant="h6"
-              sx={{ color: "#fff", fontWeight: 800, mb: 0.5 }}
+              sx={{ color: colors.textPrimary, fontWeight: 800, mb: 0.5 }}
             >
               Members
             </Typography>
             <Typography
               variant="body2"
-              sx={{ color: "#8f949c", lineHeight: 1.6 }}
+              sx={{ color: colors.textSecondary, lineHeight: 1.6 }}
             >
               People currently in this group.
             </Typography>
@@ -182,7 +185,7 @@ const GroupMembersPanel = ({ group, adminIds = [] }) => {
             {members.length > 0 ? (
               members.map(renderMemberRow)
             ) : (
-              <Typography variant="body2" sx={{ color: "#aaa" }}>
+              <Typography variant="body2" sx={{ color: colors.textSecondary }}>
                 No members yet.
               </Typography>
             )}
