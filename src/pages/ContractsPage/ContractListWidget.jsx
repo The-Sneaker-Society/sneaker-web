@@ -26,36 +26,41 @@ const GET_CONTRACT_LIST = gql`
 `;
 
 const STATUS_CONFIG = {
-  NOT_STARTED:    { label: "Not Started",    icon: FiInbox,       colorKey: "notStarted" },
-  PENDING_REVIEW: { label: "Pending Review", icon: FiClock,       colorKey: "pending"    },
-  STARTED:        { label: "In Progress",    icon: FiTool,        colorKey: "inProgress" },
-  FINISHED:       { label: "Completed",      icon: FiCheckCircle, colorKey: "completed"  },
+  PENDING_REVIEW:      { label: "Pending Review",      icon: FiClock,       colorKey: "pending"    },
+  PRICE_PROPOSED:      { label: "Price Proposed",      icon: FiClock,       colorKey: "inProgress" },
+  PRICE_ACCEPTED:      { label: "Price Accepted",      icon: FiClock,       colorKey: "inProgress" },
+  WAITING_SHIPMENT:    { label: "Waiting Shipment",    icon: FiInbox,       colorKey: "inProgress" },
+  SHIPPED:             { label: "Shipped",              icon: FiInbox,       colorKey: "inProgress" },
+  ARRIVED_AT_MEMBER:   { label: "Arrived at Member",   icon: FiTool,        colorKey: "inProgress" },
+  WORK_IN_PROGRESS:    { label: "Work in Progress",    icon: FiTool,        colorKey: "inProgress" },
+  PROCESSING_RETURN:   { label: "Processing Return",   icon: FiTool,        colorKey: "inProgress" },
+  SHIPPED_BACK:        { label: "Shipped Back",         icon: FiInbox,       colorKey: "inProgress" },
+  USER_RECEIVED:       { label: "User Received",        icon: FiCheckCircle, colorKey: "completed"  },
+  PAYOUT_RELEASED:     { label: "Payout Released",      icon: FiCheckCircle, colorKey: "completed"  },
 };
 
-// The three filterable status pills (excluding PENDING_REVIEW for now)
-const FILTER_ITEMS = [
-  { label: "Not Started", statusKey: "NOT_STARTED", icon: FiInbox,       colorKey: "notStarted" },
-  { label: "In Progress", statusKey: "STARTED",     icon: FiTool,        colorKey: "inProgress" },
-  { label: "Completed",   statusKey: "FINISHED",    icon: FiCheckCircle, colorKey: "completed"  },
+const STATUS_BUCKETS = [
+  { label: "Pending Review", statuses: ["PENDING_REVIEW"],                                    icon: FiClock,       colorKey: "pending"    },
+  { label: "In Progress",    statuses: ["PRICE_PROPOSED","PRICE_ACCEPTED","WAITING_SHIPMENT", "SHIPPED","ARRIVED_AT_MEMBER","WORK_IN_PROGRESS","PROCESSING_RETURN","SHIPPED_BACK"], icon: FiTool, colorKey: "inProgress" },
+  { label: "Completed",      statuses: ["USER_RECEIVED","PAYOUT_RELEASED"],                    icon: FiCheckCircle, colorKey: "completed"  },
 ];
 
 function StatusStrip({ contracts, activeFilter, onFilterChange, colors }) {
-  const counts = {
-    NOT_STARTED: contracts.filter((c) => c.status === "NOT_STARTED").length,
-    STARTED:     contracts.filter((c) => c.status === "STARTED").length,
-    FINISHED:    contracts.filter((c) => c.status === "FINISHED").length,
-  };
+  const counts = {};
+  STATUS_BUCKETS.forEach(({ label, statuses }) => {
+    counts[label] = contracts.filter((c) => statuses.includes(c.status)).length;
+  });
 
   return (
     <Box sx={{ display: "flex", gap: 1.5, mb: 2, pb: 2, borderBottom: `1px solid ${colors.borderSubtle}` }}>
-      {FILTER_ITEMS.map(({ label, statusKey, icon: Icon, colorKey }) => {
+      {STATUS_BUCKETS.map(({ label, statuses, icon: Icon, colorKey }) => {
         const color = colors.status[colorKey];
-        const isActive = activeFilter === statusKey;
+        const isActive = activeFilter === label;
 
         return (
           <Box
-            key={statusKey}
-            onClick={() => onFilterChange(isActive ? null : statusKey)}
+            key={label}
+            onClick={() => onFilterChange(isActive ? null : label)}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -76,7 +81,7 @@ function StatusStrip({ contracts, activeFilter, onFilterChange, colors }) {
           >
             <Icon size={13} color={color} />
             <Typography sx={{ fontSize: "0.8rem", fontWeight: 700, color, lineHeight: 1 }}>
-              {counts[statusKey]}
+              {counts[label]}
             </Typography>
             <Typography sx={{ fontSize: "0.7rem", color: isActive ? colors.textPrimary : colors.textSecondary, fontWeight: 500, display: { xs: "none", sm: "block" } }}>
               {label}
@@ -178,7 +183,10 @@ export const ContractListWidget = () => {
 
   // Apply filter
   const visibleContracts = activeFilter
-    ? allContracts.filter((c) => c.status === activeFilter)
+    ? allContracts.filter((c) => {
+        const bucket = STATUS_BUCKETS.find((b) => b.label === activeFilter);
+        return bucket ? bucket.statuses.includes(c.status) : true;
+      })
     : allContracts;
 
   const columns = [
