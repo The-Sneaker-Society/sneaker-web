@@ -150,7 +150,7 @@ export const MemberDashboard = () => {
           </Box>
 
           {/* Row 4: Revenue — reference/trend, fills remaining height */}
-          <Box sx={{ flex: 1, minHeight: 0 }}>
+          <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <RevenueSummaryWidget />
           </Box>
         </Box>

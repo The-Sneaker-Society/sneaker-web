@@ -7,6 +7,7 @@ const GET_CHAT_BY_ID = gql`
     getChatById(chatId: $id) {
       id
       name
+      contractId
       member {
         id
         firstName
@@ -21,6 +22,12 @@ const GET_CHAT_BY_ID = gql`
         content
         senderId
         senderType
+        type
+        metadata {
+          price
+          checkoutUrl
+          status
+        }
         createdAt
       }
     }
@@ -35,6 +42,31 @@ const CREATE_MESSAGE = gql`
       content
       senderId
       senderType
+      type
+      metadata {
+        price
+        checkoutUrl
+        status
+      }
+      createdAt
+    }
+  }
+`;
+
+const PROPOSE_PRICE = gql`
+  mutation ProposePriceInChat($contractId: ID!, $price: Float!) {
+    proposePriceInChat(contractId: $contractId, price: $price) {
+      id
+      chatId
+      content
+      senderId
+      senderType
+      type
+      metadata {
+        price
+        checkoutUrl
+        status
+      }
       createdAt
     }
   }
@@ -48,6 +80,12 @@ const SUBSCRIBE_TO_CHAT = gql`
       senderId
       content
       senderType
+      type
+      metadata {
+        price
+        checkoutUrl
+        status
+      }
       createdAt
     }
   }
@@ -66,6 +104,7 @@ const useChatDashboard = (senderType) => {
   });
 
   const [createMessage] = useMutation(CREATE_MESSAGE);
+  const [proposePriceMutation] = useMutation(PROPOSE_PRICE);
 
   const { data: subscriptionData } = useSubscription(SUBSCRIBE_TO_CHAT, {
     variables: { data: { chatId: id } },
@@ -73,6 +112,7 @@ const useChatDashboard = (senderType) => {
   });
 
   const [isSending, setIsSending] = useState(false);
+  const [isProposing, setIsProposing] = useState(false);
   const [messages, setMessages] = useState([]);
 
   // Merge initial query messages, deduped and sorted by createdAt
@@ -112,6 +152,22 @@ const useChatDashboard = (senderType) => {
     }
   };
 
+  const proposePrice = async (price) => {
+    const contractId = data?.getChatById?.contractId;
+    if (!contractId) throw new Error("No contract associated with this chat");
+    setIsProposing(true);
+    try {
+      await proposePriceMutation({
+        variables: { contractId, price },
+      });
+    } catch (err) {
+      console.error("Error proposing price:", err);
+      throw err;
+    } finally {
+      setIsProposing(false);
+    }
+  };
+
   return {
     chatId: id,
     chat: data?.getChatById,
@@ -119,8 +175,10 @@ const useChatDashboard = (senderType) => {
     error,
     messages,
     isSending,
+    isProposing,
     setIsSending,
     sendMessage,
+    proposePrice,
   };
 };
 

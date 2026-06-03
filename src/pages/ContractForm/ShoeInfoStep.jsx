@@ -12,6 +12,7 @@ import {
   Grid,
   Paper,
   Divider,
+  InputAdornment,
 } from "@mui/material";
 import { Field, useField } from "formik";
 import brandOptions from "./config/brandOptions";
@@ -44,7 +45,27 @@ const ShoeInfoStep = ({ formik }) => {
           Tell us about your sneakers
         </Typography>
       </Box>
-      <Paper variant="outlined" sx={{ p: 3 }}>
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h5" fontWeight={600} mb={2}>
+          Declared Value
+        </Typography>
+        <Typography variant="body2" color="text.secondary" mb={2}>
+          What is the current market value of your sneakers? This helps us assess the level of care needed.
+        </Typography>
+        <FormikTextField
+          label="Declared Market Value"
+          name="declaredMarketValue"
+          type="number"
+          fullWidth
+          size="small"
+          required
+          inputProps={{ min: 0, step: 0.01 }}
+          InputProps={{
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+          }}
+        />
+      </Paper>
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Typography variant="h5" fontWeight={600} mb={2}>
           Shoe Details
         </Typography>
@@ -219,6 +240,22 @@ const ShoeInfoStep = ({ formik }) => {
           name="shoeDetails.clientNotes"
           size="small"
         />
+
+        <Divider sx={{ my: 3 }} />
+
+        <FormControlLabel
+          control={
+            <Field
+              as={Checkbox}
+              name="boxIncluded"
+              color="primary"
+            />
+          }
+          label="Shoe box is included"
+        />
+        <Typography variant="body2" color="text.secondary" mt={0.5}>
+          Check this if you have the original shoebox and want to include it with your sneakers.
+        </Typography>
       </Paper>
     </Box>
   );
