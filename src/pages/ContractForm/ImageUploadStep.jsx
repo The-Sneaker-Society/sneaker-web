@@ -26,10 +26,12 @@ const ImageUploadStep = () => {
     bottomView: [],
     frontView: [],
     backView: [],
+    inside: [],
+    tongue: [],
+    box: [],
     other: [],
   });
 
-  // Effect to initialize localImages from Formik values on mount and update
   useEffect(() => {
     if (values.shoeDetails && values.shoeDetails.photos) {
       setLocalImages(values.shoeDetails.photos);
@@ -322,9 +324,12 @@ const ImageUploadStep = () => {
         {renderSingleImageSection("Right Side", "rightSide")}
         {renderSingleImageSection("Top View", "topView")}
         {renderSingleImageSection("Bottom View", "bottomView")}
+        {renderSingleImageSection("Inside of Shoe", "inside")}
         {renderSingleImageSection("Front View", "frontView")}
+        {renderSingleImageSection("Tongue", "tongue")}
         {renderSingleImageSection("Back View", "backView")}
         {renderMultipleImageSection("Other Areas", "other")}
+        {values.boxIncluded && renderMultipleImageSection("Box Condition", "box")}
       </Grid>
       <ImagePreviewDialog
         open={!!previewUrl}

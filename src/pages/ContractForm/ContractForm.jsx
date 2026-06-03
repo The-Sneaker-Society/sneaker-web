@@ -30,6 +30,10 @@ const GET_MEMBER_CONTRACT_STATUS = gql`
 `;
 
 const ShoeInfoSchema = Yup.object().shape({
+  declaredMarketValue: Yup.number()
+    .typeError("Must be a number")
+    .required("Declared market value is required")
+    .positive("Must be a positive number"),
   shoeDetails: Yup.object().shape({
     brand: Yup.string().required("Brand is required"),
     model: Yup.string().required("Model is required"),
@@ -46,19 +50,21 @@ const ShoeInfoSchema = Yup.object().shape({
 });
 
 const initialValues = {
+  declaredMarketValue: "2900",
+  boxIncluded: true,
   shoeDetails: {
-    brand: "Jordan",
-    model: "Retro 4",
-    color: "Bred",
+    brand: "nike",
+    model: "Air Force 1",
+    color: "White",
     material: "Leather",
     size: "10.5",
-    soleCondition: "Good - minimal wear",
-    year: "2024",
+    soleCondition: "light wear",
+    year: "2022",
     returnTimeframe: "standard",
     odorLevel: "none",
     previousRepairs: false,
     previousRepairsNotes: "",
-    clientNotes: "Restoration and deep clean requested. Small scuff on right toe box.",
+    clientNotes: "Deep clean and restore original white finish. Light yellowing on soles, minor creasing on toe box. Please also condition the leather.",
     photos: {
       leftSide: [],
       rightSide: [],
@@ -66,6 +72,9 @@ const initialValues = {
       bottomView: [],
       frontView: [],
       backView: [],
+      inside: [],
+      tongue: [],
+      box: [],
       other: [],
     },
   },
@@ -155,6 +164,8 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
       variables: {
         data: {
           memberId,
+          declaredMarketValue: parseFloat(values.declaredMarketValue),
+          boxIncluded: values.boxIncluded,
           repairDetails: {
             clientNotes,
           },
