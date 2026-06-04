@@ -14,6 +14,7 @@ import { FiSend, FiArrowLeft, FiDollarSign, FiX } from "react-icons/fi";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import PriceProposalBubble from "./PriceProposalBubble";
+import PricePreviewModal from "./PricePreviewModal";
 
 const Chat = ({
   messages,
@@ -29,6 +30,8 @@ const Chat = ({
   const [newMessage, setNewMessage] = useState("");
   const [showPriceInput, setShowPriceInput] = useState(false);
   const [priceAmount, setPriceAmount] = useState("");
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [pendingPrice, setPendingPrice] = useState(null);
   const messageEndRef = useRef(null);
   const inputRef = useRef(null);
   const priceInputRef = useRef(null);
@@ -78,10 +81,18 @@ const Chat = ({
   const handleProposePrice = async () => {
     const amount = parseFloat(priceAmount);
     if (!amount || amount <= 0) return;
+    setPendingPrice(amount);
+    setShowPreviewModal(true);
+  };
+
+  const handleConfirmPrice = async () => {
+    if (!pendingPrice) return;
     try {
-      await proposePrice(amount);
+      await proposePrice(pendingPrice);
+      setShowPreviewModal(false);
       setShowPriceInput(false);
       setPriceAmount("");
+      setPendingPrice(null);
     } catch (err) {
       console.error("Failed to propose price:", err);
     }
@@ -303,6 +314,14 @@ const Chat = ({
           </IconButton>
         </Box>
       </Box>
+
+      <PricePreviewModal
+        open={showPreviewModal}
+        price={pendingPrice}
+        onConfirm={handleConfirmPrice}
+        onClose={() => { setShowPreviewModal(false); setPendingPrice(null); }}
+        isProposing={isProposing}
+      />
     </Box>
   );
 };
