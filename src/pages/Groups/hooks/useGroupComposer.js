@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@apollo/client";
 import { CREATE_POST, GET_POSTS_BY_GROUP } from "../graphql";
+import { useImageUploader } from "../../../hooks/useImageUploader";
 
 const POSTS_PAGE_SIZE = 10;
 const INITIAL_COMMENT_PAGE_SIZE = 3;
@@ -16,13 +17,27 @@ export const useGroupComposer = ({ groupId }) => {
   const [imageFiles, setImageFiles] = useState([]);
   const [postError, setPostError] = useState("");
 
+  const { upload, loading: imageUploading } = useImageUploader();
+
   useEffect(() => {
     return () => {
       imageSrcs.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [imageSrcs]);
 
-  const [createPost, { loading: posting }] = useMutation(CREATE_POST, {
+  const resetComposer = () => {
+    imageSrcs.forEach((url) => URL.revokeObjectURL(url));
+    setPostContent("");
+    setImageSrcs([]);
+    setImageFiles([]);
+    setPostError("");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const [createPost, { loading: creatingPost }] = useMutation(CREATE_POST, {
     refetchQueries: [
       {
         query: GET_POSTS_BY_GROUP,
@@ -30,21 +45,11 @@ export const useGroupComposer = ({ groupId }) => {
           groupId,
           limit: POSTS_PAGE_SIZE,
           offset: 0,
-          commentLimit: INITIAL_COMMENT_PAGE_SIZE,
         },
       },
     ],
     awaitRefetchQueries: true,
-    onCompleted: () => {
-      imageSrcs.forEach((url) => URL.revokeObjectURL(url));
-      setPostContent("");
-      setImageSrcs([]);
-      setImageFiles([]);
-      setPostError("");
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    },
+    onCompleted: resetComposer,
     onError: (err) => setPostError(err.message),
   });
 
@@ -101,22 +106,26 @@ export const useGroupComposer = ({ groupId }) => {
     setImageSrcs((prev) => {
       const next = [...prev];
       const [removedUrl] = next.splice(indexToRemove, 1);
+
       if (removedUrl) {
         URL.revokeObjectURL(removedUrl);
       }
+
       return next;
     });
 
     setImageFiles((prev) => {
       const next = prev.filter((_, index) => index !== indexToRemove);
+
       if (fileInputRef.current && next.length === 0) {
         fileInputRef.current.value = "";
       }
+
       return next;
     });
   };
 
-  const handlePostSubmit = () => {
+  const handlePostSubmit = async () => {
     if (!postContent.trim()) {
       setPostError("Post content cannot be empty.");
       return;
@@ -124,23 +133,25 @@ export const useGroupComposer = ({ groupId }) => {
 
     if (!groupId) return;
 
-    const toBase64 = (file) =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+    try {
+      setPostError("");
 
-    Promise.all(imageFiles.map(toBase64)).then((base64Images) => {
-      createPost({
+      const uploadedImages = await Promise.all(
+        imageFiles.map((file) => upload(file)),
+      );
+
+      const imageUrls = uploadedImages.map((img) => img?.url).filter(Boolean);
+
+      await createPost({
         variables: {
           groupId,
           content: postContent.trim(),
-          images: base64Images,
+          images: imageUrls,
         },
       });
-    });
+    } catch (err) {
+      setPostError(err?.message || "Failed to upload images.");
+    }
   };
 
   return {
@@ -149,7 +160,7 @@ export const useGroupComposer = ({ groupId }) => {
     setPostContent,
     imageSrcs,
     postError,
-    posting,
+    posting: creatingPost || imageUploading,
     handleFileInputChange,
     handleRemoveImage,
     handlePostSubmit,

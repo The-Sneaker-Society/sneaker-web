@@ -1,14 +1,18 @@
 import { Box } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { useColors } from "../../../theme/colors";
 
-const GroupPageLayout = ({ header, sidebar, children, variant = "dark" }) => {
-  const isDark = variant === "dark";
+const GroupPageLayout = ({ header, sidebar, children }) => {
+  const theme = useTheme();
+  const colors = useColors();
+  const isDark = theme.palette.mode === "dark";
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: isDark ? "#050506" : "#f5f5f5",
-        color: isDark ? "#fff" : "#111",
+        bgcolor: theme.palette.background.default,
+        color: colors.textPrimary,
       }}
     >
       <Box

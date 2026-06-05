@@ -78,7 +78,7 @@ const PostCard = ({
   const borderSubtle = colors.borderSubtle;
   const textPrimary = colors.textPrimary;
   const textSecondary = colors.textSecondary;
-  const accent = colors.primary; // yellowAccent[500]
+  const accent = colors.primary;
 
   const deleteBtnSx = {
     ...actionChipButtonSx,
@@ -154,7 +154,6 @@ const PostCard = ({
         p: { xs: 2, md: 2.5 },
       }}
     >
-      {/* Header */}
       <Stack
         direction="row"
         alignItems="flex-start"
@@ -198,7 +197,6 @@ const PostCard = ({
         )}
       </Stack>
 
-      {/* Post content */}
       {!!post.content && (
         <Typography
           variant="body2"
@@ -208,7 +206,6 @@ const PostCard = ({
         </Typography>
       )}
 
-      {/* Post images */}
       {post.images?.length > 0 && (
         <Box
           sx={{

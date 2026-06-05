@@ -50,8 +50,32 @@ export const GET_POSTS_BY_GROUP = gql`
         id
         content
         createdAt
+        images
+        commentCount
         author {
           id
+          firstName
+          lastName
+          email
+        }
+        likes {
+          id
+        }
+        commentsPage(limit: 3, offset: 0) {
+          items {
+            id
+            content
+            createdAt
+            author {
+              id
+              firstName
+              lastName
+              email
+            }
+          }
+          totalCount
+          hasMore
+          nextOffset
         }
       }
       totalCount

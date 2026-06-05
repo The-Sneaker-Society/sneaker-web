@@ -2,11 +2,17 @@ import { Box, Typography, Stack, Chip } from "@mui/material";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import { useGroupPageStyles } from "../styles/groupPageStyles";
 
-const GroupMembersPanel = ({ group, adminIds = [] }) => {
+const GroupMembersPanel = ({ group, adminIds }) => {
   const { colors, isDark, cardSx } = useGroupPageStyles();
 
   const members = Array.isArray(group?.members) ? group.members : [];
-  const admins = members.filter((member) => adminIds.includes(member?.id));
+
+  const adminIdSet =
+    adminIds instanceof Set
+      ? adminIds
+      : new Set(Array.isArray(adminIds) ? adminIds : []);
+
+  const admins = members.filter((member) => adminIdSet.has(member?.id));
   const previewMembers = members.slice(0, 3);
 
   const pillSx = {
@@ -34,7 +40,7 @@ const GroupMembersPanel = ({ group, adminIds = [] }) => {
     borderRadius: "50%",
     display: "grid",
     placeItems: "center",
-    bgcolor: isDark ? "#1b1d22" : "#f0f2f5",
+    bgcolor: isDark ? colors.accent.primary[700] : colors.accent.primary[400],
     color: colors.primary,
     fontWeight: 800,
     fontSize: "1.1rem",
@@ -54,12 +60,17 @@ const GroupMembersPanel = ({ group, adminIds = [] }) => {
   };
 
   const getName = (member) =>
-    member?.name || member?.fullName || member?.username || "Member";
+    member?.name ||
+    member?.fullName ||
+    [member?.firstName, member?.lastName].filter(Boolean).join(" ").trim() ||
+    member?.username ||
+    member?.email ||
+    "Member";
 
   const getInitial = (member) => getName(member).charAt(0).toUpperCase();
 
   const renderMemberRow = (member) => {
-    const isAdmin = adminIds.includes(member?.id);
+    const isAdmin = adminIdSet.has(member?.id);
 
     return (
       <Box key={member?.id || getName(member)} sx={memberRowSx}>

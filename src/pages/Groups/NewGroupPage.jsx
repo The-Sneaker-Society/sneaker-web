@@ -152,7 +152,7 @@ const NewGroupPage = () => {
   );
 
   return (
-    <GroupPageLayout header={header} sidebar={sidebar} variant="dark">
+    <GroupPageLayout header={header} sidebar={sidebar}>
       <Stack spacing={3}>
         <DeletePostModal
           open={deleteModalOpen}
