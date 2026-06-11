@@ -24,9 +24,17 @@ const GroupComposerCard = ({
   const { colors, isDark, cardSx, filledUtilityButtonSx, primaryButtonSx } =
     useGroupPageStyles();
 
+  const inputBg = isDark
+    ? colors.accent.primary[800]
+    : colors.accent.primary[400];
+  const previewBg = inputBg;
+  const removeOverlayBg = isDark
+    ? "rgba(17,17,17,0.78)"
+    : "rgba(255,255,255,0.92)";
+
   const composerFieldSx = {
     "& .MuiInputBase-root": {
-      bgcolor: isDark ? "#0d0e10" : "#f5f5f7",
+      bgcolor: inputBg,
       color: colors.textPrimary,
       borderRadius: 2.5,
     },
@@ -106,7 +114,7 @@ const GroupComposerCard = ({
                   borderRadius: 2,
                   overflow: "hidden",
                   border: `1px solid ${colors.borderSubtle}`,
-                  bgcolor: isDark ? "#0d0e10" : "#f5f5f7",
+                  bgcolor: previewBg,
                 }}
               >
                 <Box
@@ -134,14 +142,12 @@ const GroupComposerCard = ({
                     height: 26,
                     p: 0,
                     borderRadius: "50%",
-                    bgcolor: isDark
-                      ? "rgba(17,17,17,0.78)"
-                      : "rgba(255,255,255,0.92)",
+                    bgcolor: removeOverlayBg,
                     color: colors.textPrimary,
                     border: `1px solid ${colors.borderSubtle}`,
                     "&:hover": {
                       bgcolor: colors.status.error,
-                      color: "#fff",
+                      color: colors.textInverse,
                     },
                   }}
                 >

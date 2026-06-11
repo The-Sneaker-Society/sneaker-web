@@ -36,12 +36,18 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
     navigate(`/member/groups/${group.id}`);
   };
 
-  // Theme-aware values
-  const accent = colors.primary; // yellowAccent[500]
+  const accent = colors.primary;
   const containerBg = colors.sidebarBg;
   const textOnSidebar = colors.sidebarText;
+  const textSecondary = colors.textSecondary;
   const borderSubtle = colors.borderSubtle;
-  const textSecondary = isDark ? "#aaa" : "#666";
+  const inputBg = isDark
+    ? colors.accent.primary[800]
+    : colors.accent.primary[400];
+  const inputText = textOnSidebar;
+  const hoverBg = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)";
+  const tabHoverBg = isDark ? "rgba(255,195,28,0.08)" : "rgba(255,195,28,0.10)";
+  const activeTabText = colors.textInverse;
 
   const activeTabSx = {
     flex: 1,
@@ -50,8 +56,12 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
     fontWeight: 700,
     fontSize: 14,
     bgcolor: accent,
-    color: isDark ? "#111" : "#000",
-    "&:hover": { bgcolor: isDark ? "#f5c400" : "#e6a800" },
+    color: activeTabText,
+    "&:hover": {
+      bgcolor: isDark
+        ? colors.accent.yellowAccent[600]
+        : colors.accent.yellowAccent[600],
+    },
   };
 
   const inactiveTabSx = {
@@ -63,7 +73,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
     bgcolor: "transparent",
     color: accent,
     "&:hover": {
-      bgcolor: isDark ? "rgba(255,209,0,0.08)" : "rgba(255,195,28,0.1)",
+      bgcolor: tabHoverBg,
     },
   };
 
@@ -79,7 +89,6 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
         p: 2,
       }}
     >
-      {/* Tabs */}
       <Stack direction="row" spacing={1}>
         <Button
           onClick={() => setTab("trending")}
@@ -95,7 +104,6 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
         </Button>
       </Stack>
 
-      {/* Search */}
       <TextField
         fullWidth
         size="small"
@@ -104,14 +112,17 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
         onChange={(e) => setSearch(e.target.value)}
         sx={{
           "& .MuiInputBase-root": {
-            bgcolor: isDark ? "#111" : "#f0f0f0",
+            bgcolor: inputBg,
             borderRadius: "999px",
+            color: inputText,
           },
-          "& fieldset": { border: "none" },
+          "& fieldset": {
+            border: "none",
+          },
           "& .MuiInputBase-input": {
             px: 2,
             py: 1.2,
-            color: isDark ? "#fff" : "#111",
+            color: inputText,
             fontSize: 13,
           },
           "& .MuiInputBase-input::placeholder": {
@@ -121,7 +132,6 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
         }}
       />
 
-      {/* List / Status messages */}
       <Box sx={{ flex: 1, overflowY: "auto" }}>
         {loading && (
           <Typography
@@ -242,9 +252,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
                   borderRadius: 1,
                   transition: "background 150ms ease",
                   "&:hover": {
-                    bgcolor: isDark
-                      ? "rgba(255,255,255,0.05)"
-                      : "rgba(0,0,0,0.04)",
+                    bgcolor: hoverBg,
                   },
                   "&:last-child": { borderBottom: "none" },
                 }}
@@ -269,7 +277,6 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
                   </Typography>
                 </Box>
 
-                {/* Avatar */}
                 {group.avatar ? (
                   <Box
                     component="img"
@@ -290,7 +297,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
                       height: 36,
                       borderRadius: "50%",
                       bgcolor: accent,
-                      color: isDark ? "#111" : "#000",
+                      color: activeTabText,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",

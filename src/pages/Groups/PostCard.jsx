@@ -72,22 +72,47 @@ const PostCard = ({
 
   const formattedDate = formatPostDate(post.createdAt);
 
-  // Derived theme-aware values
-  const cardBg = isDark ? "#151618" : "#ffffff";
-  const inputBg = isDark ? "#0b0c0e" : "#f3f4f6";
+  const cardBg = colors.widgetBg;
+  const inputBg = isDark
+    ? colors.accent.primary[800]
+    : colors.accent.primary[400];
+  const commentItemBg = inputBg;
+
   const borderSubtle = colors.borderSubtle;
   const textPrimary = colors.textPrimary;
   const textSecondary = colors.textSecondary;
   const accent = colors.primary;
+  const error = colors.status.error;
+  const errorSoft = isDark
+    ? colors.accent.redAccent[400]
+    : colors.accent.redAccent[600];
+  const likeSoftBg = isDark
+    ? "rgba(255, 195, 28, 0.10)"
+    : "rgba(255, 195, 28, 0.14)";
+  const likeSoftBorder = isDark
+    ? "rgba(255, 195, 28, 0.30)"
+    : "rgba(255, 195, 28, 0.42)";
+  const neutralHoverBg = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)";
+  const deleteSoftBg = isDark ? "rgba(219,79,74,0.10)" : "rgba(175,63,59,0.08)";
+  const deleteSoftHoverBg = isDark
+    ? "rgba(219,79,74,0.16)"
+    : "rgba(175,63,59,0.14)";
+  const deleteSoftBorder = isDark
+    ? "rgba(219,79,74,0.28)"
+    : "rgba(175,63,59,0.28)";
+  const deleteSoftBorderHover = isDark
+    ? "rgba(219,79,74,0.42)"
+    : "rgba(175,63,59,0.42)";
+  const primaryActionText = colors.textInverse;
 
   const deleteBtnSx = {
     ...actionChipButtonSx,
-    color: isDark ? "#ff8a8a" : "#c0392b",
-    border: `1px solid ${isDark ? "rgba(255,107,107,0.22)" : "rgba(192,57,43,0.25)"}`,
-    bgcolor: isDark ? "rgba(255,107,107,0.08)" : "rgba(192,57,43,0.06)",
+    color: errorSoft,
+    border: `1px solid ${deleteSoftBorder}`,
+    bgcolor: deleteSoftBg,
     "&:hover": {
-      bgcolor: isDark ? "rgba(255,107,107,0.14)" : "rgba(192,57,43,0.12)",
-      borderColor: isDark ? "rgba(255,107,107,0.32)" : "rgba(192,57,43,0.4)",
+      bgcolor: deleteSoftHoverBg,
+      borderColor: deleteSoftBorderHover,
     },
     "&.Mui-disabled": {
       color: textSecondary,
@@ -98,27 +123,26 @@ const PostCard = ({
   const likeBtnSx = {
     ...actionChipButtonSx,
     color: !isJoined ? textSecondary : hasLiked ? accent : textSecondary,
-    bgcolor: hasLiked
-      ? isDark
-        ? "rgba(255,209,0,0.10)"
-        : "rgba(255,195,28,0.12)"
-      : "transparent",
+    bgcolor: hasLiked ? likeSoftBg : "transparent",
     border: hasLiked
-      ? `1px solid ${isDark ? "rgba(255,209,0,0.28)" : "rgba(255,195,28,0.4)"}`
+      ? `1px solid ${likeSoftBorder}`
       : `1px solid ${borderSubtle}`,
     "&:hover": {
-      bgcolor: hasLiked
-        ? isDark
-          ? "rgba(255,209,0,0.15)"
-          : "rgba(255,195,28,0.2)"
-        : isDark
-          ? "rgba(255,255,255,0.06)"
-          : "rgba(0,0,0,0.04)",
+      bgcolor: hasLiked ? likeSoftBg : neutralHoverBg,
     },
     "&.Mui-disabled": {
       color: textSecondary,
       borderColor: borderSubtle,
     },
+  };
+
+  const staticActionChipSx = {
+    ...actionChipButtonSx,
+    color: textSecondary,
+    border: `1px solid ${borderSubtle}`,
+    bgcolor: "transparent",
+    cursor: "default",
+    "&:hover": { bgcolor: "transparent" },
   };
 
   const commentFieldSx = {
@@ -135,11 +159,159 @@ const PostCard = ({
       borderColor: borderSubtle,
     },
     "& .MuiOutlinedInput-root:hover fieldset": {
-      borderColor: `${accent}66`,
+      borderColor: accent,
     },
     "& .MuiOutlinedInput-root.Mui-focused fieldset": {
       borderColor: accent,
     },
+  };
+
+  const primaryActionButtonSx = {
+    bgcolor: accent,
+    color: primaryActionText,
+    textTransform: "none",
+    fontWeight: 700,
+    borderRadius: "999px",
+    boxShadow: "none",
+    minHeight: 40,
+    px: 2,
+    flexShrink: 0,
+    "&:hover": {
+      bgcolor: colors.accent.yellowAccent[600],
+      boxShadow: "none",
+    },
+    "&.Mui-disabled": {
+      bgcolor: borderSubtle,
+      color: textSecondary,
+    },
+  };
+
+  // Image layout helpers
+  const images = Array.isArray(post.images) ? post.images.slice(0, 4) : [];
+  const extraImageCount = Math.max((post.images?.length || 0) - 4, 0);
+
+  const mediaFrameSx = {
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: 2,
+    border: `1px solid ${borderSubtle}`,
+    bgcolor: commentItemBg,
+    width: "100%",
+  };
+
+  const mediaImageSx = {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    display: "block",
+  };
+
+  const renderMediaImage = (img, i, sx = {}, showOverlay = false) => (
+    <Box key={`${img}-${i}`} sx={{ ...mediaFrameSx, ...sx }}>
+      <Box
+        component="img"
+        src={img}
+        alt={`Post image ${i + 1}`}
+        sx={mediaImageSx}
+      />
+
+      {showOverlay && extraImageCount > 0 && (
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            display: "grid",
+            placeItems: "center",
+            bgcolor: "rgba(0,0,0,0.42)",
+            color: "#fff",
+            fontSize: "1.15rem",
+            fontWeight: 800,
+            letterSpacing: "-0.01em",
+          }}
+        >
+          +{extraImageCount}
+        </Box>
+      )}
+    </Box>
+  );
+
+  const renderImageLayout = () => {
+    if (images.length === 1) {
+      return renderMediaImage(images[0], 0, {
+        aspectRatio: "16 / 10",
+      });
+    }
+
+    if (images.length === 2) {
+      return (
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: 1,
+          }}
+        >
+          {images.map((img, i) =>
+            renderMediaImage(img, i, {
+              aspectRatio: "1 / 1",
+            }),
+          )}
+        </Box>
+      );
+    }
+
+    if (images.length === 3) {
+      return (
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1.35fr 1fr",
+            gap: 1,
+          }}
+        >
+          {renderMediaImage(images[0], 0, {
+            aspectRatio: "1 / 1",
+          })}
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateRows: "repeat(2, minmax(0, 1fr))",
+              gap: 1,
+            }}
+          >
+            {renderMediaImage(images[1], 1, {
+              aspectRatio: "1 / 1",
+            })}
+            {renderMediaImage(images[2], 2, {
+              aspectRatio: "1 / 1",
+            })}
+          </Box>
+        </Box>
+      );
+    }
+
+    // 4+ images → 2x2 grid with overlay on last tile if there are extras
+    return (
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          gap: 1,
+        }}
+      >
+        {images.map((img, i) =>
+          renderMediaImage(
+            img,
+            i,
+            {
+              aspectRatio: "1 / 1",
+            },
+            i === 3 && extraImageCount > 0,
+          ),
+        )}
+      </Box>
+    );
   };
 
   return (
@@ -206,34 +378,8 @@ const PostCard = ({
         </Typography>
       )}
 
-      {post.images?.length > 0 && (
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 1,
-            mb: 1.5,
-          }}
-        >
-          {post.images.map((img, i) => (
-            <Box
-              key={i}
-              component="img"
-              src={img}
-              alt={`post-image-${i}`}
-              sx={{
-                width: post.images.length === 1 ? "100%" : "calc(50% - 4px)",
-                maxHeight: 320,
-                objectFit: "cover",
-                borderRadius: 2,
-                border: `1px solid ${borderSubtle}`,
-              }}
-            />
-          ))}
-        </Box>
-      )}
+      {images.length > 0 && <Box sx={{ mb: 1.5 }}>{renderImageLayout()}</Box>}
 
-      {/* Action row */}
       <Stack direction="row" spacing={1} alignItems="center" mb={1}>
         <Button
           size="small"
@@ -257,14 +403,7 @@ const PostCard = ({
           size="small"
           startIcon={<ChatBubbleOutlineIcon fontSize="small" />}
           disableRipple
-          sx={{
-            ...actionChipButtonSx,
-            color: textSecondary,
-            border: `1px solid ${borderSubtle}`,
-            bgcolor: "transparent",
-            cursor: "default",
-            "&:hover": { bgcolor: "transparent" },
-          }}
+          sx={staticActionChipSx}
         >
           {commentCount} {commentCount === 1 ? "comment" : "comments"}
         </Button>
@@ -273,13 +412,12 @@ const PostCard = ({
       {likeError && (
         <Typography
           variant="caption"
-          sx={{ color: colors.status.error, mb: 1, display: "block" }}
+          sx={{ color: error, mb: 1, display: "block" }}
         >
           {likeError}
         </Typography>
       )}
 
-      {/* Comments section */}
       {(visibleComments.length > 0 || isJoined) && (
         <Box>
           <Divider sx={{ borderColor: borderSubtle, mb: 1.5 }} />
@@ -298,7 +436,7 @@ const PostCard = ({
                   <Box
                     key={comment.id}
                     sx={{
-                      bgcolor: isDark ? "#0d0e10" : "#f7f8fa",
+                      bgcolor: commentItemBg,
                       borderRadius: 2,
                       px: 1.5,
                       py: 1,
@@ -368,21 +506,7 @@ const PostCard = ({
                 size="small"
                 onClick={onAddComment}
                 disabled={commentLoading}
-                sx={{
-                  bgcolor: accent,
-                  color: isDark ? "#111" : "#000",
-                  textTransform: "none",
-                  fontWeight: 700,
-                  borderRadius: "999px",
-                  boxShadow: "none",
-                  minHeight: 40,
-                  px: 2,
-                  flexShrink: 0,
-                  "&:hover": {
-                    bgcolor: isDark ? "#f5c400" : "#e6a800",
-                    boxShadow: "none",
-                  },
-                }}
+                sx={primaryActionButtonSx}
               >
                 {commentLoading ? (
                   <CircularProgress size={14} color="inherit" />
@@ -409,7 +533,7 @@ const PostCard = ({
           {commentError && (
             <Typography
               variant="caption"
-              sx={{ color: colors.status.error, mt: 0.75, display: "block" }}
+              sx={{ color: error, mt: 0.75, display: "block" }}
             >
               {commentError}
             </Typography>

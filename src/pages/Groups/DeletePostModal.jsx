@@ -1,35 +1,17 @@
-import { Modal, Box, Typography, Stack, Button, CircularProgress } from "@mui/material";
-
-const secondaryButtonSx = {
-  color: "#c2c6cc",
-  borderColor: "rgba(255,255,255,0.14)",
-  textTransform: "none",
-  fontWeight: 700,
-  borderRadius: "999px",
-  px: 2,
-  minHeight: 44,
-  "&:hover": {
-    borderColor: "rgba(255,209,0,0.35)",
-    bgcolor: "rgba(255,255,255,0.02)",
-  },
-};
-
-const destructiveButtonSx = {
-  bgcolor: "#ff6b6b",
-  color: "#fff",
-  textTransform: "none",
-  fontWeight: 700,
-  borderRadius: "999px",
-  boxShadow: "none",
-  px: 2,
-  minHeight: 44,
-  "&:hover": {
-    bgcolor: "#ff5252",
-    boxShadow: "none",
-  },
-};
+import {
+  Modal,
+  Box,
+  Typography,
+  Stack,
+  Button,
+  CircularProgress,
+} from "@mui/material";
+import { useGroupPageStyles } from "../Groups/styles/groupPageStyles";
 
 const DeletePostModal = ({ open, onClose, onConfirm, loading, error }) => {
+  const { colors, modalCardSx, secondaryButtonSx, destructiveButtonSx } =
+    useGroupPageStyles();
+
   return (
     <Modal
       open={open}
@@ -39,14 +21,8 @@ const DeletePostModal = ({ open, onClose, onConfirm, loading, error }) => {
     >
       <Box
         sx={{
-          bgcolor: "#151618",
-          color: "#fff",
-          p: 3,
-          borderRadius: 3,
-          border: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.34)",
+          ...modalCardSx,
           width: "min(420px, calc(100vw - 32px))",
-          mx: "auto",
           mt: { xs: "12vh", sm: "18vh" },
         }}
       >
@@ -54,7 +30,7 @@ const DeletePostModal = ({ open, onClose, onConfirm, loading, error }) => {
           <Typography
             id="delete-post-title"
             variant="h6"
-            sx={{ fontWeight: 800 }}
+            sx={{ fontWeight: 800, color: colors.textPrimary }}
           >
             Delete this post?
           </Typography>
@@ -62,13 +38,14 @@ const DeletePostModal = ({ open, onClose, onConfirm, loading, error }) => {
           <Typography
             id="delete-post-description"
             variant="body2"
-            sx={{ color: "#aaa", lineHeight: 1.6 }}
+            sx={{ color: colors.textSecondary, lineHeight: 1.6 }}
           >
-            This action cannot be undone. The post and its conversation will be removed from the group.
+            This action cannot be undone. The post and its conversation will be
+            removed from the group.
           </Typography>
 
           {error && (
-            <Typography variant="caption" color="error.main">
+            <Typography variant="caption" sx={{ color: colors.status.error }}>
               {error}
             </Typography>
           )}
@@ -89,7 +66,10 @@ const DeletePostModal = ({ open, onClose, onConfirm, loading, error }) => {
               sx={destructiveButtonSx}
             >
               {loading ? (
-                <CircularProgress size={18} sx={{ color: "#fff" }} />
+                <CircularProgress
+                  size={18}
+                  sx={{ color: colors.textInverse }}
+                />
               ) : (
                 "Delete Post"
               )}

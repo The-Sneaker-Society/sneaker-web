@@ -22,17 +22,33 @@ const GroupHeaderBanner = ({
   onEditGroup,
   onDeleteGroup,
 }) => {
-  const { colors, isDark, primaryButtonSx, destructiveButtonSx } =
-    useGroupPageStyles();
+  const { colors, isDark, primaryButtonSx } = useGroupPageStyles();
 
   const title = group?.name || "Group";
   const description = group?.description || "No description provided.";
   const postCount = group?.postCount ?? group?.postsCount ?? null;
 
+  const pillBg = isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)";
+  const statPillBg = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)";
+  const avatarBg = isDark
+    ? colors.accent.primary[700]
+    : colors.accent.primary[400];
+  const deleteBorder = isDark ? "rgba(219,79,74,0.45)" : "rgba(175,63,59,0.35)";
+  const deleteHoverBg = isDark
+    ? "rgba(219,79,74,0.08)"
+    : "rgba(175,63,59,0.08)";
+  const leaveHoverBg = isDark ? "rgba(219,79,74,0.14)" : "rgba(175,63,59,0.12)";
+  const bannerGradient = isDark
+    ? `linear-gradient(180deg, rgba(255,195,28,0.10) 0%, ${colors.accent.primary[900]} 34%, ${colors.widgetBg} 100%)`
+    : `linear-gradient(180deg, rgba(255,195,28,0.18) 0%, ${colors.widgetBg} 38%, ${colors.accent.primary[400]} 100%)`;
+  const overlayGradient = isDark
+    ? "radial-gradient(circle at top left, rgba(255,195,28,0.14), transparent 28%)"
+    : "radial-gradient(circle at top left, rgba(255,195,28,0.18), transparent 28%)";
+
   const pillChipSx = {
     height: 28,
     borderRadius: "999px",
-    bgcolor: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)",
+    bgcolor: pillBg,
     color: colors.textPrimary,
     fontWeight: 700,
     border: `1px solid ${colors.borderSubtle}`,
@@ -65,7 +81,7 @@ const GroupHeaderBanner = ({
     px: 1.35,
     py: 0.95,
     borderRadius: "999px",
-    bgcolor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+    bgcolor: statPillBg,
     border: `1px solid ${colors.borderSubtle}`,
     color: colors.textPrimary,
   };
@@ -105,9 +121,7 @@ const GroupHeaderBanner = ({
         overflow: "hidden",
         borderRadius: 4,
         border: `1px solid ${colors.borderSubtle}`,
-        background: isDark
-          ? "linear-gradient(180deg, rgba(255,209,0,0.10) 0%, rgba(7,7,8,1) 34%, rgba(10,11,14,1) 100%)"
-          : "linear-gradient(180deg, rgba(255,195,28,0.18) 0%, rgba(255,255,255,1) 38%, rgba(248,248,250,1) 100%)",
+        background: bannerGradient,
         boxShadow: isDark
           ? "0 24px 60px rgba(0,0,0,0.28)"
           : "0 12px 30px rgba(0,0,0,0.08)",
@@ -117,9 +131,7 @@ const GroupHeaderBanner = ({
         sx={{
           position: "absolute",
           inset: 0,
-          background: isDark
-            ? "radial-gradient(circle at top left, rgba(255,209,0,0.14), transparent 28%)"
-            : "radial-gradient(circle at top left, rgba(255,195,28,0.18), transparent 28%)",
+          background: overlayGradient,
           pointerEvents: "none",
         }}
       />
@@ -144,7 +156,7 @@ const GroupHeaderBanner = ({
               borderRadius: "50%",
               display: "grid",
               placeItems: "center",
-              bgcolor: isDark ? "#1b1d22" : "#f0f2f5",
+              bgcolor: avatarBg,
               color: colors.primary,
               fontWeight: 800,
               fontSize: { xs: "1.9rem", md: "2.2rem" },
@@ -260,14 +272,10 @@ const GroupHeaderBanner = ({
                     sx={{
                       ...actionButtonBaseSx,
                       color: colors.status.error,
-                      borderColor: isDark
-                        ? "rgba(255,107,107,0.45)"
-                        : "rgba(217,67,67,0.35)",
+                      borderColor: deleteBorder,
                       "&:hover": {
                         borderColor: colors.status.error,
-                        bgcolor: isDark
-                          ? "rgba(255,107,107,0.08)"
-                          : "rgba(217,67,67,0.08)",
+                        bgcolor: deleteHoverBg,
                       },
                     }}
                   >
@@ -283,20 +291,14 @@ const GroupHeaderBanner = ({
                   disabled={leaving}
                   sx={{
                     ...actionButtonBaseSx,
-                    color: isHovering ? "#fff" : colors.primary,
+                    color: isHovering ? colors.textInverse : colors.primary,
                     borderColor: isHovering
                       ? colors.status.error
                       : colors.primary,
-                    bgcolor: isHovering
-                      ? isDark
-                        ? "rgba(255,107,107,0.14)"
-                        : "rgba(217,67,67,0.12)"
-                      : "transparent",
+                    bgcolor: isHovering ? leaveHoverBg : "transparent",
                     "&:hover": {
                       borderColor: colors.status.error,
-                      bgcolor: isDark
-                        ? "rgba(255,107,107,0.14)"
-                        : "rgba(217,67,67,0.12)",
+                      bgcolor: leaveHoverBg,
                     },
                   }}
                 >

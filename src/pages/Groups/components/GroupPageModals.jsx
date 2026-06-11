@@ -190,7 +190,10 @@ const GroupPageModals = ({
                 sx={destructiveButtonSx}
               >
                 {deletingGroup ? (
-                  <CircularProgress size={18} sx={{ color: "#fff" }} />
+                  <CircularProgress
+                    size={18}
+                    sx={{ color: colors.textInverse }}
+                  />
                 ) : (
                   "Yes, delete group"
                 )}
@@ -249,7 +252,10 @@ const GroupPageModals = ({
                 sx={destructiveButtonSx}
               >
                 {leaving ? (
-                  <CircularProgress size={18} sx={{ color: "#fff" }} />
+                  <CircularProgress
+                    size={18}
+                    sx={{ color: colors.textInverse }}
+                  />
                 ) : (
                   "Yes, leave group"
                 )}

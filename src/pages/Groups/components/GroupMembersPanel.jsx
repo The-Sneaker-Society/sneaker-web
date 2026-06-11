@@ -15,10 +15,22 @@ const GroupMembersPanel = ({ group, adminIds }) => {
   const admins = members.filter((member) => adminIdSet.has(member?.id));
   const previewMembers = members.slice(0, 3);
 
+  const pillBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+  const adminPillBg = isDark
+    ? "rgba(255,195,28,0.14)"
+    : "rgba(255,195,28,0.16)";
+  const adminPillBorder = isDark
+    ? "rgba(255,195,28,0.22)"
+    : "rgba(255,195,28,0.28)";
+  const memberRowBg = isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.03)";
+  const memberRowBorder = isDark
+    ? "rgba(255,255,255,0.05)"
+    : "rgba(0,0,0,0.05)";
+
   const pillSx = {
     height: 28,
     borderRadius: "999px",
-    bgcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+    bgcolor: pillBg,
     color: colors.textPrimary,
     border: `1px solid ${colors.borderSubtle}`,
     "& .MuiChip-label": {
@@ -29,9 +41,9 @@ const GroupMembersPanel = ({ group, adminIds }) => {
 
   const adminPillSx = {
     ...pillSx,
-    bgcolor: isDark ? "rgba(255,209,0,0.14)" : "rgba(255,195,28,0.16)",
+    bgcolor: adminPillBg,
     color: colors.primary,
-    border: `1px solid ${isDark ? "rgba(255,209,0,0.22)" : "rgba(255,195,28,0.28)"}`,
+    border: `1px solid ${adminPillBorder}`,
   };
 
   const avatarSx = {
@@ -55,8 +67,8 @@ const GroupMembersPanel = ({ group, adminIds }) => {
     gap: 1.25,
     p: 1.25,
     borderRadius: 2.5,
-    bgcolor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.03)",
-    border: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
+    bgcolor: memberRowBg,
+    border: `1px solid ${memberRowBorder}`,
   };
 
   const getName = (member) =>

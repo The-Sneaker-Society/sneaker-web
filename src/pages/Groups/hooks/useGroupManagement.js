@@ -36,7 +36,7 @@ export const useGroupManagement = ({ groupId, group, skip }) => {
     onCompleted: () => {
       setDeleteGroupError("");
       setDeleteGroupModalOpen(false);
-      navigate("/groups");
+      navigate("/member/groups");
     },
     onError: (err) => setDeleteGroupError(err.message),
   });
