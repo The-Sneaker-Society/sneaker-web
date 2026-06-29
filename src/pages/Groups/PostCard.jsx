@@ -35,6 +35,7 @@ const PostCard = ({
   currentUser,
   group,
   isJoined,
+  canInteractWithPosts,
   liking,
   deleting,
   commentLoading,
@@ -60,7 +61,6 @@ const PostCard = ({
   const commentCount = post.commentCount || 0;
   const visibleComments = post.commentsPage?.items || [];
   const hasMoreComments = !!post.commentsPage?.hasMore;
-
   const hasLiked = !!post.likes?.some((like) => like.id === currentUser?.id);
 
   const isPostAuthor = post.author?.id === currentUser?.id;
@@ -122,7 +122,11 @@ const PostCard = ({
 
   const likeBtnSx = {
     ...actionChipButtonSx,
-    color: !isJoined ? textSecondary : hasLiked ? accent : textSecondary,
+    color: !canInteractWithPosts
+      ? textSecondary
+      : hasLiked
+        ? accent
+        : textSecondary,
     bgcolor: hasLiked ? likeSoftBg : "transparent",
     border: hasLiked
       ? `1px solid ${likeSoftBorder}`
@@ -186,7 +190,6 @@ const PostCard = ({
     },
   };
 
-  // Image layout helpers
   const images = Array.isArray(post.images) ? post.images.slice(0, 4) : [];
   const extraImageCount = Math.max((post.images?.length || 0) - 4, 0);
 
@@ -291,7 +294,6 @@ const PostCard = ({
       );
     }
 
-    // 4+ images → 2x2 grid with overlay on last tile if there are extras
     return (
       <Box
         sx={{
@@ -393,7 +395,7 @@ const PostCard = ({
             )
           }
           onClick={onLike}
-          disabled={!isJoined || liking}
+          disabled={!canInteractWithPosts || liking}
           sx={likeBtnSx}
         >
           {hasLiked ? "Liked" : "Like"} · {likeCount}
@@ -418,7 +420,7 @@ const PostCard = ({
         </Typography>
       )}
 
-      {(visibleComments.length > 0 || isJoined) && (
+      {(visibleComments.length > 0 || canInteractWithPosts) && (
         <Box>
           <Divider sx={{ borderColor: borderSubtle, mb: 1.5 }} />
 
@@ -491,7 +493,7 @@ const PostCard = ({
             </Stack>
           )}
 
-          {isJoined ? (
+          {canInteractWithPosts ? (
             <Stack direction="row" spacing={1} alignItems="flex-start">
               <TextField
                 fullWidth

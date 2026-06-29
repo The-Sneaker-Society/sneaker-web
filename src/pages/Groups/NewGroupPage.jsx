@@ -28,9 +28,6 @@ const NewGroupPage = () => {
     postsError,
     currentUserLoading,
     currentUser,
-    isJoined,
-    isCreator,
-    canManageGroup,
     memberCount,
     adminIds,
     hasMorePosts,
@@ -92,6 +89,12 @@ const NewGroupPage = () => {
     openDeleteGroupModal,
     handleUpdateGroup,
     handleDeleteGroup,
+    isJoined,
+    isCreator,
+    canManageGroup,
+    canInteractWithPosts,
+    isVisitor,
+    isMemberNonAdmin,
   } = useNewGroupPage();
 
   if (loading || currentUserLoading) {
@@ -129,6 +132,16 @@ const NewGroupPage = () => {
     );
   }
 
+  const handleOpenEditGroup = () => {
+    if (!canManageGroup) return;
+    openEditGroupModal();
+  };
+
+  const handleOpenDeleteGroup = () => {
+    if (!canManageGroup) return;
+    openDeleteGroupModal();
+  };
+
   const header = (
     <GroupHeaderBanner
       group={group}
@@ -142,8 +155,8 @@ const NewGroupPage = () => {
       setIsHovering={setIsHovering}
       onJoin={handleJoinGroup}
       onOpenLeave={() => setModalOpen(true)}
-      onEditGroup={openEditGroupModal}
-      onDeleteGroup={openDeleteGroupModal}
+      onEditGroup={handleOpenEditGroup}
+      onDeleteGroup={handleOpenDeleteGroup}
     />
   );
 
@@ -216,6 +229,8 @@ const NewGroupPage = () => {
           postsLoading={postsLoading}
           postsError={postsError}
           isJoined={isJoined}
+          canInteractWithPosts={canInteractWithPosts}
+          isVisitor={isVisitor}
           isCreator={isCreator}
           joining={joining}
           currentUser={currentUser}
