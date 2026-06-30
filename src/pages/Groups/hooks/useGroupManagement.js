@@ -5,7 +5,7 @@ import { DELETE_GROUP, GET_GROUP, UPDATE_GROUP } from "../graphql";
 
 export const useGroupManagement = ({ groupId, group, skip }) => {
   const navigate = useNavigate();
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editGroupModalOpen, setEditGroupModalOpen] = useState(false);
   const [deleteGroupModalOpen, setDeleteGroupModalOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -14,11 +14,11 @@ export const useGroupManagement = ({ groupId, group, skip }) => {
   const [deleteGroupError, setDeleteGroupError] = useState("");
 
   useEffect(() => {
-    if (!editModalOpen || !group) return;
+    if (!editGroupModalOpen || !group) return;
     setEditName(group.name || "");
     setEditDescription(group.description || "");
     setEditAvatar(group.avatar || "");
-  }, [editModalOpen, group]);
+  }, [editGroupModalOpen, group]);
 
   const [updateGroup, { loading: updatingGroup }] = useMutation(UPDATE_GROUP, {
     refetchQueries: skip
@@ -27,7 +27,7 @@ export const useGroupManagement = ({ groupId, group, skip }) => {
     awaitRefetchQueries: true,
     onCompleted: () => {
       setEditGroupError("");
-      setEditModalOpen(false);
+      setEditGroupModalOpen(false);
     },
     onError: (err) => setEditGroupError(err.message),
   });
@@ -47,7 +47,7 @@ export const useGroupManagement = ({ groupId, group, skip }) => {
     setEditDescription(group.description || "");
     setEditAvatar(group.avatar || "");
     setEditGroupError("");
-    setEditModalOpen(true);
+    setEditGroupModalOpen(true);
   };
 
   const handleUpdateGroup = async (event) => {
@@ -90,8 +90,8 @@ export const useGroupManagement = ({ groupId, group, skip }) => {
   };
 
   return {
-    editModalOpen,
-    setEditModalOpen,
+    editGroupModalOpen,
+    setEditGroupModalOpen,
     deleteGroupModalOpen,
     setDeleteGroupModalOpen,
     editName,

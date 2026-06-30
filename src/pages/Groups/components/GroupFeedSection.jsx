@@ -19,6 +19,7 @@ const GroupFeedSection = ({
   group,
   likingPostId,
   deletingPostId,
+  updatingPostId,
   commentLoadingByPost,
   commentInputs,
   commentErrors,
@@ -32,6 +33,7 @@ const GroupFeedSection = ({
   handleCommentChange,
   handleAddComment,
   handleLoadMoreComments,
+  openEditPostModal,
   openDeletePostModal,
   handleLoadMorePosts,
 }) => {
@@ -126,6 +128,7 @@ const GroupFeedSection = ({
           canInteractWithPosts={canInteractWithPosts}
           liking={likingPostId === post.id}
           deleting={deletingPostId === post.id}
+          updating={updatingPostId === post.id}
           commentLoading={!!commentLoadingByPost[post.id]}
           commentValue={commentInputs[post.id] || ""}
           commentError={commentErrors[post.id] || ""}
@@ -135,6 +138,7 @@ const GroupFeedSection = ({
           onCommentChange={(value) => handleCommentChange(post.id, value)}
           onAddComment={() => handleAddComment(post.id)}
           onLoadMoreComments={() => handleLoadMoreComments(post.id)}
+          onEdit={() => openEditPostModal(post)}
           onDelete={() => openDeletePostModal(post)}
         />
       ))}

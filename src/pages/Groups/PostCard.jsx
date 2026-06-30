@@ -11,6 +11,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useColors } from "../../theme/colors";
 
 const actionChipButtonSx = {
@@ -38,6 +39,7 @@ const PostCard = ({
   canInteractWithPosts,
   liking,
   deleting,
+  updating,
   commentLoading,
   commentValue,
   commentError,
@@ -47,6 +49,7 @@ const PostCard = ({
   onCommentChange,
   onAddComment,
   onLoadMoreComments,
+  onEdit,
   onDelete,
 }) => {
   const colors = useColors();
@@ -68,7 +71,10 @@ const PostCard = ({
   const isGroupAdmin = !!group?.admins?.some(
     (admin) => admin.id === currentUser?.id,
   );
+
+  const canEditPost = isPostAuthor;
   const canDeletePost = isPostAuthor || isGroupCreator || isGroupAdmin;
+  const isModerationAction = canDeletePost && !isPostAuthor;
 
   const formattedDate = formatPostDate(post.createdAt);
 
@@ -86,6 +92,9 @@ const PostCard = ({
   const errorSoft = isDark
     ? colors.accent.redAccent[400]
     : colors.accent.redAccent[600];
+  const editSoft = isDark
+    ? colors.accent.blueAccent?.[300] || colors.textPrimary
+    : colors.accent.blueAccent?.[600] || colors.primary;
   const likeSoftBg = isDark
     ? "rgba(255, 195, 28, 0.10)"
     : "rgba(255, 195, 28, 0.14)";
@@ -103,6 +112,15 @@ const PostCard = ({
   const deleteSoftBorderHover = isDark
     ? "rgba(219,79,74,0.42)"
     : "rgba(175,63,59,0.42)";
+  const editSoftBg = isDark
+    ? "rgba(91, 143, 249, 0.12)"
+    : "rgba(91, 143, 249, 0.10)";
+  const editSoftBorder = isDark
+    ? "rgba(91, 143, 249, 0.28)"
+    : "rgba(91, 143, 249, 0.28)";
+  const editSoftBorderHover = isDark
+    ? "rgba(91, 143, 249, 0.40)"
+    : "rgba(91, 143, 249, 0.40)";
   const primaryActionText = colors.textInverse;
 
   const deleteBtnSx = {
@@ -113,6 +131,21 @@ const PostCard = ({
     "&:hover": {
       bgcolor: deleteSoftHoverBg,
       borderColor: deleteSoftBorderHover,
+    },
+    "&.Mui-disabled": {
+      color: textSecondary,
+      borderColor: borderSubtle,
+    },
+  };
+
+  const editBtnSx = {
+    ...actionChipButtonSx,
+    color: editSoft,
+    border: `1px solid ${editSoftBorder}`,
+    bgcolor: editSoftBg,
+    "&:hover": {
+      bgcolor: neutralHoverBg,
+      borderColor: editSoftBorderHover,
     },
     "&.Mui-disabled": {
       color: textSecondary,
@@ -333,6 +366,7 @@ const PostCard = ({
         alignItems="flex-start"
         justifyContent="space-between"
         mb={1}
+        spacing={1.25}
       >
         <Box>
           <Typography
@@ -341,33 +375,77 @@ const PostCard = ({
           >
             {authorName}
           </Typography>
-          {formattedDate && (
-            <Typography
-              variant="caption"
-              sx={{ color: textSecondary, fontWeight: 600, fontSize: 12 }}
-            >
-              {formattedDate}
-            </Typography>
-          )}
+
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            flexWrap="wrap"
+          >
+            {formattedDate && (
+              <Typography
+                variant="caption"
+                sx={{ color: textSecondary, fontWeight: 600, fontSize: 12 }}
+              >
+                {formattedDate}
+              </Typography>
+            )}
+
+            {isModerationAction && (
+              <Typography
+                variant="caption"
+                sx={{
+                  color: errorSoft,
+                  fontWeight: 700,
+                  fontSize: 12,
+                }}
+              >
+                Admin controls
+              </Typography>
+            )}
+          </Stack>
         </Box>
 
-        {canDeletePost && (
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={
-              deleting ? (
-                <CircularProgress size={12} color="inherit" />
-              ) : (
-                <DeleteOutlineIcon fontSize="small" />
-              )
-            }
-            onClick={onDelete}
-            disabled={deleting}
-            sx={deleteBtnSx}
-          >
-            Delete
-          </Button>
+        {(canEditPost || canDeletePost) && (
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {canEditPost && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={
+                  updating ? (
+                    <CircularProgress size={12} color="inherit" />
+                  ) : (
+                    <EditOutlinedIcon fontSize="small" />
+                  )
+                }
+                onClick={onEdit}
+                disabled={updating}
+                sx={editBtnSx}
+              >
+                Edit
+              </Button>
+            )}
+
+            {canDeletePost && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={
+                  deleting ? (
+                    <CircularProgress size={12} color="inherit" />
+                  ) : (
+                    <DeleteOutlineIcon fontSize="small" />
+                  )
+                }
+                onClick={onDelete}
+                disabled={deleting}
+                sx={deleteBtnSx}
+              >
+                {isModerationAction ? "Remove" : "Delete"}
+              </Button>
+            )}
+          </Stack>
         )}
       </Stack>
 

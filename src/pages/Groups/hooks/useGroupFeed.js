@@ -5,6 +5,7 @@ import {
   DELETE_POST,
   GET_POSTS_BY_GROUP,
   LIKE_POST,
+  UPDATE_POST,
 } from "../graphql";
 
 const POSTS_PAGE_SIZE = 10;
@@ -18,11 +19,19 @@ export const useGroupFeed = ({ groupId, skip, isJoined }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
   const [deleteError, setDeleteError] = useState("");
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [postToEdit, setPostToEdit] = useState(null);
+  const [editContent, setEditContent] = useState("");
+  const [editImages, setEditImages] = useState([]);
+  const [editError, setEditError] = useState("");
+
   const [commentInputs, setCommentInputs] = useState({});
   const [commentErrors, setCommentErrors] = useState({});
   const [likingPostId, setLikingPostId] = useState(null);
   const [commentLoadingByPost, setCommentLoadingByPost] = useState({});
   const [deletingPostId, setDeletingPostId] = useState(null);
+  const [updatingPostId, setUpdatingPostId] = useState(null);
   const [loadingMorePosts, setLoadingMorePosts] = useState(false);
   const [loadingMoreCommentsByPost, setLoadingMoreCommentsByPost] = useState(
     {},
@@ -92,6 +101,25 @@ export const useGroupFeed = ({ groupId, skip, isJoined }) => {
     },
   });
 
+  const [updatePost] = useMutation(UPDATE_POST, {
+    refetchQueries: [
+      { query: GET_POSTS_BY_GROUP, variables: baseFeedVariables },
+    ],
+    awaitRefetchQueries: true,
+    onCompleted: () => {
+      setEditModalOpen(false);
+      setPostToEdit(null);
+      setEditContent("");
+      setEditImages([]);
+      setEditError("");
+      setUpdatingPostId(null);
+    },
+    onError: (err) => {
+      setEditError(err.message);
+      setUpdatingPostId(null);
+    },
+  });
+
   const [deletePost] = useMutation(DELETE_POST, {
     refetchQueries: [
       { query: GET_POSTS_BY_GROUP, variables: baseFeedVariables },
@@ -109,10 +137,57 @@ export const useGroupFeed = ({ groupId, skip, isJoined }) => {
     },
   });
 
+  const openEditPostModal = (post) => {
+    setPostToEdit(post);
+    setEditContent(post?.content || "");
+    setEditImages(Array.isArray(post?.images) ? post.images : []);
+    setEditError("");
+    setEditModalOpen(true);
+  };
+
+  const closeEditPostModal = () => {
+    if (updatingPostId) return;
+    setEditModalOpen(false);
+    setPostToEdit(null);
+    setEditContent("");
+    setEditImages([]);
+    setEditError("");
+  };
+
+  const handleUpdatePost = async () => {
+    if (!postToEdit?.id || updatingPostId === postToEdit.id) return;
+
+    const trimmedContent = editContent.trim();
+    if (!trimmedContent) {
+      setEditError("Post content is required.");
+      return;
+    }
+
+    setEditError("");
+    setUpdatingPostId(postToEdit.id);
+
+    try {
+      await updatePost({
+        variables: {
+          postId: postToEdit.id,
+          content: trimmedContent,
+          images: editImages,
+        },
+      });
+    } catch {}
+  };
+
   const openDeletePostModal = (post) => {
     setPostToDelete(post);
     setDeleteError("");
     setDeleteModalOpen(true);
+  };
+
+  const closeDeletePostModal = () => {
+    if (deletingPostId) return;
+    setDeleteModalOpen(false);
+    setPostToDelete(null);
+    setDeleteError("");
   };
 
   const handleDeletePost = async () => {
@@ -239,12 +314,26 @@ export const useGroupFeed = ({ groupId, skip, isJoined }) => {
     deleteError,
     setDeleteError,
     postToDelete,
+    editModalOpen,
+    setEditModalOpen,
+    postToEdit,
+    editContent,
+    setEditContent,
+    editImages,
+    setEditImages,
+    editError,
+    setEditError,
     commentInputs,
     commentErrors,
     likingPostId,
     commentLoadingByPost,
     deletingPostId,
+    updatingPostId,
+    openEditPostModal,
+    closeEditPostModal,
+    handleUpdatePost,
     openDeletePostModal,
+    closeDeletePostModal,
     handleDeletePost,
     handleLikePost,
     handleCommentChange,
