@@ -207,6 +207,8 @@ const NewGroupPage = () => {
         />
 
         <GroupPageModals
+          canManageGroup={canManageGroup}
+          canLeaveGroup={isJoined && !isCreator}
           editModalOpen={editGroupModalOpen}
           setEditModalOpen={setEditGroupModalOpen}
           deleteGroupModalOpen={deleteGroupModalOpen}
