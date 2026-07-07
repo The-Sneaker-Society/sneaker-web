@@ -29,6 +29,9 @@ const SECTION_LABELS = {
   bottomView: "Bottom View",
   frontView: "Front View",
   backView: "Back View",
+  inside: "Inside of Shoe",
+  tongue: "Tongue",
+  box: "Box Condition",
   other: "Other Areas",
 };
 
@@ -58,7 +61,11 @@ export const ContractDetailsPage = () => {
   const handleAddTracking = () => setModalOpen(true);
   const handleModalClose = () => setModalOpen(false);
 
-  const handleMessageClick = () => navigate(`/member/chat/${id}`);
+  const handleMessageClick = () => {
+    if (contract?.chatId) {
+      navigate(`/member/chats/${contract.chatId}`);
+    }
+  };
   const handleSupportClick = () => {
     window.location.href = "mailto:support@thesneakersociety.com";
   };
@@ -66,20 +73,41 @@ export const ContractDetailsPage = () => {
   const renderStatusBadge = (status) => {
     let backgroundColor = "";
     switch (status) {
-      case "IN_PROGRESS":
+      case "PENDING_REVIEW":
+        backgroundColor = "#F59E0B";
+        break;
+      case "PRICE_PROPOSED":
+        backgroundColor = "#3B82F6";
+        break;
+      case "PRICE_ACCEPTED":
+        backgroundColor = "#10B981";
+        break;
+      case "WAITING_SHIPMENT":
+        backgroundColor = "#8B5CF6";
+        break;
+      case "SHIPPED":
+        backgroundColor = "#6366F1";
+        break;
+      case "ARRIVED_AT_MEMBER":
+        backgroundColor = "#F97316";
+        break;
+      case "WORK_IN_PROGRESS":
         backgroundColor = "#D4AC0D";
         break;
-      case "PENDING":
-        backgroundColor = "#2ECC71";
+      case "PROCESSING_RETURN":
+        backgroundColor = "#EC4899";
         break;
-      case "COMPLETED":
-        backgroundColor = "#3498DB";
+      case "SHIPPED_BACK":
+        backgroundColor = "#06B6D4";
         break;
-      case "NOT_STARTED":
-        backgroundColor = "#E67E22";
+      case "USER_RECEIVED":
+        backgroundColor = "#14B8A6";
+        break;
+      case "PAYOUT_RELEASED":
+        backgroundColor = "#22C55E";
         break;
       default:
-        backgroundColor = "#E0E0E0";
+        backgroundColor = "#6B7280";
     }
 
     return (
@@ -178,19 +206,19 @@ export const ContractDetailsPage = () => {
             <Typography variant="h4" fontWeight={600} mb={2}>
               Shipping
             </Typography>
-            {contract.trackingNumber ? (
+            {contract.inboundTracking?.trackingNumber ? (
               <>
                 <Typography variant="body1" fontWeight={700} color="text.secondary">
-                  Tracking
+                  Inbound Tracking
                 </Typography>
                 <Typography variant="h6" fontWeight={600} mb={1.5}>
-                  {contract.trackingNumber.trackingNumber}
+                  {contract.inboundTracking.trackingNumber}
                 </Typography>
                 <Typography variant="body1" fontWeight={700} color="text.secondary">
                   Carrier
                 </Typography>
                 <Typography variant="h6" fontWeight={600}>
-                  {contract.trackingNumber.carrier || contract.shippingCarrier}
+                  {contract.inboundTracking.carrier}
                 </Typography>
               </>
             ) : (
@@ -236,7 +264,7 @@ export const ContractDetailsPage = () => {
       </Paper>
 
       {contract.shoeDetails?.photos &&
-        Object.entries(contract.shoeDetails.photos).some(([, photos]) => photos?.length > 0) && (
+        Object.entries(contract.shoeDetails.photos).some(([, photos]) => Array.isArray(photos) && photos.length > 0) && (
           <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
             <Typography variant="h4" fontWeight={600} mb={2}>
               Photos
@@ -244,7 +272,7 @@ export const ContractDetailsPage = () => {
             <Grid2 container spacing={2}>
               {Object.entries(contract.shoeDetails.photos).map(
                 ([section, photos]) =>
-                  photos?.length > 0 && (
+                  Array.isArray(photos) && photos.length > 0 && (
                     <Grid2 xs={12} sm={6} md={4} key={section}>
                       <Typography
                         variant="body1"

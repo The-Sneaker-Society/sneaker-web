@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { ContractReviewPage } from "../pages/ContractsPage/ContractReviewPage";
+import ContractReviewSummary from "../pages/ContractsPage/ContractReviewSummary";
 import { ContractPage } from "../pages/ContractsPage/Contracts";
 import { Subscriptions } from "../pages/PaymentStatus/Subscriptions";
 import SuccessPage from "../pages/PaymentStatus/SubscriptionSuccess";
@@ -46,7 +47,7 @@ const MemberRoutes = () => {
             path="contract/:id"
             element={
               <Layout>
-                <ContractReviewPage />
+                <ContractReviewSummary />
               </Layout>
             }
           />

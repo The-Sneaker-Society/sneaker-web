@@ -15,6 +15,11 @@ import { FiZoomIn } from "react-icons/fi";
 import { useFormikContext } from "formik";
 import ImagePreviewDialog from "../../components/ImagePreviewDialog";
 
+const titleCase = (str) => {
+  if (!str) return str;
+  return str.replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
 const SECTION_LABELS = {
   leftSide: "Left Side",
   rightSide: "Right Side",
@@ -22,6 +27,9 @@ const SECTION_LABELS = {
   bottomView: "Bottom View",
   frontView: "Front View",
   backView: "Back View",
+  inside: "Inside of Shoe",
+  tongue: "Tongue",
+  box: "Box Condition",
   other: "Other Areas",
 };
 
@@ -30,6 +38,8 @@ const TIMEFRAME_LABELS = {
   rush: "Rush (1 week)",
   "no-rush": "No rush",
 };
+
+const CAPITALIZE_FIELDS = ["brand", "model", "color", "material", "soleCondition", "odorLevel"];
 
 const SHOE_FIELDS = [
   { label: "Brand", key: "brand" },
@@ -61,6 +71,32 @@ const ConfirmationStep = () => {
 
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Typography variant="h4" fontWeight={600} mb={2}>
+          Declared Value & Box
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={6} sm={4}>
+            <Typography variant="body1" fontWeight={700} color="text.secondary">
+              Declared Market Value
+            </Typography>
+            <Typography variant="h6" fontWeight={600}>
+              {values.declaredMarketValue
+                ? `$${parseFloat(values.declaredMarketValue).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : "\u2014"}
+            </Typography>
+          </Grid>
+          <Grid item xs={6} sm={4}>
+            <Typography variant="body1" fontWeight={700} color="text.secondary">
+              Box Included
+            </Typography>
+            <Typography variant="h6" fontWeight={600}>
+              {values.boxIncluded ? "Yes" : "No"}
+            </Typography>
+          </Grid>
+        </Grid>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h4" fontWeight={600} mb={2}>
           Shoe Details
         </Typography>
         <Grid container spacing={2}>
@@ -68,6 +104,8 @@ const ConfirmationStep = () => {
             let displayValue = values.shoeDetails[key];
             if (key === "returnTimeframe" && displayValue) {
               displayValue = TIMEFRAME_LABELS[displayValue] || displayValue;
+            } else if (displayValue && CAPITALIZE_FIELDS.includes(key)) {
+              displayValue = titleCase(displayValue);
             }
             return (
               <Grid item xs={6} sm={4} key={key}>
