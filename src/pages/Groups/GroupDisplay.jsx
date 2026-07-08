@@ -28,18 +28,15 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
   const baseGroups = useMemo(() => {
     if (tab === "my") {
       if (currentUserLoading) return null;
-
       return allGroups.filter((group) =>
         (group.members || []).some((member) => member.id === currentUserId),
       );
     }
-
     return allGroups;
   }, [tab, allGroups, currentUserId, currentUserLoading]);
 
   const filteredGroups = useMemo(() => {
     if (baseGroups === null) return null;
-
     return baseGroups.filter((group) =>
       group.name.toLowerCase().includes(search.toLowerCase()),
     );
@@ -195,7 +192,15 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
         )}
 
         {error && (
-          <Typography sx={{ px: 2, py: 2 }} color="error">
+          <Typography
+            variant="body2"
+            sx={{
+              color: colors.status.error,
+              textAlign: "center",
+              py: 3,
+              fontSize: 13,
+            }}
+          >
             Failed to load groups
           </Typography>
         )}
@@ -236,14 +241,15 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
           filteredGroups &&
           filteredGroups.map((group, index) => {
             const memberCount = (group.members || []).length;
+            const avatarLetter = group.name?.trim()?.[0]?.toUpperCase() || "G";
 
             return (
               <Box
                 key={group.id}
                 onClick={() => handleGroupClick(group)}
                 sx={{
-                  px: 2,
-                  py: 1.5,
+                  px: 1.5,
+                  py: 1.25,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -253,6 +259,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
                   "&:hover": {
                     bgcolor: hoverBg,
                   },
+                  "&:last-child": { borderBottom: "none" },
                 }}
               >
                 <Stack spacing={0.35} sx={{ minWidth: 0 }}>
