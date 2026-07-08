@@ -7,11 +7,14 @@ import {
   Avatar,
   IconButton,
   Stack,
+  alpha,
+  useTheme,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import { gql, useMutation, useLazyQuery } from "@apollo/client";
 import { GET_GROUPS } from "../../context/graphql/getGroups";
+import { tokens } from "../../theme/theme";
 
 const CREATE_GROUP = gql`
   mutation CreateGroup(
@@ -53,6 +56,10 @@ const GET_MEMBERS = gql`
 `;
 
 const GroupCreationForm = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const isDark = theme.palette.mode === "dark";
+
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
   const [groupAvatar, setGroupAvatar] = useState(null);
@@ -134,35 +141,96 @@ const GroupCreationForm = () => {
       return;
     }
 
-    const variables = {
-      name: groupName.trim(),
-      description: groupDescription.trim(),
-      avatar: groupAvatar || "https://via.placeholder.com/150",
-      memberIds: selectedUsers,
-    };
-
-    createGroup({ variables });
+    createGroup({
+      variables: {
+        name: groupName.trim(),
+        description: groupDescription.trim(),
+        avatar: groupAvatar || "https://via.placeholder.com/150",
+        memberIds: selectedUsers,
+      },
+    });
   };
 
   const users = data?.members || [];
+
+  const textPrimary = isDark ? colors.grey[100] : colors.grey[900];
+  const textSecondary = isDark ? colors.grey[300] : colors.grey[500];
+  const accent = colors.yellowAccent[500];
+  const accentHover = colors.yellowAccent[400];
+  const danger = colors.redAccent[400];
+
+  const fieldBg = isDark
+    ? alpha(colors.primary[400], 0.22)
+    : alpha(colors.grey[900], 0.55);
+
+  const fieldBorder = isDark
+    ? alpha(colors.grey[300], 0.16)
+    : alpha(colors.grey[400], 0.5);
+
+  const memberRowBg = isDark
+    ? alpha(colors.primary[400], 0.28)
+    : alpha(colors.grey[900], 0.42);
+
+  const sharedTextFieldStyles = {
+    "& .MuiOutlinedInput-root": {
+      bgcolor: fieldBg,
+      color: textPrimary,
+      borderRadius: 1.75,
+      transition: "all 0.2s ease",
+      "& fieldset": {
+        borderColor: fieldBorder,
+      },
+      "&:hover fieldset": {
+        borderColor: alpha(accent, 0.7),
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: accent,
+        borderWidth: "1px",
+      },
+    },
+    "& .MuiInputLabel-root": {
+      color: textSecondary,
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: accent,
+    },
+    "& .MuiInputBase-input": {
+      color: textPrimary,
+    },
+    "& .MuiInputBase-input::placeholder": {
+      color: textSecondary,
+      opacity: 1,
+    },
+    "& .MuiOutlinedInput-input::placeholder": {
+      color: textSecondary,
+      opacity: 1,
+    },
+    "& .MuiOutlinedInput-root textarea::placeholder": {
+      color: textSecondary,
+      opacity: 1,
+    },
+  };
 
   return (
     <Box
       sx={{
         width: "100%",
-        maxWidth: 700,
-        p: 4,
-        bgcolor: "#111",
-        borderRadius: 3,
-        color: "#fff",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+        maxWidth: 760,
+        mx: "auto",
+        px: { xs: 1, sm: 2, md: 3 },
+        py: { xs: 2, sm: 2.5, md: 3 },
+        bgcolor: "transparent",
+        color: textPrimary,
       }}
     >
       <Typography
         variant="h5"
         mb={3}
         align="center"
-        sx={{ color: "#FFD100", fontWeight: 700 }}
+        sx={{
+          color: accent,
+          fontWeight: 700,
+        }}
       >
         Create a Group
       </Typography>
@@ -176,17 +244,25 @@ const GroupCreationForm = () => {
           onChange={handleAvatarUpload}
         />
         <label htmlFor="upload-avatar">
-          <IconButton component="span">
+          <IconButton component="span" aria-label="Upload group photo">
             <Avatar
               src={groupAvatar || ""}
-              sx={{ width: 80, height: 80, mx: "auto", bgcolor: "#333" }}
+              sx={{
+                width: 80,
+                height: 80,
+                mx: "auto",
+                bgcolor: isDark
+                  ? alpha(colors.grey[700], 0.85)
+                  : alpha(colors.grey[700], 0.35),
+                color: isDark ? colors.grey[100] : colors.grey[300],
+              }}
             />
           </IconButton>
         </label>
         <Typography
           variant="caption"
           display="block"
-          sx={{ color: "#b3b3b3", mt: 1 }}
+          sx={{ color: textSecondary, mt: 1 }}
         >
           Upload Group Photo
         </Typography>
@@ -198,11 +274,7 @@ const GroupCreationForm = () => {
         variant="outlined"
         value={groupName}
         onChange={(e) => setGroupName(e.target.value)}
-        sx={{
-          mb: 2,
-          "& .MuiInputBase-root": { bgcolor: "#000", color: "#fff" },
-          "& .MuiInputLabel-root": { color: "#b3b3b3" },
-        }}
+        sx={{ mb: 2, ...sharedTextFieldStyles }}
       />
 
       <TextField
@@ -210,14 +282,10 @@ const GroupCreationForm = () => {
         label="Description"
         variant="outlined"
         multiline
-        rows={3}
+        rows={4}
         value={groupDescription}
         onChange={(e) => setGroupDescription(e.target.value)}
-        sx={{
-          mb: 2,
-          "& .MuiInputBase-root": { bgcolor: "#000", color: "#fff" },
-          "& .MuiInputLabel-root": { color: "#b3b3b3" },
-        }}
+        sx={{ mb: 2, ...sharedTextFieldStyles }}
       />
 
       <TextField
@@ -226,16 +294,19 @@ const GroupCreationForm = () => {
         variant="outlined"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        sx={{
-          mb: 1,
-          "& .MuiInputBase-root": { bgcolor: "#000", color: "#fff" },
-          "& .MuiInputLabel-root": { color: "#b3b3b3" },
-        }}
+        sx={{ mb: 1.25, ...sharedTextFieldStyles }}
       />
 
-      <Stack sx={{ maxHeight: 150, overflowY: "auto", mb: 2 }}>
+      <Stack
+        spacing={1}
+        sx={{
+          maxHeight: 180,
+          overflowY: "auto",
+          mb: 2,
+        }}
+      >
         {membersLoading && (
-          <Typography variant="body2" sx={{ color: "#b3b3b3" }}>
+          <Typography variant="body2" sx={{ color: textSecondary }}>
             Loading members...
           </Typography>
         )}
@@ -243,7 +314,7 @@ const GroupCreationForm = () => {
         {!membersLoading &&
           users.length === 0 &&
           debouncedSearchTerm !== "" && (
-            <Typography variant="body2" sx={{ color: "#b3b3b3" }}>
+            <Typography variant="body2" sx={{ color: textSecondary }}>
               No members found
             </Typography>
           )}
@@ -256,35 +327,75 @@ const GroupCreationForm = () => {
             return (
               <Box
                 key={user.id}
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                py={0.75}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 1.5,
+                  py: 1,
+                  px: 1.25,
+                  borderRadius: 1.5,
+                  bgcolor: memberRowBg,
+                  border: `1px solid ${fieldBorder}`,
+                }}
               >
-                <Typography variant="body2">{fullName}</Typography>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: textPrimary,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {fullName}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: textSecondary,
+                      display: "block",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {user.email}
+                  </Typography>
+                </Box>
 
                 <Button
                   size="small"
                   variant={isSelected ? "outlined" : "contained"}
                   onClick={() => toggleUserSelection(user)}
                   sx={{
+                    flexShrink: 0,
+                    minWidth: 84,
                     textTransform: "none",
                     fontSize: 12,
-                    bgcolor: isSelected ? "transparent" : "#FFD100",
-                    color: isSelected ? "#FFD100" : "#000",
-                    borderColor: "#FFD100",
+                    fontWeight: 600,
+                    borderRadius: "999px",
+                    bgcolor: isSelected ? "transparent" : accent,
+                    color: isSelected ? accent : colors.grey[100],
+                    borderColor: accent,
+                    boxShadow: "none",
                     "&:hover": {
-                      bgcolor: isSelected ? "rgba(255,209,0,0.08)" : "#ffde33",
+                      bgcolor: isSelected ? alpha(accent, 0.08) : accentHover,
+                      borderColor: accent,
+                      boxShadow: "none",
                     },
                   }}
                 >
                   {isSelected ? (
                     <>
-                      <CheckIcon fontSize="small" sx={{ mr: 0.5 }} /> Added
+                      <CheckIcon fontSize="small" sx={{ mr: 0.5 }} />
+                      Added
                     </>
                   ) : (
                     <>
-                      <AddIcon fontSize="small" sx={{ mr: 0.5 }} /> Add
+                      <AddIcon fontSize="small" sx={{ mr: 0.5 }} />
+                      Add
                     </>
                   )}
                 </Button>
@@ -295,51 +406,77 @@ const GroupCreationForm = () => {
 
       {selectedUsers.length > 0 && (
         <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="subtitle2"
+            gutterBottom
+            sx={{ fontWeight: 700, color: textPrimary }}
+          >
             Selected Members
           </Typography>
 
-          {selectedUsers.map((id) => {
-            const user = selectedUsersMap[id];
-            if (!user) return null;
+          <Stack spacing={1}>
+            {selectedUsers.map((id) => {
+              const user = selectedUsersMap[id];
+              if (!user) return null;
 
-            return (
-              <Box
-                key={id}
-                display="flex"
-                alignItems="center"
-                gap={1}
-                sx={{ mb: 0.5 }}
-              >
-                <Typography variant="body2">
-                  {user.firstName} {user.lastName}
-                </Typography>
-                <Button
-                  size="small"
-                  onClick={() => toggleUserSelection(user)}
+              return (
+                <Box
+                  key={id}
                   sx={{
-                    minWidth: 0,
-                    px: 1,
-                    color: "#ff6b6b",
-                    textTransform: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 1,
+                    px: 1.25,
+                    py: 1,
+                    borderRadius: 1.5,
+                    bgcolor: memberRowBg,
+                    border: `1px solid ${fieldBorder}`,
                   }}
                 >
-                  ×
-                </Button>
-              </Box>
-            );
-          })}
+                  <Typography
+                    variant="body2"
+                    sx={{ color: textPrimary, minWidth: 0 }}
+                  >
+                    {user.firstName} {user.lastName}
+                  </Typography>
+
+                  <Button
+                    size="small"
+                    onClick={() => toggleUserSelection(user)}
+                    sx={{
+                      minWidth: 0,
+                      px: 1,
+                      color: danger,
+                      textTransform: "none",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </Box>
+              );
+            })}
+          </Stack>
         </Box>
       )}
 
-      <Box textAlign="right" mt={1}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: 1.5,
+          mt: 2,
+        }}
+      >
         <Button
-          sx={{
-            mr: 2,
-            color: "#ff6b6b",
-            textTransform: "none",
-          }}
           onClick={handleReset}
+          sx={{
+            color: danger,
+            textTransform: "none",
+            fontWeight: 600,
+          }}
         >
           Cancel
         </Button>
@@ -351,9 +488,18 @@ const GroupCreationForm = () => {
           sx={{
             textTransform: "none",
             fontWeight: 700,
-            bgcolor: "#FFD100",
-            color: "#000",
-            "&:hover": { bgcolor: "#ffde33" },
+            px: 2.5,
+            bgcolor: accent,
+            color: colors.grey[100],
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: accentHover,
+              boxShadow: "none",
+            },
+            "&.Mui-disabled": {
+              bgcolor: alpha(accent, 0.35),
+              color: alpha(colors.grey[100], 0.5),
+            },
           }}
         >
           {creating ? "Creating..." : "Create Group"}
@@ -361,7 +507,7 @@ const GroupCreationForm = () => {
       </Box>
 
       {createError && (
-        <Typography color="error" mt={2} variant="body2">
+        <Typography sx={{ color: danger, mt: 2 }} variant="body2">
           {createError.message}
         </Typography>
       )}

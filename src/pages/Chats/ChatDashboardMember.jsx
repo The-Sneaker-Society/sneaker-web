@@ -5,7 +5,7 @@ import useChatDashboard from "./useChatDashboard";
 
 export const ChatDashboardMember = () => {
   const { member: currentUser, loading: userLoading } = useSneakerMember();
-  const { chatId, chat, loading, error, messages, isSending, setIsSending, sendMessage } =
+  const { chatId, chat, loading, error, messages, isSending, isProposing, setIsSending, sendMessage, proposePrice } =
     useChatDashboard("MEMBER");
 
   if (!chatId) {
@@ -36,8 +36,10 @@ export const ChatDashboardMember = () => {
     <Chat
       messages={messages}
       sendMessage={sendMessage}
+      proposePrice={proposePrice}
       isSending={isSending}
       setIsSending={setIsSending}
+      isProposing={isProposing}
       currentUser={currentUser?.id}
       otherUserName={chat?.user?.email || "Chat"}
     />

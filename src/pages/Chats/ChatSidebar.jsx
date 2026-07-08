@@ -306,7 +306,7 @@ const ChatSidebar = () => {
             >
               {searchTerm
                 ? "No conversations match your search."
-                : "No conversations yet. Start chatting!"}
+                : "Create your first contract and initiate a chat to start messaging."}
             </Typography>
           </Box>
         )}

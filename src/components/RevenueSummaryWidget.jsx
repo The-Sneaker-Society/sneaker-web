@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Typography, Tooltip } from "@mui/material";
+import { Box, Typography, Tooltip, Switch } from "@mui/material";
 import { useQuery, gql } from "@apollo/client";
 import { useColors } from "../theme/colors";
 import { FiInbox, FiCheckCircle, FiDollarSign } from "react-icons/fi";
@@ -17,6 +17,18 @@ const GET_REVENUE_SUMMARY = gql`
     }
   }
 `;
+
+const FAKE_DATA = {
+  months: [
+    { month: "Oct", revenue: 1200, newContracts: 3, completed: 1 },
+    { month: "Nov", revenue: 2800, newContracts: 5, completed: 2 },
+    { month: "Dec", revenue: 1900, newContracts: 4, completed: 3 },
+    { month: "Jan", revenue: 4200, newContracts: 7, completed: 4 },
+    { month: "Feb", revenue: 3600, newContracts: 6, completed: 5 },
+    { month: "Mar", revenue: 5100, newContracts: 8, completed: 6 },
+  ],
+  percentChange: 21.4,
+};
 
 const CHART_HEIGHT = 90;
 
@@ -143,9 +155,18 @@ function SvgBarChart({ data, colors }) {
 
 export default function RevenueSummaryWidget() {
   const colors = useColors();
+  const [showFake, setShowFake] = useState(false);
   const { data, loading } = useQuery(GET_REVENUE_SUMMARY);
 
-  if (loading) {
+  const summary = showFake ? FAKE_DATA : data?.revenueSummary;
+  const months = summary?.months ?? [];
+  const percentChange = summary?.percentChange ?? 0;
+  const isEmpty = !showFake && (months.length === 0 || months.every((m) => m.revenue === 0));
+
+  const latestRev = !isEmpty ? months[months.length - 1]?.revenue : 0;
+  const formattedRev = latestRev ? `$${latestRev.toLocaleString()}` : "$0";
+
+  if (loading && !showFake) {
     return (
       <Box sx={{ width: "100%", height: "100%", borderRadius: 3, border: `1px solid ${colors.borderSubtle}`, bgcolor: colors.widgetBg, p: 2.5, boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <Box>
@@ -157,18 +178,11 @@ export default function RevenueSummaryWidget() {
     );
   }
 
-  const summary = data?.revenueSummary;
-  const months = summary?.months ?? [];
-  const percentChange = summary?.percentChange ?? 0;
-  const isEmpty = months.length === 0 || months.every((m) => m.revenue === 0);
-
-  const latestRev = !isEmpty ? months[months.length - 1]?.revenue : 0;
-  const formattedRev = latestRev ? `$${latestRev.toLocaleString()}` : "$0";
-
   return (
     <Box sx={{ width: "100%", height: "100%", borderRadius: 3, border: `1px solid ${colors.borderSubtle}`, bgcolor: colors.widgetBg, p: 2.5, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
-      {!isEmpty && (
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+      {/* Header row */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
+        {!isEmpty ? (
           <Box>
             <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: colors.textSecondary, mb: 0.25 }}>
               Analytics · This Month
@@ -177,17 +191,37 @@ export default function RevenueSummaryWidget() {
               {formattedRev}
             </Typography>
           </Box>
-          <Box sx={{ px: 1.25, py: 0.5, borderRadius: 5, border: `1px solid ${colors.borderSubtle}`, bgcolor: colors.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" }}>
-            <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: percentChange >= 0 ? colors.status.completed : colors.status.error }}>
-              {percentChange >= 0 ? "+" : ""}{percentChange}%
+        ) : (
+          <Box />
+        )}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {!isEmpty && (
+            <Box sx={{ px: 1.25, py: 0.5, borderRadius: 5, border: `1px solid ${colors.borderSubtle}`, bgcolor: colors.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" }}>
+              <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: percentChange >= 0 ? colors.status.completed : colors.status.error }}>
+                {percentChange >= 0 ? "+" : ""}{percentChange}%
+              </Typography>
+            </Box>
+          )}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Typography sx={{ fontSize: "0.65rem", color: colors.textSecondary, fontWeight: 500 }}>
+              Demo
             </Typography>
+            <Switch
+              size="small"
+              checked={showFake}
+              onChange={(e) => setShowFake(e.target.checked)}
+              sx={{
+                "& .MuiSwitch-thumb": { bgcolor: "#FFD100" },
+                "& .MuiSwitch-track": { bgcolor: colors.isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)" },
+              }}
+            />
           </Box>
         </Box>
-      )}
+      </Box>
 
       {/* Body */}
       {isEmpty ? (
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, textAlign: "center", py: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, textAlign: "center", px: 2, minHeight: 0 }}>
           <Typography sx={{ fontSize: "0.95rem", fontWeight: 600, color: colors.textPrimary, mb: 0.5 }}>
             No analytics to show yet
           </Typography>
@@ -196,7 +230,7 @@ export default function RevenueSummaryWidget() {
           </Typography>
         </Box>
       ) : (
-        <>
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", minHeight: 0 }}>
           <SvgBarChart data={months} colors={colors} />
           <Box sx={{ display: "flex", gap: "8px", mt: 0.75 }}>
             {months.map((d) => (
@@ -207,7 +241,7 @@ export default function RevenueSummaryWidget() {
               </Box>
             ))}
           </Box>
-        </>
+        </Box>
       )}
     </Box>
   );
