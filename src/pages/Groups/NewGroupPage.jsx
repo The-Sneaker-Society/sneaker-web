@@ -9,6 +9,7 @@ import DeletePostModal from "./DeletePostModal";
 import GroupComposerCard from "./components/GroupComposerCard";
 import GroupFeedSection from "./components/GroupFeedSection";
 import GroupPageModals from "./components/GroupPageModals";
+import EditPostModal from "./components/EditPostModal";
 import {
   FeedSectionHeader,
   PageLoadingState,
@@ -28,9 +29,6 @@ const NewGroupPage = () => {
     postsError,
     currentUserLoading,
     currentUser,
-    isJoined,
-    isCreator,
-    canManageGroup,
     memberCount,
     adminIds,
     hasMorePosts,
@@ -43,10 +41,17 @@ const NewGroupPage = () => {
     joinLeaveError,
     likeErrors,
     deleteModalOpen,
-    setDeleteModalOpen,
     deleteError,
     setDeleteError,
     postToDelete,
+    editModalOpen,
+    postToEdit,
+    editContent,
+    setEditContent,
+    editImages,
+    setEditImages,
+    editError,
+    setEditError,
     postContent,
     setPostContent,
     imageSrcs,
@@ -60,9 +65,14 @@ const NewGroupPage = () => {
     likingPostId,
     commentLoadingByPost,
     deletingPostId,
+    updatingPostId,
     handleJoinGroup,
     handleLeaveGroup,
+    closeDeletePostModal,
     handleDeletePost,
+    openEditPostModal,
+    closeEditPostModal,
+    handleUpdatePost,
     handleFileInputChange,
     handleRemoveImage,
     handlePostSubmit,
@@ -74,8 +84,8 @@ const NewGroupPage = () => {
     openDeletePostModal,
     refetchGroup,
     refetchPosts,
-    editModalOpen,
-    setEditModalOpen,
+    editGroupModalOpen,
+    setEditGroupModalOpen,
     deleteGroupModalOpen,
     setDeleteGroupModalOpen,
     editName,
@@ -92,6 +102,11 @@ const NewGroupPage = () => {
     openDeleteGroupModal,
     handleUpdateGroup,
     handleDeleteGroup,
+    isJoined,
+    isCreator,
+    canManageGroup,
+    canInteractWithPosts,
+    isVisitor,
   } = useNewGroupPage();
 
   if (loading || currentUserLoading) {
@@ -129,6 +144,21 @@ const NewGroupPage = () => {
     );
   }
 
+  const handleOpenEditGroup = () => {
+    if (!canManageGroup) return;
+    openEditGroupModal();
+  };
+
+  const handleOpenDeleteGroup = () => {
+    if (!canManageGroup) return;
+    openDeleteGroupModal();
+  };
+
+  const isDeleteModerationAction =
+    !!postToDelete &&
+    postToDelete.author?.id &&
+    postToDelete.author.id !== currentUser?.id;
+
   const header = (
     <GroupHeaderBanner
       group={group}
@@ -142,8 +172,8 @@ const NewGroupPage = () => {
       setIsHovering={setIsHovering}
       onJoin={handleJoinGroup}
       onOpenLeave={() => setModalOpen(true)}
-      onEditGroup={openEditGroupModal}
-      onDeleteGroup={openDeleteGroupModal}
+      onEditGroup={handleOpenEditGroup}
+      onDeleteGroup={handleOpenDeleteGroup}
     />
   );
 
@@ -157,17 +187,30 @@ const NewGroupPage = () => {
         <DeletePostModal
           open={deleteModalOpen}
           onClose={() => {
-            setDeleteModalOpen(false);
+            closeDeletePostModal();
             setDeleteError("");
           }}
           onConfirm={handleDeletePost}
           loading={postToDelete?.id && deletingPostId === postToDelete.id}
           error={deleteError}
+          isModerationAction={isDeleteModerationAction}
+        />
+
+        <EditPostModal
+          open={editModalOpen}
+          onClose={closeEditPostModal}
+          onConfirm={handleUpdatePost}
+          loading={postToEdit?.id && updatingPostId === postToEdit.id}
+          error={editError}
+          content={editContent}
+          setContent={setEditContent}
         />
 
         <GroupPageModals
-          editModalOpen={editModalOpen}
-          setEditModalOpen={setEditModalOpen}
+          canManageGroup={canManageGroup}
+          canLeaveGroup={isJoined && !isCreator}
+          editModalOpen={editGroupModalOpen}
+          setEditModalOpen={setEditGroupModalOpen}
           deleteGroupModalOpen={deleteGroupModalOpen}
           setDeleteGroupModalOpen={setDeleteGroupModalOpen}
           modalOpen={modalOpen}
@@ -216,10 +259,24 @@ const NewGroupPage = () => {
           postsLoading={postsLoading}
           postsError={postsError}
           isJoined={isJoined}
+          canInteractWithPosts={canInteractWithPosts}
+          isVisitor={isVisitor}
           isCreator={isCreator}
           joining={joining}
           currentUser={currentUser}
           group={group}
+          editModalOpen={editModalOpen}
+          postToEdit={postToEdit}
+          editContent={editContent}
+          setEditContent={setEditContent}
+          editImages={editImages}
+          setEditImages={setEditImages}
+          editError={editError}
+          setEditError={setEditError}
+          updatingPostId={updatingPostId}
+          closeEditPostModal={closeEditPostModal}
+          handleUpdatePost={handleUpdatePost}
+          openEditPostModal={openEditPostModal}
           likingPostId={likingPostId}
           deletingPostId={deletingPostId}
           commentLoadingByPost={commentLoadingByPost}

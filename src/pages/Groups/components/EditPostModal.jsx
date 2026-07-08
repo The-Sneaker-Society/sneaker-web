@@ -4,57 +4,69 @@ import {
   Typography,
   Stack,
   Button,
+  TextField,
   CircularProgress,
 } from "@mui/material";
-import { useGroupPageStyles } from "../Groups/styles/groupPageStyles";
+import { useGroupPageStyles } from "../styles/groupPageStyles";
 
-const DeletePostModal = ({
+const EditPostModal = ({
   open,
   onClose,
   onConfirm,
   loading,
   error,
-  isModerationAction = false,
+  content,
+  setContent,
 }) => {
-  const { colors, modalCardSx, secondaryButtonSx, destructiveButtonSx } =
+  const { colors, modalCardSx, secondaryButtonSx, primaryButtonSx } =
     useGroupPageStyles();
-
-  const title = isModerationAction ? "Remove this post?" : "Delete this post?";
-  const description = isModerationAction
-    ? "This post will be removed from the group for all members. This action cannot be undone."
-    : "This action cannot be undone. The post and its conversation will be removed from the group.";
-  const confirmLabel = isModerationAction ? "Remove Post" : "Delete Post";
 
   return (
     <Modal
       open={open}
-      onClose={onClose}
-      aria-labelledby="delete-post-title"
-      aria-describedby="delete-post-description"
+      onClose={loading ? undefined : onClose}
+      aria-labelledby="edit-post-title"
+      aria-describedby="edit-post-description"
     >
       <Box
         sx={{
           ...modalCardSx,
-          width: "min(420px, calc(100vw - 32px))",
-          mt: { xs: "12vh", sm: "18vh" },
+          width: "min(560px, calc(100vw - 32px))",
+          mt: { xs: "10vh", sm: "14vh" },
         }}
       >
         <Stack spacing={2}>
           <Typography
-            id="delete-post-title"
+            id="edit-post-title"
             variant="h6"
             sx={{ fontWeight: 800, color: colors.textPrimary }}
           >
-            {title}
+            Edit post
           </Typography>
 
           <Typography
-            id="delete-post-description"
+            id="edit-post-description"
             variant="body2"
             sx={{ color: colors.textSecondary, lineHeight: 1.6 }}
           >
-            {description}
+            Update your post content and save your changes.
           </Typography>
+
+          <TextField
+            multiline
+            minRows={5}
+            fullWidth
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Update your post..."
+            sx={{
+              "& .MuiInputBase-root": {
+                color: colors.textPrimary,
+                bgcolor: colors.inputBg || colors.widgetBg,
+                borderRadius: 2,
+              },
+            }}
+          />
 
           {error && (
             <Typography variant="caption" sx={{ color: colors.status.error }}>
@@ -75,7 +87,7 @@ const DeletePostModal = ({
               variant="contained"
               onClick={onConfirm}
               disabled={loading}
-              sx={destructiveButtonSx}
+              sx={primaryButtonSx}
             >
               {loading ? (
                 <CircularProgress
@@ -83,7 +95,7 @@ const DeletePostModal = ({
                   sx={{ color: colors.textInverse }}
                 />
               ) : (
-                confirmLabel
+                "Save changes"
               )}
             </Button>
           </Stack>
@@ -93,4 +105,4 @@ const DeletePostModal = ({
   );
 };
 
-export default DeletePostModal;
+export default EditPostModal;

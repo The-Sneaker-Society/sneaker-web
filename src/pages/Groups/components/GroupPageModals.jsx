@@ -10,6 +10,8 @@ import {
 import { useGroupPageStyles } from "../styles/groupPageStyles";
 
 const GroupPageModals = ({
+  canManageGroup = false,
+  canLeaveGroup = false,
   editModalOpen,
   setEditModalOpen,
   deleteGroupModalOpen,
@@ -41,10 +43,14 @@ const GroupPageModals = ({
     destructiveButtonSx,
   } = useGroupPageStyles();
 
+  const showEditModal = canManageGroup && editModalOpen;
+  const showDeleteGroupModal = canManageGroup && deleteGroupModalOpen;
+  const showLeaveModal = canLeaveGroup && modalOpen;
+
   return (
     <>
       <Modal
-        open={editModalOpen}
+        open={showEditModal}
         onClose={() => setEditModalOpen(false)}
         aria-labelledby="edit-group-title"
         aria-describedby="edit-group-description"
@@ -141,7 +147,7 @@ const GroupPageModals = ({
       </Modal>
 
       <Modal
-        open={deleteGroupModalOpen}
+        open={showDeleteGroupModal}
         onClose={() => setDeleteGroupModalOpen(false)}
         aria-labelledby="delete-group-title"
         aria-describedby="delete-group-description"
@@ -204,7 +210,7 @@ const GroupPageModals = ({
       </Modal>
 
       <Modal
-        open={modalOpen}
+        open={showLeaveModal}
         onClose={() => setModalOpen(false)}
         aria-labelledby="leave-group-title"
         aria-describedby="leave-group-description"

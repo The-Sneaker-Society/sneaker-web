@@ -8,9 +8,8 @@ const GroupAboutSection = ({ group, memberCount }) => {
   const { colors, cardSx } = useGroupPageStyles();
 
   const createdBy =
-    group?.createdBy?.name ||
-    group?.createdBy?.fullName ||
-    group?.creator?.name ||
+    `${group?.createdBy?.firstName || ""} ${group?.createdBy?.lastName || ""}`.trim() ||
+    group?.createdBy?.email ||
     "Unknown";
 
   const rowSx = {

@@ -44,7 +44,12 @@ export const GET_GROUP = gql`
 `;
 
 export const GET_POSTS_BY_GROUP = gql`
-  query GetPostsByGroup($groupId: ID!, $limit: Int = 10, $offset: Int = 0) {
+  query GetPostsByGroup(
+    $groupId: ID!
+    $limit: Int = 10
+    $offset: Int = 0
+    $commentLimit: Int = 3
+  ) {
     getPostsByGroup(groupId: $groupId, limit: $limit, offset: $offset) {
       items {
         id
@@ -61,7 +66,7 @@ export const GET_POSTS_BY_GROUP = gql`
         likes {
           id
         }
-        commentsPage(limit: 3, offset: 0) {
+        commentsPage(limit: $commentLimit, offset: 0) {
           items {
             id
             content
@@ -119,6 +124,43 @@ export const CREATE_POST = gql`
   mutation CreatePost($groupId: ID!, $content: String!, $images: [String!]) {
     createPost(groupId: $groupId, content: $content, images: $images) {
       id
+    }
+  }
+`;
+
+export const UPDATE_POST = gql`
+  mutation UpdatePost($postId: ID!, $content: String!, $images: [String!]) {
+    updatePost(postId: $postId, content: $content, images: $images) {
+      id
+      content
+      createdAt
+      images
+      commentCount
+      author {
+        id
+        firstName
+        lastName
+        email
+      }
+      likes {
+        id
+      }
+      commentsPage(limit: 3, offset: 0) {
+        items {
+          id
+          content
+          createdAt
+          author {
+            id
+            firstName
+            lastName
+            email
+          }
+        }
+        totalCount
+        hasMore
+        nextOffset
+      }
     }
   }
 `;

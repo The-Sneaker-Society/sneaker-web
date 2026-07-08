@@ -35,8 +35,13 @@ export const useGroupMembership = ({ groupId, currentUser, skip }) => {
   }, [group, currentUser]);
 
   const canManageGroup = isCreator || isGroupAdmin;
+  const canInteractWithPosts = isJoined;
+  const isVisitor = !isJoined;
+  const isMemberNonAdmin = isJoined && !canManageGroup;
+
   const memberCount = group?.members?.length || 0;
   const adminCount = group?.admins?.length || 0;
+
   const adminIds = useMemo(
     () => new Set((group?.admins || []).map((admin) => admin.id)),
     [group],
@@ -77,6 +82,9 @@ export const useGroupMembership = ({ groupId, currentUser, skip }) => {
     isCreator,
     isGroupAdmin,
     canManageGroup,
+    canInteractWithPosts,
+    isVisitor,
+    isMemberNonAdmin,
     memberCount,
     adminCount,
     adminIds,

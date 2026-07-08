@@ -11,12 +11,15 @@ const GroupFeedSection = ({
   postsLoading,
   postsError,
   isJoined,
+  canInteractWithPosts,
+  isVisitor,
   isCreator,
   joining,
   currentUser,
   group,
   likingPostId,
   deletingPostId,
+  updatingPostId,
   commentLoadingByPost,
   commentInputs,
   commentErrors,
@@ -30,6 +33,7 @@ const GroupFeedSection = ({
   handleCommentChange,
   handleAddComment,
   handleLoadMoreComments,
+  openEditPostModal,
   openDeletePostModal,
   handleLoadMorePosts,
 }) => {
@@ -71,14 +75,18 @@ const GroupFeedSection = ({
     return (
       <StatePanel
         icon={<ForumOutlinedIcon />}
-        title={isJoined ? "No posts yet" : "This group is quiet right now"}
+        title={
+          canInteractWithPosts
+            ? "No posts yet"
+            : "This group is quiet right now"
+        }
         description={
-          isJoined
+          canInteractWithPosts
             ? "Be the first to start the conversation by sharing an update, question, or photo with the group."
             : "Join the group to take part in the conversation and see new activity as members start posting."
         }
         primaryAction={
-          isJoined ? (
+          canInteractWithPosts ? (
             <Button
               variant="contained"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -117,8 +125,10 @@ const GroupFeedSection = ({
           currentUser={currentUser}
           group={group}
           isJoined={isJoined}
+          canInteractWithPosts={canInteractWithPosts}
           liking={likingPostId === post.id}
           deleting={deletingPostId === post.id}
+          updating={updatingPostId === post.id}
           commentLoading={!!commentLoadingByPost[post.id]}
           commentValue={commentInputs[post.id] || ""}
           commentError={commentErrors[post.id] || ""}
@@ -128,6 +138,7 @@ const GroupFeedSection = ({
           onCommentChange={(value) => handleCommentChange(post.id, value)}
           onAddComment={() => handleAddComment(post.id)}
           onLoadMoreComments={() => handleLoadMoreComments(post.id)}
+          onEdit={() => openEditPostModal(post)}
           onDelete={() => openDeletePostModal(post)}
         />
       ))}
