@@ -153,7 +153,7 @@ const GroupCreationForm = () => {
 
   const users = data?.members || [];
 
-  const textPrimary = isDark ? colors.grey[100] : colors.grey[100];
+  const textPrimary = isDark ? colors.grey[100] : colors.grey[900];
   const textSecondary = isDark ? colors.grey[300] : colors.grey[500];
   const accent = colors.yellowAccent[500];
   const accentHover = colors.yellowAccent[400];
