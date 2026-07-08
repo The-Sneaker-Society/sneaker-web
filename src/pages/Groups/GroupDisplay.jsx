@@ -1,16 +1,26 @@
 import { useMemo, useState } from "react";
-import { Box, Button, TextField, Typography, Stack } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Stack,
+  alpha,
+  useTheme,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { GET_GROUPS } from "../../context/graphql/getGroups";
-import { useColors } from "../../theme/colors";
+import { tokens } from "../../theme/theme";
 
 const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
   const [tab, setTab] = useState("trending");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
-  const colors = useColors();
-  const isDark = colors.isDark;
+
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const isDark = theme.palette.mode === "dark";
 
   const { data, loading, error } = useQuery(GET_GROUPS);
   const allGroups = data?.getGroups || [];
@@ -36,127 +46,147 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
     navigate(`/member/groups/${group.id}`);
   };
 
-  const accent = colors.primary;
-  const containerBg = colors.sidebarBg;
-  const textOnSidebar = colors.sidebarText;
-  const textSecondary = colors.textSecondary;
-  const borderSubtle = colors.borderSubtle;
-  const inputBg = isDark
-    ? colors.accent.primary[800]
-    : colors.accent.primary[400];
-  const inputText = textOnSidebar;
-  const hoverBg = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)";
-  const tabHoverBg = isDark ? "rgba(255,195,28,0.08)" : "rgba(255,195,28,0.10)";
-  const activeTabText = colors.textInverse;
+  const panelBg = isDark
+    ? alpha(colors.primary[400], 0.28)
+    : alpha(colors.grey[900], 0.35);
 
-  const activeTabSx = {
-    flex: 1,
-    borderRadius: "999px",
-    textTransform: "none",
-    fontWeight: 700,
-    fontSize: 14,
-    bgcolor: accent,
-    color: activeTabText,
-    "&:hover": {
-      bgcolor: isDark
-        ? colors.accent.yellowAccent[600]
-        : colors.accent.yellowAccent[600],
-    },
-  };
+  const tabRailBg = isDark
+    ? alpha(colors.grey[900], 0.9)
+    : alpha(colors.grey[100], 0.82);
 
-  const inactiveTabSx = {
-    flex: 1,
-    borderRadius: "999px",
-    textTransform: "none",
-    fontWeight: 700,
-    fontSize: 14,
-    bgcolor: "transparent",
-    color: accent,
-    "&:hover": {
-      bgcolor: tabHoverBg,
-    },
-  };
+  const searchBg = isDark
+    ? alpha(colors.primary[900], 0.9)
+    : alpha(colors.grey[100], 0.95);
+
+  const borderColor = isDark
+    ? alpha(colors.grey[300], 0.16)
+    : alpha(colors.grey[400], 0.45);
+
+  const rowBorder = isDark
+    ? alpha(colors.grey[300], 0.1)
+    : alpha(colors.grey[400], 0.3);
+
+  const hoverBg = isDark
+    ? alpha(colors.primary[300], 0.22)
+    : alpha(colors.grey[800], 0.18);
+
+  const textPrimary = isDark ? colors.grey[100] : colors.grey[900];
+  const textSecondary = isDark ? colors.grey[300] : colors.grey[500];
+  const accent = colors.yellowAccent[500];
+  const accentHover = colors.yellowAccent[400];
 
   return (
     <Box
       sx={{
-        bgcolor: containerBg,
-        color: textOnSidebar,
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        gap: 1.5,
-        p: 2,
+        width: "100%",
+        maxWidth: 520,
+        borderRadius: 3,
+        overflow: "hidden",
+        bgcolor: panelBg,
+        border: `1px solid ${borderColor}`,
+        boxShadow: "none",
+        backdropFilter: "blur(6px)",
       }}
     >
-      <Stack direction="row" spacing={1}>
-        <Button
-          onClick={() => setTab("trending")}
-          sx={tab === "trending" ? activeTabSx : inactiveTabSx}
-        >
-          Trending Groups
-        </Button>
-        <Button
-          onClick={() => setTab("my")}
-          sx={tab === "my" ? activeTabSx : inactiveTabSx}
-        >
-          My Groups
-        </Button>
-      </Stack>
-
-      <TextField
-        fullWidth
-        size="small"
-        placeholder="Search groups..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        sx={{
-          "& .MuiInputBase-root": {
-            bgcolor: inputBg,
+      <Box sx={{ p: 1.5, pb: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            bgcolor: tabRailBg,
             borderRadius: "999px",
-            color: inputText,
-          },
-          "& fieldset": {
-            border: "none",
-          },
-          "& .MuiInputBase-input": {
-            px: 2,
-            py: 1.2,
-            color: inputText,
-            fontSize: 13,
-          },
-          "& .MuiInputBase-input::placeholder": {
-            color: textSecondary,
-            opacity: 1,
-          },
-        }}
-      />
-
-      <Box sx={{ flex: 1, overflowY: "auto" }}>
-        {loading && (
-          <Typography
-            variant="body2"
+            p: 0.5,
+            border: `1px solid ${borderColor}`,
+          }}
+        >
+          <Button
+            onClick={() => setTab("trending")}
             sx={{
-              color: textSecondary,
-              textAlign: "center",
-              py: 3,
-              fontSize: 13,
+              flex: 1,
+              minHeight: 40,
+              borderRadius: "999px",
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: 14,
+              bgcolor: tab === "trending" ? accent : "transparent",
+              color: tab === "trending" ? colors.grey[100] : accent,
+              boxShadow: "none",
+              "&:hover": {
+                bgcolor: tab === "trending" ? accentHover : "transparent",
+                boxShadow: "none",
+              },
             }}
           >
+            Trending Groups
+          </Button>
+
+          <Button
+            onClick={() => setTab("my")}
+            sx={{
+              flex: 1,
+              minHeight: 40,
+              borderRadius: "999px",
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: 14,
+              bgcolor: tab === "my" ? accent : "transparent",
+              color: tab === "my" ? colors.grey[100] : accent,
+              boxShadow: "none",
+              "&:hover": {
+                bgcolor: tab === "my" ? accentHover : "transparent",
+                boxShadow: "none",
+              },
+            }}
+          >
+            My Groups
+          </Button>
+        </Box>
+      </Box>
+
+      <Box sx={{ px: 2, pt: 1, pb: 1.5 }}>
+        <TextField
+          fullWidth
+          size="small"
+          variant="outlined"
+          placeholder="Search for a group"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              bgcolor: searchBg,
+              borderRadius: "999px",
+              color: textPrimary,
+              "& fieldset": {
+                borderColor: borderColor,
+              },
+              "&:hover fieldset": {
+                borderColor: alpha(accent, 0.65),
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: accent,
+              },
+            },
+            "& .MuiInputBase-input": {
+              px: 2,
+              py: 1.2,
+              color: textPrimary,
+            },
+            "& .MuiInputBase-input::placeholder": {
+              color: textSecondary,
+              opacity: 1,
+            },
+          }}
+        />
+      </Box>
+
+      <Box>
+        {loading && (
+          <Typography sx={{ px: 2, py: 2, color: textSecondary }}>
             Loading groups...
           </Typography>
         )}
 
         {!loading && tab === "my" && currentUserLoading && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: textSecondary,
-              textAlign: "center",
-              py: 3,
-              fontSize: 13,
-            }}
-          >
+          <Typography sx={{ px: 2, py: 2, color: textSecondary }}>
             Loading your groups...
           </Typography>
         )}
@@ -180,15 +210,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
           baseGroups !== null &&
           tab === "trending" &&
           allGroups.length === 0 && (
-            <Typography
-              variant="body2"
-              sx={{
-                color: textSecondary,
-                textAlign: "center",
-                py: 3,
-                fontSize: 13,
-              }}
-            >
+            <Typography sx={{ px: 2, py: 2, color: textSecondary }}>
               No groups have been created yet.
             </Typography>
           )}
@@ -198,16 +220,8 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
           baseGroups !== null &&
           tab === "my" &&
           baseGroups.length === 0 && (
-            <Typography
-              variant="body2"
-              sx={{
-                color: textSecondary,
-                textAlign: "center",
-                py: 3,
-                fontSize: 13,
-              }}
-            >
-              You haven&apos;t joined any groups yet.
+            <Typography sx={{ px: 2, py: 2, color: textSecondary }}>
+              You haven't joined any groups yet.
             </Typography>
           )}
 
@@ -217,15 +231,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
           baseGroups.length > 0 &&
           filteredGroups &&
           filteredGroups.length === 0 && (
-            <Typography
-              variant="body2"
-              sx={{
-                color: textSecondary,
-                textAlign: "center",
-                py: 3,
-                fontSize: 13,
-              }}
-            >
+            <Typography sx={{ px: 2, py: 2, color: textSecondary }}>
               No groups match your search.
             </Typography>
           )}
@@ -233,7 +239,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
         {!loading &&
           !error &&
           filteredGroups &&
-          filteredGroups.map((group) => {
+          filteredGroups.map((group, index) => {
             const memberCount = (group.members || []).length;
             const avatarLetter = group.name?.trim()?.[0]?.toUpperCase() || "G";
 
@@ -247,68 +253,67 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  borderBottom: `1px solid ${borderSubtle}`,
+                  gap: 1.5,
                   cursor: "pointer",
-                  borderRadius: 1,
-                  transition: "background 150ms ease",
+                  borderTop: index === 0 ? "none" : `1px solid ${rowBorder}`,
                   "&:hover": {
                     bgcolor: hoverBg,
                   },
                   "&:last-child": { borderBottom: "none" },
                 }}
               >
-                <Box>
+                <Stack spacing={0.35} sx={{ minWidth: 0 }}>
                   <Typography
-                    variant="body2"
                     sx={{
                       fontWeight: 700,
-                      color: textOnSidebar,
-                      fontSize: 13,
-                      lineHeight: 1.3,
+                      fontSize: 14,
+                      color: textPrimary,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {group.name}
                   </Typography>
                   <Typography
-                    variant="caption"
-                    sx={{ color: textSecondary, fontSize: 11 }}
+                    sx={{
+                      fontSize: 12,
+                      color: textSecondary,
+                    }}
                   >
                     {memberCount} {memberCount === 1 ? "member" : "members"}
                   </Typography>
-                </Box>
+                </Stack>
 
-                {group.avatar ? (
-                  <Box
-                    component="img"
-                    src={group.avatar}
-                    alt={group.name}
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      flexShrink: 0,
-                    }}
-                  />
-                ) : (
-                  <Box
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: "50%",
-                      bgcolor: accent,
-                      color: activeTabText,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: 700,
-                      fontSize: 15,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {avatarLetter}
-                  </Box>
-                )}
+                <Box
+                  sx={{
+                    width: 70,
+                    height: 40,
+                    flexShrink: 0,
+                    borderRadius: 1.5,
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: `1px solid ${borderColor}`,
+                    bgcolor: group.avatar
+                      ? "transparent"
+                      : isDark
+                        ? alpha(colors.primary[900], 0.9)
+                        : alpha(colors.grey[100], 0.9),
+                    color: group.avatar ? "inherit" : accent,
+                    fontWeight: 700,
+                    fontSize: 18,
+                    textTransform: "uppercase",
+                    backgroundImage: group.avatar
+                      ? `url(${group.avatar})`
+                      : "none",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
+                >
+                  {!group.avatar && (group.name?.trim()?.[0] || "G")}
+                </Box>
               </Box>
             );
           })}
