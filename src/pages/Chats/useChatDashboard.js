@@ -91,6 +91,25 @@ const SUBSCRIBE_TO_CHAT = gql`
   }
 `;
 
+const MESSAGE_UPDATED = gql`
+  subscription MessageUpdated($data: SubscribeToChatInput!) {
+    messageUpdated(data: $data) {
+      id
+      chatId
+      senderId
+      content
+      senderType
+      type
+      metadata {
+        price
+        checkoutUrl
+        status
+      }
+      createdAt
+    }
+  }
+`;
+
 /**
  * Shared hook for both ChatDashboardMember and ChatDashboardUser.
  * @param {string} senderType - "MEMBER" or "USER"
@@ -107,6 +126,11 @@ const useChatDashboard = (senderType) => {
   const [proposePriceMutation] = useMutation(PROPOSE_PRICE);
 
   const { data: subscriptionData } = useSubscription(SUBSCRIBE_TO_CHAT, {
+    variables: { data: { chatId: id } },
+    skip: !id,
+  });
+
+  const { data: updateData } = useSubscription(MESSAGE_UPDATED, {
     variables: { data: { chatId: id } },
     skip: !id,
   });
@@ -138,6 +162,17 @@ const useChatDashboard = (senderType) => {
       });
     }
   }, [subscriptionData]);
+
+  // Update existing messages when their status changes (e.g. superseded, paid)
+  useEffect(() => {
+    if (updateData?.messageUpdated) {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === updateData.messageUpdated.id ? updateData.messageUpdated : m,
+        ),
+      );
+    }
+  }, [updateData]);
 
   const sendMessage = async (content) => {
     setIsSending(true);

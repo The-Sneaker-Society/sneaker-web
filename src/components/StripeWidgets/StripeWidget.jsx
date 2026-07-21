@@ -14,6 +14,8 @@ const GET_STRIPE_WIDGET_DATA = gql`
       previousPayoutAmount
       accountStatus
       pendingCount
+      totalFees
+      totalGross
     }
   }
 `;
@@ -83,14 +85,17 @@ export const StripeWidget = () => {
     );
   }
 
-  const { nextPayoutDate, payoutAmount, previousPayoutAmount, accountStatus, pendingCount } = data.stripeWidgetData;
+  const { payoutAmount, previousPayoutAmount, accountStatus, pendingCount } = data.stripeWidgetData;
   const hasPending = pendingCount > 0;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%", bgcolor: colors.widgetBg, borderRadius: 3, border: `1px solid ${colors.borderSubtle}`, p: 3 }}>
-      <Typography sx={{ fontSize: "0.75rem", fontWeight: 500, color: colors.textSecondary, mb: 1, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-        Pending Payout
-      </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
+        <Typography sx={{ fontSize: "0.75rem", fontWeight: 500, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          Pending Payout
+        </Typography>
+      </Box>
+
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 0.5 }}>
         <Typography sx={{ fontSize: { xs: "1.75rem", sm: "2rem", md: "2.5rem" }, fontWeight: 700, color: colors.textPrimary, lineHeight: 1.1 }}>
           {payoutAmount}
