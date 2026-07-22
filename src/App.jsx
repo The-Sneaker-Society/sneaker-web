@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { useMode, ColorModeContext } from "./theme/theme";
+import { useMode, ColorModeContext, getDarkTheme } from "./theme/theme";
 import HomePage from "./pages/HomePage/HomePage";
 import ErrorPage from "./pages/ErrorPage";
 import StripeSignupPage from "./pages/StripeSignUpPage/StripeSignupPage";
@@ -19,8 +19,6 @@ import LoginSSOCallback from "./pages/LoginSSOCallback/LoginSSOCallback";
 import DashboardRouter from "./routes/DashboardRouter";
 import MemberRoutes from "./routes/MemberRoutes";
 import UserRoutes from "./routes/UserRoutes";
-import NewGroupPage from "./pages/GroupsPage/NewGroupPage";
-import Groups from "./pages/Dashboard/Groups";
 import MySociety from "./pages/Dashboard/Discover";
 
 function App() {
@@ -35,7 +33,12 @@ function App() {
             <Routes>
               {/* Public Routes */}
               <Route path="/test" element={<LoginV2 />} />
-              <Route path="/" element={<HomePage />} />
+              <Route path="/" element={
+                <ThemeProvider theme={getDarkTheme()}>
+                  <CssBaseline />
+                  <HomePage />
+                </ThemeProvider>
+              } />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/login/sso-callback" element={<LoginSSOCallback />} />
               <Route path="/logout" element={<LogoutPage />} />
@@ -49,13 +52,9 @@ function App() {
                 element={<PaymentStatus success={false} />}
               />
               <Route path="member/signup" element={<SignupMember />} />
-              <Route path="member/signup/callback" element={<SignUpCallback />} />
               <Route path="user/signup" element={<SignUpUser />} />
               <Route path="user/signup/callback" element={<UserSignupCallback />} />
-              <Route path="/newgrouppage" element={<NewGroupPage />} />
-              <Route path="/groups" element={<Groups />} />
               <Route path="/mysociety" element={<MySociety />} />
-              <Route path="/grouppage" element={<NewGroupPage />} />
 
               <Route
                 path="/dashboard"

@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import Button from "@mui/material/Button";
+import QrActionButton from "../../components/QrActionButton";
+import { useColors } from "../../theme/colors";
+
 const ImageDownloadButton = ({ imageSrc }) => {
   const [error, setError] = useState(null);
+  const colors = useColors();
 
   const downloadImage = () => {
     try {
@@ -17,21 +20,10 @@ const ImageDownloadButton = ({ imageSrc }) => {
   };
 
   return (
-    <div>
-      {error && <div style={{ color: "red" }}>An error occurred: {error}</div>}
-      <Button
-        variant="outlined"
-        onClick={downloadImage}
-        style={{ marginTop: "10px" }}
-        sx={{
-          color: "white",
-          borderColor: "white",
-          borderRadius: "5px",
-        }}
-      >
-        Download
-      </Button>
-    </div>
+    <>
+      {error && <div style={{ color: colors.status.error, marginTop: "8px", fontSize: "0.75rem" }}>An error occurred: {error}</div>}
+      <QrActionButton onClick={downloadImage}>Download</QrActionButton>
+    </>
   );
 };
 

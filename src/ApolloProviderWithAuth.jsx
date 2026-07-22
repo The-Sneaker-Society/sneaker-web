@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useMemo } from "react";
 import {
   ApolloProvider,
   ApolloClient,
@@ -25,32 +25,43 @@ const wsLink = new GraphQLWsLink(
 const ApolloProviderWithAuth = ({ children }) => {
   const { getToken } = useAuth();
 
-  const authLink = setContext(async (_, { headers }) => {
-    const token = await getToken();
-    return {
-      headers: {
-        ...headers,
-        Authorization: token ? `Bearer ${token}` : "",
+  // Keep a ref to getToken so the authLink always calls the latest version
+  // without needing to recreate the client on every Clerk token refresh.
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
+
+  // Create the client exactly once. Recreating it on every render (e.g. when
+  // Clerk refreshes its token in the background) replaces the ApolloProvider
+  // value, wipes the InMemoryCache, and re-mounts the entire subtree —
+  // which looks like a full page reload to the user.
+  const client = useMemo(() => {
+    const authLink = setContext(async (_, { headers }) => {
+      const token = await getTokenRef.current();
+      return {
+        headers: {
+          ...headers,
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      };
+    });
+
+    const splitLink = split(
+      ({ query }) => {
+        const definition = getMainDefinition(query);
+        return (
+          definition.kind === "OperationDefinition" &&
+          definition.operation === "subscription"
+        );
       },
-    };
-  });
+      wsLink,
+      authLink.concat(httpLink)
+    );
 
-  const splitLink = split(
-    ({ query }) => {
-      const definition = getMainDefinition(query);
-      return (
-        definition.kind === "OperationDefinition" &&
-        definition.operation === "subscription"
-      );
-    },
-    wsLink,
-    authLink.concat(httpLink)
-  );
-
-  const client = new ApolloClient({
-    link: splitLink,
-    cache: new InMemoryCache(),
-  });
+    return new ApolloClient({
+      link: splitLink,
+      cache: new InMemoryCache(),
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>;
 };

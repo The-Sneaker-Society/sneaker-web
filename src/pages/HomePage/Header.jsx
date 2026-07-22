@@ -157,9 +157,13 @@ const Header = ({
               Contact
             </Typography>
             <StyledButton
-              sx={{
-                fontSize: "30px", // Adjusting button font size for mobile
-              }}
+              sx={{ fontSize: "30px", marginBottom: "20px" }}
+              onClick={onLoginButtonClick}
+            >
+              Login
+            </StyledButton>
+            <StyledButton
+              sx={{ fontSize: "30px" }}
               onClick={onButtonClick}
             >
               Sign Up

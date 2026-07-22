@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { Box, Stepper, Step, StepLabel, Button } from "@mui/material";
+import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
 import ShoeInfoStep from "./ShoeInfoStep";
 import ImageUploadStep from "./ImageUploadStep";
 import ConfirmationStep from "./ConfirmStep";
+import TimelineCarousel from "./TimelineCarousel";
+import ShoeAnimation from "./ShoeAnimation";
 import { useParams } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import NotAcceptingContracts from "../../components/NotAcceptingContracts";
@@ -28,6 +30,10 @@ const GET_MEMBER_CONTRACT_STATUS = gql`
 `;
 
 const ShoeInfoSchema = Yup.object().shape({
+  declaredMarketValue: Yup.number()
+    .typeError("Must be a number")
+    .required("Declared market value is required")
+    .positive("Must be a positive number"),
   shoeDetails: Yup.object().shape({
     brand: Yup.string().required("Brand is required"),
     model: Yup.string().required("Model is required"),
@@ -35,19 +41,30 @@ const ShoeInfoSchema = Yup.object().shape({
     material: Yup.string().required("Material is required"),
     size: Yup.string().required("Size is required"),
     soleCondition: Yup.string().required("Sole condition is required"),
+    previousRepairsNotes: Yup.string().when("previousRepairs", {
+      is: true,
+      then: (schema) => schema.required("Please describe the previous repairs"),
+    }),
     clientNotes: Yup.string().required("Please explain your repair request"),
   }),
 });
 
 const initialValues = {
+  declaredMarketValue: "2900",
+  boxIncluded: true,
   shoeDetails: {
     brand: "nike",
-    model: "dfhad",
-    color: "dbhad",
-    material: "fdbad",
-    size: "12",
-    soleCondition: "none",
-    clientNotes: "zdjgvadf",
+    model: "Air Force 1",
+    color: "White",
+    material: "Leather",
+    size: "10.5",
+    soleCondition: "light wear",
+    year: "2022",
+    returnTimeframe: "standard",
+    odorLevel: "none",
+    previousRepairs: false,
+    previousRepairsNotes: "",
+    clientNotes: "Deep clean and restore original white finish. Light yellowing on soles, minor creasing on toe box. Please also condition the leather.",
     photos: {
       leftSide: [],
       rightSide: [],
@@ -55,25 +72,62 @@ const initialValues = {
       bottomView: [],
       frontView: [],
       backView: [],
+      inside: [],
+      tongue: [],
+      box: [],
       other: [],
     },
   },
 };
 
-export const ContractForm = () => {
+export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const [activeStep, setActiveStep] = useState(0);
-  const { memberId } = useParams();
+  const [showIntro, setShowIntro] = useState(true);
+  const { memberId: memberIdParam } = useParams();
+
   const [createContract] = useMutation(CREATE_CONTRACT);
+
+  const memberId = isPreview ? memberIdProp : memberIdParam;
 
   const {
     loading: statusLoading,
     error: statusError,
     data: statusData,
-  } = useQuery(GET_MEMBER_CONTRACT_STATUS, { variables: { memberId } });
+  } = useQuery(GET_MEMBER_CONTRACT_STATUS, {
+    variables: { memberId },
+    skip: isPreview,
+  });
 
-  if (statusLoading) return <LoadingCircle />;
-  if (statusError) return <div>Error: {statusError.message}</div>;
-  if (statusData?.member?.contractsDisabled) return <NotAcceptingContracts />;
+  if (isPreview && !memberIdProp) return <div>Unauthorized preview access</div>;
+
+  if (showIntro) {
+    return (
+      <Box sx={{ width: "100%", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", px: { xs: 2, sm: 4 } }}>
+        <Paper variant="outlined" sx={{ p: 5, maxWidth: 640, textAlign: "center" }}>
+          <ShoeAnimation isPreview={isPreview} />
+          <Typography variant="h3" fontWeight={700} mb={1}>
+            Start Your Request
+          </Typography>
+          <Typography variant="body1" color="text.secondary" mb={4}>
+            Tell us about your sneakers, upload photos, describe what you want done, and we'll take it from there.
+          </Typography>
+          <Box sx={{ width: "100%", mb: 4, mt: 5 }}>
+            <TimelineCarousel />
+          </Box>
+          <Box sx={{ mt: 5 }} />
+          <Button variant="contained" color="primary" size="large" onClick={() => setShowIntro(false)}>
+            Get Started
+          </Button>
+        </Paper>
+      </Box>
+    );
+  }
+
+  if (!isPreview) {
+    if (statusLoading) return <LoadingCircle />;
+    if (statusError) return <div>Error: {statusError.message}</div>;
+    if (statusData?.member?.contractsDisabled) return <NotAcceptingContracts />;
+  };
 
   const steps = ["Shoe Information", "Image Upload", "Confirmation"];
 
@@ -97,6 +151,11 @@ export const ContractForm = () => {
       color,
       size,
       soleCondition,
+      year,
+      returnTimeframe,
+      odorLevel,
+      previousRepairs,
+      previousRepairsNotes,
       clientNotes,
       photos,
     } = values.shoeDetails;
@@ -105,6 +164,8 @@ export const ContractForm = () => {
       variables: {
         data: {
           memberId,
+          declaredMarketValue: parseFloat(values.declaredMarketValue),
+          boxIncluded: values.boxIncluded,
           repairDetails: {
             clientNotes,
           },
@@ -115,6 +176,11 @@ export const ContractForm = () => {
             size,
             soleCondition,
             material,
+            year,
+            returnTimeframe,
+            odorLevel,
+            previousRepairs,
+            previousRepairsNotes,
             photos: photos,
           },
         },
@@ -136,35 +202,54 @@ export const ContractForm = () => {
   };
 
   return (
-    <Box sx={{ width: "100%", height: "100%" }}>
-      <Stepper activeStep={activeStep} alternativeLabel>
+    <Box sx={{ width: "100%", height: "100vh", display: "flex", flexDirection: "column" }}>
+      {isPreview && (
+        <Alert severity="warning" sx={{ mx: { xs: 2, sm: 4 }, mt: 2, fontWeight: "bold", fontSize: "1rem" }}>
+          DRAFT PREVIEW — This form is in preview mode. No data will be submitted.
+        </Alert>
+      )}
+      <Stepper sx={{ px: { xs: 2, sm: 4 }, pt: 2 }} activeStep={activeStep} alternativeLabel>
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
           </Step>
         ))}
       </Stepper>
-      <Box mt={4}>
+      <Box sx={{ flex: 1, overflowY: "auto", px: { xs: 2, sm: 4 }, mt: 4 }}>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchemas[activeStep]}
           onSubmit={activeStep === steps.length - 1 ? handleSubmit : handleNext}
         >
           {(formik) => (
-            <Form>
-              {getStepContent(activeStep, formik)}
-              <Box mt={4} display="flex" justifyContent="space-between">
+            <Form style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
+              <Box sx={{ flex: 1 }}>
+                {getStepContent(activeStep, formik)}
+              </Box>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ py: 2, mt: 4, borderTop: 1, borderColor: "divider", bgcolor: "background.default" }}
+              >
                 <Button disabled={activeStep === 0} onClick={handleBack}>
                   Back
                 </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  disabled={formik.isSubmitting}
-                >
-                  {activeStep === steps.length - 1 ? "Submit" : "Next"}
-                </Button>
+                <Box display="flex" flexDirection="column" alignItems="center">
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={formik.isSubmitting || (isPreview && activeStep === steps.length - 1)}
+                  >
+                    {activeStep === steps.length - 1 ? "Submit" : "Next"}
+                  </Button>
+                  {isPreview && activeStep === steps.length - 1 && (
+                    <Typography variant="body2" sx={{ color: "text.secondary", mt: 1, fontStyle: "italic" }}>
+                      This is a preview — you cannot submit
+                    </Typography>
+                  )}
+                </Box>
               </Box>
             </Form>
           )}

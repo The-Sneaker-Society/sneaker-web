@@ -6,81 +6,32 @@ import {
   Paper,
   Typography,
   IconButton,
-  Container,
-  AppBar,
-  Toolbar,
   CircularProgress,
-  useTheme,
+  Button,
+  Collapse,
 } from "@mui/material";
-import { styled } from "@mui/system";
-import { FiSend } from "react-icons/fi";
+import { FiSend, FiArrowLeft, FiDollarSign, FiX } from "react-icons/fi";
 import { format } from "date-fns";
-
-const ChatContainer = styled(Box)(({ theme }) => ({
-  height: "100%",
-  width: "100%",
-  display: "flex",
-  flexDirection: "column",
-  background: theme.palette.background.default,
-}));
-
-const MessageArea = styled(Box)(({ theme }) => ({
-  flex: 1,
-  overflowY: "auto",
-  padding: theme.spacing(2.5),
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(1.25),
-}));
-
-const MessageBubble = styled(Paper)(({ theme, isuser }) => ({
-  padding: theme.spacing(1.5, 2),
-  maxWidth: "70%",
-  width: "fit-content",
-  marginLeft: isuser === "true" ? "auto" : 0,
-  backgroundColor:
-    isuser === "true"
-      ? theme.palette.primary.main
-      : theme.palette.background.paper,
-  color:
-    isuser === "true"
-      ? theme.palette.primary.contrastText
-      : theme.palette.text.primary,
-  borderRadius: theme.shape.borderRadius * 2,
-  boxShadow: theme.shadows[2],
-  transition: "transform 0.2s",
-  minWidth: 80,
-  "&:hover": {
-    transform: "scale(1.02)",
-  },
-}));
-
-const InputArea = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2.5),
-  backgroundColor: theme.palette.background.paper,
-  borderTop: `1px solid ${theme.palette.divider}`,
-}));
-
-const MessageRow = styled(Box)(({ theme, isuser }) => ({
-  display: "flex",
-  alignItems: "flex-start",
-  gap: theme.spacing(1),
-  flexDirection: isuser === "true" ? "row-reverse" : "row",
-}));
+import { useNavigate } from "react-router-dom";
+import PriceProposalBubble from "./PriceProposalBubble";
 
 const Chat = ({
   messages,
   sendMessage,
+  proposePrice,
   isSending,
   setIsSending,
+  isProposing,
   currentUser,
   otherUserName,
 }) => {
-  const theme = useTheme();
+  const navigate = useNavigate();
   const [newMessage, setNewMessage] = useState("");
-  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
+  const [showPriceInput, setShowPriceInput] = useState(false);
+  const [priceAmount, setPriceAmount] = useState("");
   const messageEndRef = useRef(null);
   const inputRef = useRef(null);
+  const priceInputRef = useRef(null);
 
   const scrollToBottom = () => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -96,13 +47,18 @@ const Chat = ({
     }
   }, [isSending]);
 
+  useEffect(() => {
+    if (showPriceInput && priceInputRef.current) {
+      priceInputRef.current.focus();
+    }
+  }, [showPriceInput]);
+
   const handleSend = async () => {
     if (newMessage.trim()) {
       setIsSending(true);
       try {
         await sendMessage(newMessage.trim());
         setNewMessage("");
-        // Focus back on the input field after sending a message
         inputRef.current?.focus();
       } catch (error) {
         console.error("Failed to send message:", error);
@@ -112,17 +68,6 @@ const Chat = ({
     }
   };
 
-  function formatTimestampWithDateFns(timestamp) {
-    // Create a new Date object from the timestamp.
-    const date = new Date(Number(timestamp));
-
-    // Format the date using date-fns' format function.
-    // The format string 'PPPppp' provides a localized, human-readable date and time.
-    const formattedDate = format(date, "EEE h:mm a");
-
-    return formattedDate;
-  }
-
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -130,113 +75,235 @@ const Chat = ({
     }
   };
 
-  const handleSendPaymentLink = async () => {
-    setIsPaymentLoading(true);
-    // Simulate a GraphQL mutation call with a fake async delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // In a real application, you would get the payment URL from the mutation result
-    const paymentUrl = "https://stripe.com/your-payment-link";
-
-    const paymentMessage = (
-      <span>
-        Click here to make a payment:{" "}
-        <a
-          href={paymentUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "blue", textDecoration: "underline" }}
-        >
-          {paymentUrl}
-        </a>
-      </span>
-    );
-
-    const newMsg = {
-      id: messages.length + 1,
-      text: paymentMessage,
-      sender: currentUser,
-      timestamp: new Date(),
-    };
-    setMessages([...messages, newMsg]);
-    setIsPaymentLoading(false);
+  const handleProposePrice = async () => {
+    const amount = parseFloat(priceAmount);
+    if (!amount || amount <= 0) return;
+    try {
+      await proposePrice(amount);
+      setShowPriceInput(false);
+      setPriceAmount("");
+    } catch (err) {
+      console.error("Failed to propose price:", err);
+    }
   };
 
+  const initials = otherUserName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
   return (
-    <Container maxWidth="xl" disableGutters sx={{ height: "100%" }}>
-      <ChatContainer>
-        <AppBar
-          position="static"
-          sx={{
-            background: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-          }}
-        >
-          <Toolbar>
-            <Typography variant="h3" component="div">
-              {otherUserName}
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        <MessageArea>
-          {messages.map((message) => (
-            <MessageRow
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "background.default" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          px: 2.5,
+          py: 1.5,
+          borderBottom: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+        }}
+      >
+        <IconButton size="small" onClick={() => navigate(-1)}>
+          <FiArrowLeft size={20} />
+        </IconButton>
+        <Avatar sx={{ width: 36, height: 36, bgcolor: "#D4AC0D", fontSize: "0.8rem", fontWeight: 700 }}>
+          {initials || "?"}
+        </Avatar>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle2" fontWeight={700} lineHeight={1.2}>
+            {otherUserName}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Chat
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2, display: "flex", flexDirection: "column", gap: 1.25 }}>
+        {messages.map((message) => {
+          const isMine = message.senderId === currentUser;
+          const isPriceProposal = message.type === "PRICE_PROPOSAL";
+
+          if (isPriceProposal) {
+            return (
+              <Box
+                key={message.id}
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-end",
+                  gap: 1,
+                  flexDirection: isMine ? "row-reverse" : "row",
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    bgcolor: isMine ? "#D4AC0D" : "grey.500",
+                    fontSize: "0.65rem",
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
+                  {isMine ? "M" : initials || "?"}
+                </Avatar>
+                <PriceProposalBubble metadata={message.metadata} isMine={isMine} />
+              </Box>
+            );
+          }
+
+          return (
+            <Box
               key={message.id}
-              isuser={(message.senderId === currentUser).toString()}
+              sx={{
+                display: "flex",
+                alignItems: "flex-end",
+                gap: 1,
+                flexDirection: isMine ? "row-reverse" : "row",
+              }}
             >
               <Avatar
-                src={
-                  message.senderId === currentUser
-                    ? "https://images.unsplash.com/photo-1599566150163-29194dcaad36"
-                    : "https://images.unsplash.com/photo-1494790108377-be9c29b29330"
-                }
-                alt={message.senderId}
-              />
-              <Box sx={{ minWidth: "400px" }}>
-                <MessageBubble
-                  isuser={(message.senderId === currentUser).toString()}
-                  elevation={2}
+                sx={{
+                  width: 28,
+                  height: 28,
+                  bgcolor: isMine ? "#D4AC0D" : "grey.500",
+                  fontSize: "0.65rem",
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
+                {isMine ? "M" : initials || "?"}
+              </Avatar>
+              <Box sx={{ maxWidth: "70%", minWidth: 80 }}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    px: 2,
+                    py: 1.25,
+                    bgcolor: isMine ? "#D4AC0D" : "background.paper",
+                    color: isMine ? "#000" : "text.primary",
+                    borderRadius: isMine ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                  }}
                 >
-                  <Typography variant="body1">{message.content}</Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{ display: "block", mt: 0.5, opacity: 0.8 }}
-                  >
-                    {formatTimestampWithDateFns(message.createdAt)}
-                  </Typography>
-                </MessageBubble>
+                  <Typography variant="body2">{message.content}</Typography>
+                </Paper>
+                <Typography
+                  variant="caption"
+                  color="text.disabled"
+                  sx={{ display: "block", mt: 0.25, textAlign: isMine ? "right" : "left", px: 0.5 }}
+                >
+                  {message.createdAt ? format(new Date(Number(message.createdAt)), "h:mm a") : ""}
+                </Typography>
               </Box>
-            </MessageRow>
-          ))}
-          <div ref={messageEndRef} />
-        </MessageArea>
-        <InputArea>
-          <Box display="flex" gap={1}>
+            </Box>
+          );
+        })}
+        <div ref={messageEndRef} />
+      </Box>
+
+      <Box sx={{ px: 2.5, py: 2, borderTop: 1, borderColor: "divider", bgcolor: "background.paper" }}>
+        <Collapse in={showPriceInput}>
+          <Box sx={{ display: "flex", gap: 1, mb: 1.5, alignItems: "center" }}>
             <TextField
-              inputRef={inputRef}
-              fullWidth
-              multiline
-              maxRows={4}
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type a message..."
-              variant="outlined"
+              inputRef={priceInputRef}
               size="small"
-              disabled={isSending}
+              type="number"
+              value={priceAmount}
+              onChange={(e) => setPriceAmount(e.target.value)}
+              placeholder="Enter amount..."
+              InputProps={{
+                startAdornment: (
+                  <Typography sx={{ mr: 0.5, fontWeight: 600, color: "text.secondary" }}>$</Typography>
+                ),
+              }}
+              sx={{
+                flex: 1,
+                "& .MuiOutlinedInput-root": { borderRadius: 3 },
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleProposePrice();
+              }}
             />
-            <IconButton
-              color="primary"
-              onClick={handleSend}
-              disabled={!newMessage.trim() || isSending}
-              aria-label="Send message"
+            <Button
+              onClick={handleProposePrice}
+              disabled={!priceAmount || parseFloat(priceAmount) <= 0 || isProposing}
+              sx={{
+                bgcolor: "#FFD100",
+                color: "#000",
+                fontWeight: 700,
+                textTransform: "none",
+                borderRadius: 2,
+                px: 2,
+                minWidth: 80,
+                "&:hover": { bgcolor: "#E6BC00" },
+                "&:disabled": { bgcolor: "action.disabledBackground", color: "action.disabled" },
+              }}
             >
-              {isSending ? <CircularProgress size={24} /> : <FiSend />}
+              {isProposing ? <CircularProgress size={18} sx={{ color: "#000" }} /> : "Send"}
+            </Button>
+            <IconButton size="small" onClick={() => { setShowPriceInput(false); setPriceAmount(""); }}>
+              <FiX size={18} />
             </IconButton>
           </Box>
-        </InputArea>
-      </ChatContainer>
-    </Container>
+        </Collapse>
+
+        <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
+          <TextField
+            inputRef={inputRef}
+            fullWidth
+            multiline
+            maxRows={4}
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder="Type a message..."
+            variant="outlined"
+            size="small"
+            disabled={isSending}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 3,
+              },
+            }}
+          />
+          <Button
+            onClick={() => setShowPriceInput((v) => !v)}
+            sx={{
+              minWidth: 44,
+              height: 44,
+              bgcolor: showPriceInput ? "#FFD100" : "transparent",
+              color: showPriceInput ? "#000" : "text.secondary",
+              borderRadius: 2,
+              border: "1px solid",
+              borderColor: showPriceInput ? "#FFD100" : "divider",
+              "&:hover": { bgcolor: showPriceInput ? "#E6BC00" : "action.hover" },
+            }}
+          >
+            <FiDollarSign size={18} />
+          </Button>
+          <IconButton
+            onClick={handleSend}
+            disabled={!newMessage.trim() || isSending}
+            sx={{
+              bgcolor: "#FFD100",
+              color: "#000",
+              borderRadius: 2,
+              width: 44,
+              height: 44,
+              "&:hover": { bgcolor: "#E6BC00" },
+              "&:disabled": { bgcolor: "action.disabledBackground", color: "action.disabled" },
+            }}
+          >
+            {isSending ? <CircularProgress size={20} sx={{ color: "#000" }} /> : <FiSend size={18} />}
+          </IconButton>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
