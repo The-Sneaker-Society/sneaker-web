@@ -1,45 +1,82 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import GroupCreationForm from "./GroupCreationForm";
 import GroupDisplay from "./GroupDisplay";
 import { useSneakerMember } from "../../context/MemberContext";
+import { tokens } from "../../theme/theme";
 
 const GroupsPage = () => {
   const { member, loading } = useSneakerMember();
 
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const isDark = theme.palette.mode === "dark";
+
   return (
     <Box
       sx={{
-        px: { xs: 2, md: 4 },
-        py: 4,
-        bgcolor: "#000",
         minHeight: "100vh",
+        px: { xs: 2, sm: 3, md: 4 },
+        py: { xs: 2, md: 3 },
+        bgcolor: isDark ? colors.primary[900] : "#fcfcfc",
       }}
     >
-      <Typography
-        variant="h3"
-        sx={{
-          color: "#FFD100",
-          fontWeight: "bold",
-          mb: 4,
-          textAlign: "center",
-        }}
-      >
-        Groups
-      </Typography>
-
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", lg: "1.2fr 1fr" },
-          gap: 4,
-          alignItems: "flex-start",
-          maxWidth: 1400,
+          width: "100%",
+          maxWidth: 1320,
           mx: "auto",
         }}
       >
-        <GroupCreationForm />
+        <Typography
+          variant="h3"
+          sx={{
+            color: colors.yellowAccent[500],
+            fontWeight: 700,
+            mb: { xs: 2, md: 2.5 },
+            textAlign: "center",
+            lineHeight: 0.5,
+          }}
+        >
+          Groups
+        </Typography>
 
-        <GroupDisplay currentUserId={member?.id} currentUserLoading={loading} />
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              xl: "minmax(0, 1.15fr) minmax(360px, 0.85fr)",
+            },
+            gap: { xs: 3, lg: 4 },
+            alignItems: "start",
+          }}
+        >
+          <Box
+            sx={{
+              minWidth: 0,
+              width: "100%",
+              justifySelf: "center",
+            }}
+          >
+            <GroupCreationForm />
+          </Box>
+
+          <Box
+            sx={{
+              minWidth: 0,
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              justifySelf: "center",
+              transform: { xs: "none", xl: "translateY(-32px)" },
+            }}
+          >
+            <GroupDisplay
+              currentUserId={member?.id}
+              currentUserLoading={loading}
+            />
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

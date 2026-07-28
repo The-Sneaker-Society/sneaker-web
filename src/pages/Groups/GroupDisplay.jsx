@@ -1,13 +1,26 @@
 import { useMemo, useState } from "react";
-import { Box, Button, TextField, Typography, Stack } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Stack,
+  alpha,
+  useTheme,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { GET_GROUPS } from "../../context/graphql/getGroups";
+import { tokens } from "../../theme/theme";
 
 const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
   const [tab, setTab] = useState("trending");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const isDark = theme.palette.mode === "dark";
 
   const { data, loading, error } = useQuery(GET_GROUPS);
   const allGroups = data?.getGroups || [];
@@ -15,18 +28,15 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
   const baseGroups = useMemo(() => {
     if (tab === "my") {
       if (currentUserLoading) return null;
-
       return allGroups.filter((group) =>
         (group.members || []).some((member) => member.id === currentUserId),
       );
     }
-
     return allGroups;
   }, [tab, allGroups, currentUserId, currentUserLoading]);
 
   const filteredGroups = useMemo(() => {
     if (baseGroups === null) return null;
-
     return baseGroups.filter((group) =>
       group.name.toLowerCase().includes(search.toLowerCase()),
     );
@@ -36,39 +46,73 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
     navigate(`/member/groups/${group.id}`);
   };
 
+  const panelBg = isDark
+    ? alpha(colors.primary[400], 0.28)
+    : alpha(colors.grey[900], 0.35);
+
+  const tabRailBg = isDark
+    ? alpha(colors.grey[900], 0.9)
+    : alpha(colors.grey[100], 0.82);
+
+  const searchBg = isDark
+    ? alpha(colors.primary[900], 0.9)
+    : alpha(colors.grey[100], 0.95);
+
+  const borderColor = isDark
+    ? alpha(colors.grey[300], 0.16)
+    : alpha(colors.grey[400], 0.45);
+
+  const rowBorder = isDark
+    ? alpha(colors.grey[300], 0.1)
+    : alpha(colors.grey[400], 0.3);
+
+  const hoverBg = isDark
+    ? alpha(colors.primary[300], 0.22)
+    : alpha(colors.grey[800], 0.18);
+
+  const textPrimary = isDark ? colors.grey[100] : colors.grey[900];
+  const textSecondary = isDark ? colors.grey[300] : colors.grey[500];
+  const accent = colors.yellowAccent[500];
+  const accentHover = colors.yellowAccent[400];
+
   return (
     <Box
       sx={{
         width: "100%",
         maxWidth: 520,
-        bgcolor: "#8e8e8e",
         borderRadius: 3,
         overflow: "hidden",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+        bgcolor: panelBg,
+        border: `1px solid ${borderColor}`,
+        boxShadow: "none",
+        backdropFilter: "blur(6px)",
       }}
     >
-      {/* Tabs */}
-      <Box sx={{ bgcolor: "#8e8e8e", p: 1.5 }}>
+      <Box sx={{ p: 1.5, pb: 1 }}>
         <Box
           sx={{
             display: "flex",
-            bgcolor: "#232323",
+            bgcolor: tabRailBg,
             borderRadius: "999px",
             p: 0.5,
+            border: `1px solid ${borderColor}`,
           }}
         >
           <Button
             onClick={() => setTab("trending")}
             sx={{
               flex: 1,
+              minHeight: 40,
               borderRadius: "999px",
               textTransform: "none",
               fontWeight: 700,
               fontSize: 14,
-              bgcolor: tab === "trending" ? "#FFD100" : "transparent",
-              color: tab === "trending" ? "#000" : "#FFD100",
+              bgcolor: tab === "trending" ? accent : "transparent",
+              color: tab === "trending" ? colors.grey[100] : accent,
+              boxShadow: "none",
               "&:hover": {
-                bgcolor: tab === "trending" ? "#ffde33" : "transparent",
+                bgcolor: tab === "trending" ? accentHover : "transparent",
+                boxShadow: "none",
               },
             }}
           >
@@ -79,14 +123,17 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
             onClick={() => setTab("my")}
             sx={{
               flex: 1,
+              minHeight: 40,
               borderRadius: "999px",
               textTransform: "none",
               fontWeight: 700,
               fontSize: 14,
-              bgcolor: tab === "my" ? "#FFD100" : "transparent",
-              color: tab === "my" ? "#000" : "#FFD100",
+              bgcolor: tab === "my" ? accent : "transparent",
+              color: tab === "my" ? colors.grey[100] : accent,
+              boxShadow: "none",
               "&:hover": {
-                bgcolor: tab === "my" ? "#ffde33" : "transparent",
+                bgcolor: tab === "my" ? accentHover : "transparent",
+                boxShadow: "none",
               },
             }}
           >
@@ -95,8 +142,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
         </Box>
       </Box>
 
-      {/* Search */}
-      <Box sx={{ px: 2, pt: 1.5, pb: 1, bgcolor: "#8e8e8e" }}>
+      <Box sx={{ px: 2, pt: 1, pb: 1.5 }}>
         <TextField
           fullWidth
           size="small"
@@ -105,34 +151,56 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{
-            bgcolor: "#000",
-            borderRadius: "999px",
-            "& fieldset": { border: "none" },
+            "& .MuiOutlinedInput-root": {
+              bgcolor: searchBg,
+              borderRadius: "999px",
+              color: textPrimary,
+              "& fieldset": {
+                borderColor: borderColor,
+              },
+              "&:hover fieldset": {
+                borderColor: alpha(accent, 0.65),
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: accent,
+              },
+            },
             "& .MuiInputBase-input": {
               px: 2,
               py: 1.2,
-              color: "#fff",
+              color: textPrimary,
+            },
+            "& .MuiInputBase-input::placeholder": {
+              color: textSecondary,
+              opacity: 1,
             },
           }}
         />
       </Box>
 
-      {/* List / Messages */}
-      <Box sx={{ bgcolor: "#8e8e8e", flex: 1 }}>
+      <Box>
         {loading && (
-          <Typography sx={{ px: 2, py: 2 }} color="#232323">
+          <Typography sx={{ px: 2, py: 2, color: textSecondary }}>
             Loading groups...
           </Typography>
         )}
 
         {!loading && tab === "my" && currentUserLoading && (
-          <Typography sx={{ px: 2, py: 2 }} color="#232323">
+          <Typography sx={{ px: 2, py: 2, color: textSecondary }}>
             Loading your groups...
           </Typography>
         )}
 
         {error && (
-          <Typography sx={{ px: 2, py: 2 }} color="error">
+          <Typography
+            variant="body2"
+            sx={{
+              color: colors.status.error,
+              textAlign: "center",
+              py: 3,
+              fontSize: 13,
+            }}
+          >
             Failed to load groups
           </Typography>
         )}
@@ -142,7 +210,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
           baseGroups !== null &&
           tab === "trending" &&
           allGroups.length === 0 && (
-            <Typography sx={{ px: 2, py: 2 }} color="#232323">
+            <Typography sx={{ px: 2, py: 2, color: textSecondary }}>
               No groups have been created yet.
             </Typography>
           )}
@@ -152,7 +220,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
           baseGroups !== null &&
           tab === "my" &&
           baseGroups.length === 0 && (
-            <Typography sx={{ px: 2, py: 2 }} color="#232323">
+            <Typography sx={{ px: 2, py: 2, color: textSecondary }}>
               You haven't joined any groups yet.
             </Typography>
           )}
@@ -163,7 +231,7 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
           baseGroups.length > 0 &&
           filteredGroups &&
           filteredGroups.length === 0 && (
-            <Typography sx={{ px: 2, py: 2 }} color="#232323">
+            <Typography sx={{ px: 2, py: 2, color: textSecondary }}>
               No groups match your search.
             </Typography>
           )}
@@ -171,31 +239,48 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
         {!loading &&
           !error &&
           filteredGroups &&
-          filteredGroups.map((group) => {
+          filteredGroups.map((group, index) => {
             const memberCount = (group.members || []).length;
+            const avatarLetter = group.name?.trim()?.[0]?.toUpperCase() || "G";
 
             return (
               <Box
                 key={group.id}
                 onClick={() => handleGroupClick(group)}
                 sx={{
-                  px: 2,
-                  py: 1.5,
+                  px: 1.5,
+                  py: 1.25,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  borderBottom: "1px solid #d0d0d0",
+                  gap: 1.5,
                   cursor: "pointer",
+                  borderTop: index === 0 ? "none" : `1px solid ${rowBorder}`,
                   "&:hover": {
-                    bgcolor: "#a2a2a2",
+                    bgcolor: hoverBg,
                   },
+                  "&:last-child": { borderBottom: "none" },
                 }}
               >
-                <Stack spacing={0.3}>
-                  <Typography fontWeight={700} fontSize={14} color="#000">
+                <Stack spacing={0.35} sx={{ minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: 14,
+                      color: textPrimary,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
                     {group.name}
                   </Typography>
-                  <Typography fontSize={12} sx={{ color: "#333" }}>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      color: textSecondary,
+                    }}
+                  >
                     {memberCount} {memberCount === 1 ? "member" : "members"}
                   </Typography>
                 </Stack>
@@ -204,13 +289,19 @@ const GroupDisplay = ({ currentUserId, currentUserLoading }) => {
                   sx={{
                     width: 70,
                     height: 40,
-                    borderRadius: 1,
+                    flexShrink: 0,
+                    borderRadius: 1.5,
                     overflow: "hidden",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    bgcolor: group.avatar ? "transparent" : "#2b2b2b",
-                    color: group.avatar ? "inherit" : "#FFD100",
+                    border: `1px solid ${borderColor}`,
+                    bgcolor: group.avatar
+                      ? "transparent"
+                      : isDark
+                        ? alpha(colors.primary[900], 0.9)
+                        : alpha(colors.grey[100], 0.9),
+                    color: group.avatar ? "inherit" : accent,
                     fontWeight: 700,
                     fontSize: 18,
                     textTransform: "uppercase",

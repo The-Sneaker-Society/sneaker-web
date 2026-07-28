@@ -7,10 +7,26 @@ export const GET_GROUPS = gql`
       name
       description
       avatar
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        firstName
+        lastName
+        email
+      }
+      admins {
+        id
+        firstName
+        lastName
+        email
+      }
       members {
         id
+        firstName
+        lastName
+        email
       }
-      createdAt
     }
   }
 `;
@@ -22,13 +38,26 @@ export const GET_GROUP = gql`
       name
       description
       avatar
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        firstName
+        lastName
+        email
+      }
+      admins {
+        id
+        firstName
+        lastName
+        email
+      }
       members {
         id
         firstName
         lastName
         email
       }
-      createdAt
     }
   }
 `;
