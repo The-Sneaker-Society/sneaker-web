@@ -1,13 +1,13 @@
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography, Button, Divider, CircularProgress } from "@mui/material";
-import { FiPercent, FiInfo } from "react-icons/fi";
+import { FiPercent, FiInfo, FiAlertCircle } from "react-icons/fi";
 import { useColors } from "../../theme/colors";
 
 const STRIPE_PERCENT_FEE = 0.029;
 const STRIPE_FLAT_FEE = 0.30;
 const PLATFORM_FEE = 12;
 
-const PricePreviewModal = ({ open, price, onConfirm, onClose, isProposing }) => {
+const PricePreviewModal = ({ open, price, onConfirm, onClose, isProposing, hasPendingProposal }) => {
   const colors = useColors();
   if (!price) return null;
   const gross = price;
@@ -54,6 +54,15 @@ const PricePreviewModal = ({ open, price, onConfirm, onClose, isProposing }) => 
               ${netPayout.toFixed(2)}
             </Typography>
           </Box>
+
+          {hasPendingProposal && (
+            <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, mt: 1, p: 1.5, bgcolor: "rgba(239,68,68,0.1)", borderRadius: 2, border: "1px solid rgba(239,68,68,0.25)" }}>
+              <FiAlertCircle size={16} color="#EF4444" style={{ flexShrink: 0, marginTop: 1 }} />
+              <Typography sx={{ fontSize: "0.75rem", color: "#EF4444", fontWeight: 600, lineHeight: 1.4 }}>
+                This will expire the existing pending price proposal. The previous proposal will no longer be valid for payment.
+              </Typography>
+            </Box>
+          )}
 
           <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, mt: 0.5, px: 0.5 }}>
             <FiInfo size={13} color={colors.textSecondary} style={{ flexShrink: 0, marginTop: 2 }} />

@@ -98,6 +98,10 @@ const Chat = ({
     }
   };
 
+  const hasPendingProposal = messages.some(
+    (m) => m.type === "PRICE_PROPOSAL" && m.metadata?.status === "pending"
+  );
+
   const initials = otherUserName
     .split(" ")
     .map((n) => n[0])
@@ -321,6 +325,7 @@ const Chat = ({
         onConfirm={handleConfirmPrice}
         onClose={() => { setShowPreviewModal(false); setPendingPrice(null); }}
         isProposing={isProposing}
+        hasPendingProposal={hasPendingProposal}
       />
     </Box>
   );
