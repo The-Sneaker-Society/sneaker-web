@@ -1,16 +1,19 @@
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
-import { FiDollarSign, FiCheckCircle, FiClock, FiXCircle } from "react-icons/fi";
+import { FiDollarSign, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
 
 const statusConfig = {
   pending: { label: "Pending", icon: FiClock, color: "#F59E0B" },
   paid: { label: "Paid", icon: FiCheckCircle, color: "#10B981" },
-  expired: { label: "Expired", icon: FiXCircle, color: "#EF4444" },
+  expired: { label: "Expired", icon: FiAlertCircle, color: "#EF4444" },
 };
 
 const PriceProposalBubble = ({ metadata, isMine }) => {
-  const { price, checkoutUrl, status } = metadata || {};
-  const config = statusConfig[status] || statusConfig.pending;
+  const { price, checkoutUrl, status, expiresAt } = metadata || {};
+  const isExpired =
+    status === "pending" && expiresAt && new Date(expiresAt) < new Date();
+  const effectiveStatus = isExpired || status === "superseded" ? "expired" : status;
+  const config = statusConfig[effectiveStatus] || statusConfig.pending;
   const StatusIcon = config.icon;
 
   return (
@@ -37,7 +40,7 @@ const PriceProposalBubble = ({ metadata, isMine }) => {
           ${price?.toLocaleString()}
         </Typography>
 
-        {checkoutUrl && status === "pending" && (
+        {checkoutUrl && status === "pending" && !isExpired && (
           <Button
             href={checkoutUrl}
             target="_blank"
