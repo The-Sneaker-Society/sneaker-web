@@ -1,66 +1,46 @@
-import React from "react";
-import { styled } from "@mui/system";
+import Button from "@mui/material/Button";
+import { styled } from "@mui/material/styles";
 
-const CustomButton = styled("button")({
-  alignItems: "center",
-  backgroundColor: "black",
-  border: "2px solid #111",
-  borderRadius: "8px",
-  borderColor: "white",
-  boxSizing: "border-box",
-  color: "#fff",
-  cursor: "pointer",
-  display: "flex",
-  fontFamily: "Inter, sans-serif",
-  fontSize: "16px",
-  height: "48px",
-  justifyContent: "center",
-  lineHeight: "24px",
-  maxWidth: "100%",
-  padding: "0 25px",
-  position: "relative",
-  textAlign: "center",
-  textDecoration: "none",
-  userSelect: "none",
-  WebkitUserSelect: "none",
-  touchAction: "manipulation",
-  marginRight: "15px",
-  "&:after": {
-    backgroundColor: "#FFD100",
-    borderRadius: "8px",
-    content: '""',
-    display: "block",
-    height: "48px",
-    left: 0,
-    width: "100%",
-    position: "absolute",
-    top: "-2px",
-    transform: "translate(8px, 8px)",
-    transition: "transform .2s ease-out",
-    zIndex: "-1",
-  },
-  "&:hover:after": {
-    transform: "translate(0, 0)",
-  },
-  "&:active": {
-    backgroundColor: "#ffdeda",
-    outline: 0,
-  },
+const StyledButton = styled(Button)(({ theme }) => ({
+  minHeight: 48,
+  padding: theme.spacing(0, 3),
+  border: `2px solid ${theme.palette.divider}`,
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.background.paper,
+  color: theme.palette.text.primary,
+  boxShadow: `8px 8px 0 ${theme.palette.primary.main}`,
+
+  transition: theme.transitions.create(
+    ["background-color", "box-shadow", "transform"],
+    {
+      duration: theme.transitions.duration.short,
+    },
+  ),
+
   "&:hover": {
-    outline: 0,
+    backgroundColor: theme.palette.action.hover,
+    boxShadow: `4px 4px 0 ${theme.palette.primary.main}`,
+    transform: "translate(4px, 4px)",
   },
-  "@media (min-width: 768px)": {
-    padding: "0 40px",
-  },
-});
 
-function StyledButton({ children, onClick, ...props }) {
-  // Destructure onClick from props
-  return (
-    <CustomButton onClick={onClick} {...props}>
-      {children}
-    </CustomButton>
-  ); // Pass onClick to CustomButton
-}
+  "&:active": {
+    backgroundColor: theme.palette.action.selected,
+    boxShadow: "none",
+    transform: "translate(8px, 8px)",
+  },
+
+  "&:focus-visible": {
+    outline: `3px solid ${theme.palette.primary.main}`,
+    outlineOffset: 3,
+  },
+
+  "&.Mui-disabled": {
+    boxShadow: "none",
+  },
+
+  [theme.breakpoints.up("md")]: {
+    padding: theme.spacing(0, 5),
+  },
+}));
 
 export default StyledButton;

@@ -1,390 +1,446 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Box,
   Checkbox,
   Chip,
-  Grid,
-  Typography,
-  Container,
   IconButton,
+  Pagination,
+  Stack,
+  Typography,
   useMediaQuery,
   useTheme,
-  Pagination,
 } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import { useColors } from "../../theme/colors";
 
-function ContractWidget() {
-  // Updated with 25 contracts
-  const [contracts, setContracts] = useState([
-    {
-      id: 1,
-      client: "Richard Cochechagua",
-      status: "In Progress",
-      date: "01/24/2023",
-      selected: false,
-    },
-    {
-      id: 2,
-      client: "Gerardo Delao",
-      status: "Done",
-      date: "01/04/2023",
-      selected: false,
-    },
-    {
-      id: 3,
-      client: "Kyle Desmond",
-      status: "Complete",
-      date: "02/24/2023",
-      selected: false,
-    },
-    {
-      id: 4,
-      client: "Alanis Yates",
-      status: "Not Started",
-      date: "08/19/2023",
-      selected: false,
-    },
-    {
-      id: 5,
-      client: "Alanis Yates",
-      status: "Not Started",
-      date: "08/19/2023",
-      selected: false,
-    },
-    {
-      id: 6,
-      client: "Kyle Desmond",
-      status: "Complete",
-      date: "02/24/2023",
-      selected: false,
-    },
-    {
-      id: 7,
-      client: "New Client",
-      status: "In Review",
-      date: "03/01/2023",
-      selected: false,
-    },
-    {
-      id: 11,
-      client: "Richard Cochechagua",
-      status: "In Progress",
-      date: "01/24/2023",
-      selected: false,
-    },
-    {
-      id: 21,
-      client: "Gerardo Delao",
-      status: "Done",
-      date: "01/04/2023",
-      selected: false,
-    },
-    {
-      id: 31,
-      client: "Kyle Desmond",
-      status: "Complete",
-      date: "02/24/2023",
-      selected: false,
-    },
-    {
-      id: 41,
-      client: "Alanis Yates",
-      status: "Not Started",
-      date: "08/19/2023",
-      selected: false,
-    },
-    {
-      id: 51,
-      client: "Alanis Yates",
-      status: "Not Started",
-      date: "08/19/2023",
-      selected: false,
-    },
-    {
-      id: 61,
-      client: "Kyle Desmond",
-      status: "Complete",
-      date: "02/24/2023",
-      selected: false,
-    },
-    {
-      id: 17,
-      client: "New Client",
-      status: "In Review",
-      date: "03/01/2023",
-      selected: false,
-    },
-    {
-      id: 100,
-      client: "Sarah Lee",
-      status: "In Progress",
-      date: "04/15/2023",
-      selected: false,
-    },
-    {
-      id: 101,
-      client: "James Sullivan",
-      status: "Not Started",
-      date: "05/21/2023",
-      selected: false,
-    },
-    {
-      id: 102,
-      client: "Michael Johnson",
-      status: "Done",
-      date: "06/30/2023",
-      selected: false,
-    },
-    {
-      id: 103,
-      client: "Amanda Robertson",
-      status: "Complete",
-      date: "07/18/2023",
-      selected: false,
-    },
-    {
-      id: 104,
-      client: "Emily Watson",
-      status: "In Review",
-      date: "08/05/2023",
-      selected: false,
-    },
-    {
-      id: 105,
-      client: "Emily Watson",
-      status: "In Review",
-      date: "08/05/2023",
-      selected: false,
-    },
-    {
-      id: 106,
-      client: "Emily Watson",
-      status: "In Review",
-      date: "08/05/2023",
-      selected: false,
-    },
-    {
-      id: 107,
-      client: "Emily Watson",
-      status: "In Review",
-      date: "08/05/2023",
-      selected: false,
-    },
-  ]);
+const initialContracts = [
+  {
+    id: 1,
+    client: "Richard Cochechagua",
+    status: "In Progress",
+    date: "01/24/2023",
+    selected: false,
+  },
+  {
+    id: 2,
+    client: "Gerardo Delao",
+    status: "Done",
+    date: "01/04/2023",
+    selected: false,
+  },
+  {
+    id: 3,
+    client: "Kyle Desmond",
+    status: "Complete",
+    date: "02/24/2023",
+    selected: false,
+  },
+  {
+    id: 4,
+    client: "Alanis Yates",
+    status: "Not Started",
+    date: "08/19/2023",
+    selected: false,
+  },
+  {
+    id: 5,
+    client: "Alanis Yates",
+    status: "Not Started",
+    date: "08/19/2023",
+    selected: false,
+  },
+  {
+    id: 6,
+    client: "Kyle Desmond",
+    status: "Complete",
+    date: "02/24/2023",
+    selected: false,
+  },
+  {
+    id: 7,
+    client: "New Client",
+    status: "In Review",
+    date: "03/01/2023",
+    selected: false,
+  },
+  {
+    id: 11,
+    client: "Richard Cochechagua",
+    status: "In Progress",
+    date: "01/24/2023",
+    selected: false,
+  },
+  {
+    id: 21,
+    client: "Gerardo Delao",
+    status: "Done",
+    date: "01/04/2023",
+    selected: false,
+  },
+  {
+    id: 31,
+    client: "Kyle Desmond",
+    status: "Complete",
+    date: "02/24/2023",
+    selected: false,
+  },
+  {
+    id: 41,
+    client: "Alanis Yates",
+    status: "Not Started",
+    date: "08/19/2023",
+    selected: false,
+  },
+  {
+    id: 51,
+    client: "Alanis Yates",
+    status: "Not Started",
+    date: "08/19/2023",
+    selected: false,
+  },
+  {
+    id: 61,
+    client: "Kyle Desmond",
+    status: "Complete",
+    date: "02/24/2023",
+    selected: false,
+  },
+  {
+    id: 17,
+    client: "New Client",
+    status: "In Review",
+    date: "03/01/2023",
+    selected: false,
+  },
+  {
+    id: 100,
+    client: "Sarah Lee",
+    status: "In Progress",
+    date: "04/15/2023",
+    selected: false,
+  },
+  {
+    id: 101,
+    client: "James Sullivan",
+    status: "Not Started",
+    date: "05/21/2023",
+    selected: false,
+  },
+  {
+    id: 102,
+    client: "Michael Johnson",
+    status: "Done",
+    date: "06/30/2023",
+    selected: false,
+  },
+  {
+    id: 103,
+    client: "Amanda Robertson",
+    status: "Complete",
+    date: "07/18/2023",
+    selected: false,
+  },
+  {
+    id: 104,
+    client: "Emily Watson",
+    status: "In Review",
+    date: "08/05/2023",
+    selected: false,
+  },
+  {
+    id: 105,
+    client: "Emily Watson",
+    status: "In Review",
+    date: "08/05/2023",
+    selected: false,
+  },
+  {
+    id: 106,
+    client: "Emily Watson",
+    status: "In Review",
+    date: "08/05/2023",
+    selected: false,
+  },
+  {
+    id: 107,
+    client: "Emily Watson",
+    status: "In Review",
+    date: "08/05/2023",
+    selected: false,
+  },
+];
 
-  const [selectAll, setSelectAll] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
-  // Dynamically set contracts per page based on screen size
-  const contractsPerPage = isSmallScreen ? 6 : 20;
-
-  const getStatusChipProps = (status) => {
-    switch (status) {
-      case "In Progress":
-        return { color: "warning" };
-      case "Done":
-        return { color: "success" };
-      case "Not Started":
-        return { style: { backgroundColor: "red", color: "white" } }; // Adjusted for better visibility
-      case "Complete":
-        return { color: "info" };
-      default:
-        return { color: "default" };
-    }
-  };
-
-  const handleSelectAll = (event) => {
-    const newContracts = contracts.map((contract) => ({
-      ...contract,
-      selected: event.target.checked,
-    }));
-    setContracts(newContracts);
-    setSelectAll(event.target.checked);
-  };
-
-  const handleSelectSingle = (id) => {
-    const newContracts = contracts.map((contract) =>
-      contract.id === id
-        ? { ...contract, selected: !contract.selected }
-        : contract
-    );
-    setContracts(newContracts);
-
-    // Check if all contracts are now selected, to update the selectAll state
-    setSelectAll(newContracts.every((contract) => contract.selected));
-  };
-
-  // Calculate the contracts to display based on the current page
-  const indexOfLastContract = currentPage * contractsPerPage;
-  const indexOfFirstContract = indexOfLastContract - contractsPerPage;
-  const currentContracts = contracts.slice(
-    indexOfFirstContract,
-    indexOfLastContract
-  );
-
-  const totalPages = Math.ceil(contracts.length / contractsPerPage);
-
-  const handlePaginationChange = (event, value) => {
-    setCurrentPage(value);
+const getStatusChipProps = (status) => {
+  const statusMap = {
+    "In Progress": {
+      color: "warning",
+      label: "In Progress",
+    },
+    Done: {
+      color: "success",
+      label: "Done",
+    },
+    Complete: {
+      color: "info",
+      label: "Complete",
+    },
+    "Not Started": {
+      color: "error",
+      label: "Not Started",
+    },
+    "In Review": {
+      color: "secondary",
+      label: "In Review",
+    },
   };
 
   return (
-    <Container
-      maxWidth="md"
+    statusMap[status] ?? {
+      color: "default",
+      label: status,
+    }
+  );
+};
+
+function ContractWidget() {
+  const [contracts, setContracts] = useState(initialContracts);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const theme = useTheme();
+  const colors = useColors();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const contractsPerPage = isSmallScreen ? 6 : 20;
+  const totalPages = Math.ceil(contracts.length / contractsPerPage);
+
+  const currentContracts = useMemo(() => {
+    const firstContractIndex = (currentPage - 1) * contractsPerPage;
+    const lastContractIndex = firstContractIndex + contractsPerPage;
+
+    return contracts.slice(firstContractIndex, lastContractIndex);
+  }, [contracts, contractsPerPage, currentPage]);
+
+  const allContractsSelected =
+    contracts.length > 0 && contracts.every((contract) => contract.selected);
+
+  const someContractsSelected =
+    contracts.some((contract) => contract.selected) && !allContractsSelected;
+
+  const handleSelectAll = (event) => {
+    const selected = event.target.checked;
+
+    setContracts((currentContractsState) =>
+      currentContractsState.map((contract) => ({
+        ...contract,
+        selected,
+      })),
+    );
+  };
+
+  const handleSelectSingle = (id) => {
+    setContracts((currentContractsState) =>
+      currentContractsState.map((contract) =>
+        contract.id === id
+          ? { ...contract, selected: !contract.selected }
+          : contract,
+      ),
+    );
+  };
+
+  const handlePaginationChange = (_, page) => {
+    setCurrentPage(page);
+  };
+
+  return (
+    <Box
       sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100%",
-        padding: isSmallScreen ? 1 : 3,
-        overflowY: isSmallScreen ? "scroll" : "hidden",
-        minHeight: "500px", // Example fixed minimum height, adjust based on your content
+        bgcolor: colors.surfaceBg,
+        border: 1,
+        borderColor: "divider",
+        borderRadius: 2,
+        color: colors.textPrimary,
+        overflow: "hidden",
       }}
     >
-      <Box
+      <Stack
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        direction={{ xs: "column", sm: "row" }}
+        justifyContent="space-between"
+        spacing={2}
         sx={{
-          width: "100%",
-          height: "100%",
-          p: 2,
-          borderRadius: 2,
-          boxShadow: 3,
-          overflowX: "auto",
-          border: 2,
-          borderColor: "white",
+          borderBottom: 1,
+          borderColor: "divider",
+          px: { xs: 2, sm: 3 },
+          py: 2,
         }}
       >
-        <Typography
-          variant="h6"
-          gutterBottom
-          component="div"
-          sx={{
-            mb: 2,
-            fontSize: isSmallScreen ? "body1.fontSize" : "h6.fontSize",
-          }}
-        >
-          {`Contracts (${contracts.length} total)`}
+        <Typography fontWeight={700} variant="h5">
+          Contracts ({contracts.length} total)
         </Typography>
-        <Grid
-          container
-          alignItems="center"
-          sx={{
-            borderBottom: 1,
-            borderColor: "divider",
-            pb: 2,
-            "&:last-child": {
-              borderBottom: 0,
-            },
-          }}
-        >
-          <Grid item xs={3}>
-            <Typography
-              variant="subtitle1"
-              component="div"
+
+        <Typography color={colors.textSecondary} variant="body2">
+          Manage client service agreements and job progress.
+        </Typography>
+      </Stack>
+
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "auto minmax(0, 1fr) auto",
+            sm: "auto minmax(160px, 1.5fr) minmax(130px, 1fr) minmax(110px, 0.8fr) auto",
+          },
+          gap: 2,
+          alignItems: "center",
+          borderBottom: 1,
+          borderColor: "divider",
+          color: colors.textSecondary,
+          px: { xs: 2, sm: 3 },
+          py: 1.5,
+        }}
+      >
+        <Checkbox
+          checked={allContractsSelected}
+          color="primary"
+          indeterminate={someContractsSelected}
+          inputProps={{ "aria-label": "Select all contracts" }}
+          onChange={handleSelectAll}
+          size="small"
+          sx={{ p: 0 }}
+        />
+
+        <Typography fontWeight={700} variant="body2">
+          Client
+        </Typography>
+
+        {!isSmallScreen && (
+          <Typography fontWeight={700} variant="body2">
+            Status
+          </Typography>
+        )}
+
+        {!isSmallScreen && (
+          <Typography fontWeight={700} variant="body2">
+            Date
+          </Typography>
+        )}
+
+        <Box />
+      </Box>
+
+      <Stack divider={<Box sx={{ borderTop: 1, borderColor: "divider" }} />}>
+        {currentContracts.map((contract) => {
+          const statusChip = getStatusChipProps(contract.status);
+
+          return (
+            <Box
+              key={contract.id}
               sx={{
-                display: "flex",
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "auto minmax(0, 1fr) auto",
+                  sm: "auto minmax(160px, 1.5fr) minmax(130px, 1fr) minmax(110px, 0.8fr) auto",
+                },
+                gap: 2,
                 alignItems: "center",
-                fontSize: isSmallScreen
-                  ? "body2.fontSize"
-                  : "subtitle1.fontSize",
+                px: { xs: 2, sm: 3 },
+                py: 1.5,
+                transition: theme.transitions.create("background-color", {
+                  duration: theme.transitions.duration.shortest,
+                }),
+                "&:hover": {
+                  bgcolor: "action.hover",
+                },
               }}
             >
               <Checkbox
-                checked={selectAll}
-                onChange={handleSelectAll}
-                sx={{ padding: 0, marginRight: "8px" }}
-              />
-              Client
-            </Typography>
-          </Grid>
-          <Grid item xs={3}>
-            <Typography variant="subtitle1">Status</Typography>
-          </Grid>
-          <Grid item xs={3}>
-            <Typography variant="subtitle1">Date</Typography>
-          </Grid>
-          {!isSmallScreen && <Grid item xs={3} />}
-        </Grid>
-        {currentContracts.map((contract) => (
-          <Grid
-            container
-            alignItems="center"
-            key={contract.id}
-            sx={{
-              borderBottom: 1,
-              borderColor: "divider",
-              pb: 2,
-              "&:last-child": {
-                borderBottom: 0,
-              },
-            }}
-          >
-            <Grid
-              item
-              xs={isSmallScreen ? 4 : 3}
-              sx={{ display: "flex", alignItems: "center" }}
-            >
-              <Checkbox
                 checked={contract.selected}
-                onChange={() => handleSelectSingle(contract.id)}
-                sx={{ padding: 0, marginRight: "8px" }}
-              />
-              <Typography variant="body2" noWrap>
-                {contract.client}
-              </Typography>
-            </Grid>
-            <Grid item xs={isSmallScreen ? 4 : 3} sx={{ marginTop: "10px" }}>
-              <Chip
-                label={contract.status}
-                {...getStatusChipProps(contract.status)}
-                sx={{
-                  borderRadius: 1,
-                  width: { xs: "90px", sm: "110px" },
-                  px: "10px",
-                  py: "4px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                color="primary"
+                inputProps={{
+                  "aria-label": `Select ${contract.client}'s contract`,
                 }}
+                onChange={() => handleSelectSingle(contract.id)}
+                size="small"
+                sx={{ p: 0 }}
               />
-            </Grid>
-            <Grid item xs={isSmallScreen ? 4 : 3}>
-              <Typography variant="body2" noWrap>
-                {contract.date}
-              </Typography>
-            </Grid>
-            {!isSmallScreen && (
-              <Grid item xs={3}>
-                <IconButton size="small">
-                  <MoreHorizIcon />
-                </IconButton>
-              </Grid>
-            )}
-          </Grid>
-        ))}
 
+              <Box sx={{ minWidth: 0 }}>
+                <Typography noWrap fontWeight={600} variant="body2">
+                  {contract.client}
+                </Typography>
+
+                {isSmallScreen && (
+                  <Stack
+                    alignItems="center"
+                    direction="row"
+                    spacing={1}
+                    sx={{ mt: 0.75 }}
+                  >
+                    <Chip
+                      color={statusChip.color}
+                      label={statusChip.label}
+                      size="small"
+                    />
+
+                    <Typography color={colors.textSecondary} variant="caption">
+                      {contract.date}
+                    </Typography>
+                  </Stack>
+                )}
+              </Box>
+
+              {!isSmallScreen && (
+                <Chip
+                  color={statusChip.color}
+                  label={statusChip.label}
+                  size="small"
+                />
+              )}
+
+              {!isSmallScreen && (
+                <Typography color={colors.textSecondary} variant="body2">
+                  {contract.date}
+                </Typography>
+              )}
+
+              <IconButton
+                aria-label={`More actions for ${contract.client}`}
+                size="small"
+                sx={{
+                  color: colors.textSecondary,
+                  "&:hover": {
+                    bgcolor: "action.hover",
+                    color: colors.textPrimary,
+                  },
+                }}
+              >
+                <MoreHorizIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          );
+        })}
+      </Stack>
+
+      {totalPages > 1 && (
         <Box
           sx={{
-            width: "100%",
-            py: 2,
+            borderTop: 1,
+            borderColor: "divider",
             display: "flex",
             justifyContent: "center",
+            p: 2,
           }}
         >
           <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={handlePaginationChange}
             color="primary"
-            variant="outlined"
+            count={totalPages}
+            onChange={handlePaginationChange}
+            page={currentPage}
             shape="rounded"
-            sx={{ mt: 2, display: "flex", justifyContent: "center" }}
           />
         </Box>
-      </Box>
-    </Container>
+      )}
+    </Box>
   );
 }
 

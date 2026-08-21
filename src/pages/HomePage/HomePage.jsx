@@ -1,37 +1,42 @@
-import React, { useState, useRef } from "react";
-import { Box, Stack, Typography, Divider, useMediaQuery } from "@mui/material";
+import React, { useRef } from "react";
+import { Box } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
 import Header from "./Header";
 import Footer from "./Footer";
-import { TypeAnimation } from "react-type-animation";
-import StyledButton from "./StyledButton";
+import HeroSection from "./HeroSection";
 import FeaturesSection from "./FeaturesSection";
-import ScrollToNextIcon from "./ScrollToNextIcon";
 import PricingTable from "./PricingTable";
-import { useNavigate } from "react-router-dom";
 import ContactSection from "./ContactSection";
+import { useColors } from "../../theme/colors";
 
 function HomePage() {
-  const isSmallScreen = useMediaQuery("(max-width:600px)");
-  const isLargeScreen = useMediaQuery("(min-width:1200px)"); // For large monitors
+  const navigate = useNavigate();
+  const colors = useColors();
 
-  const featuresSectionRef = useRef(null); // Create a ref for the FeaturesSection
+  const featuresSectionRef = useRef(null);
   const pricingSectionRef = useRef(null);
   const contactSectionRef = useRef(null);
 
   const scrollToRef = (ref) => {
+    if (!ref?.current) {
+      return;
+    }
+
+    const headerOffset = 88;
+    const top = ref.current.offsetTop - headerOffset;
+
     window.scrollTo({
-      top: ref.current.offsetTop - (isSmallScreen ? 120 : 100),
+      top,
       behavior: "smooth",
     });
   };
 
-  const navigate = useNavigate();
-
-  const handleMemberSignupCLick = () => {
+  const handleMemberSignupClick = () => {
     navigate("/member/signup");
   };
 
-  const handleUserSignupCLick = () => {
+  const handleUserSignupClick = () => {
     navigate("/user/signup");
   };
 
@@ -39,159 +44,77 @@ function HomePage() {
     navigate("/login");
   };
 
-  const redirectSignupClick = () => {
-    navigate("member/signup");
+  const handleHomeClick = () => {
+    navigate("/");
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
-    <Box>
+    <Box
+      sx={{
+        bgcolor: colors.pageBg,
+        color: colors.textPrimary,
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
       <Header
-        pricingRef={() => scrollToRef(pricingSectionRef)}
-        featureRef={() => scrollToRef(featuresSectionRef)}
         contactRef={() => scrollToRef(contactSectionRef)}
+        featureRef={() => scrollToRef(featuresSectionRef)}
+        onButtonClick={handleMemberSignupClick}
         onLoginButtonClick={handleLoginClick}
-        onRedirectClick={redirectSignupClick}
+        onRedirectClick={handleHomeClick}
+        pricingRef={() => scrollToRef(pricingSectionRef)}
       />
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            flexDirection: "column",
-            height: "100vh",
-          }}
-        >
-          <Typography
-            variant="h2"
-            component="h1"
-            sx={{
-              fontWeight: "700",
-              fontSize: { lg: "96px", md: "4rem", sm: "3rem", xs: "3rem" },
-              marginTop: { xs: "20px", md: "0" },
-              marginBottom: "32px",
-              wordWrap: "break-word",
-              lineHeight: { xs: 1.2, sm: 1.3 },
-            }}
-          >
-            <Box sx={{ height: "100%" }}>
-              <TypeAnimation
-                sequence={[
-                  "Elevate your Collection",
-                  1000,
-                  "Streamline your Process",
-                  1000,
-                  "Build your Brand",
-                  1000,
-                ]}
-                speed={50}
-                wrapper="div"
-                repeat={Infinity}
-              />
-            </Box>
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: "400",
-              fontSize: { xs: "16px", md: "1.25rem" },
-              maxWidth: "800px",
-              marginBottom: "48px",
-            }}
-          >
-            Your all-in-one solution: Where restoration experts elevate their
-            brand while customers easily find top-tier restoration services.
-          </Typography>
-
-          <Stack
-            direction="row"
-            divider={<Divider orientation="vertical" flexItem />}
-            spacing={2}
-          >
-            <StyledButton onClick={handleMemberSignupCLick}>
-              Business
-            </StyledButton>
-            <StyledButton onClick={handleUserSignupCLick}>
-              Customer
-            </StyledButton>
-          </Stack>
-
-          <ScrollToNextIcon
-            scrollToNext={() => scrollToRef(featuresSectionRef)}
-          />
-        </Box>
+      <Box component="main" sx={{ flex: 1 }}>
+        <HeroSection
+          onMemberSignupClick={handleMemberSignupClick}
+          onUserSignupClick={handleUserSignupClick}
+        />
 
         <Box
-          sx={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingTop: isLargeScreen ? "10px" : "20px", // Less space above for large screens
-            paddingBottom: isLargeScreen ? "60px" : "40px", // More space below for large screens
-          }}
+          component="section"
           ref={featuresSectionRef}
+          sx={{
+            bgcolor: "background.paper",
+            borderTop: 1,
+            borderColor: "divider",
+            scrollMarginTop: "88px",
+          }}
         >
-          <FeaturesSection refFnc={() => scrollToRef(pricingSectionRef)} />
+          <FeaturesSection />
         </Box>
 
         <Box
+          component="section"
+          ref={pricingSectionRef}
           sx={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingY: isSmallScreen ? "20px" : "40px",
-            textAlign: "center",
+            bgcolor: colors.pageBg,
+            borderTop: 1,
+            borderColor: "divider",
+            scrollMarginTop: "88px",
           }}
         >
-          <Box sx={{ width: "100%" }}>
-            <Typography
-              fontWeight="bold"
-              gutterBottom
-              ref={pricingSectionRef}
-              sx={{
-                fontSize: { xs: "3rem", sm: "5.2rem" },
-                lineHeight: 1.4,
-              }}
-            >
-              Pricing
-            </Typography>
-
-            <PricingTable
-              features={[
-                "Unlimited Prospect Intakes",
-                "Direct Messaging",
-                "Direct Stripe Payments",
-                "Business analytics",
-              ]}
-              onButtonClick={handleMemberSignupCLick}
-            />
-          </Box>
-          <ScrollToNextIcon
-            scrollToNext={() => scrollToRef(contactSectionRef)}
+          <PricingTable
+            onMemberSignupClick={handleMemberSignupClick}
+            onUserSignupClick={handleUserSignupClick}
           />
         </Box>
 
         <Box
-          sx={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingY: isSmallScreen ? "20px" : "40px",
-          }}
+          component="section"
           ref={contactSectionRef}
+          sx={{
+            bgcolor: "background.paper",
+            borderTop: 1,
+            borderColor: "divider",
+            scrollMarginTop: "88px",
+          }}
         >
           <ContactSection />
         </Box>
