@@ -9,6 +9,9 @@ import FeaturesSection from "./FeaturesSection";
 import PricingTable from "./PricingTable";
 import ContactSection from "./ContactSection";
 import { useColors } from "../../theme/colors";
+import AboutSection from "./AboutSection";
+import CallToAction from "./CallToAction";
+import ConnectSection from "./ConnectSection";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -88,6 +91,8 @@ function HomePage() {
           }}
         >
           <FeaturesSection />
+
+          <AboutSection />
         </Box>
 
         <Box
@@ -103,6 +108,13 @@ function HomePage() {
           <PricingTable
             onMemberSignupClick={handleMemberSignupClick}
             onUserSignupClick={handleUserSignupClick}
+          />
+
+          <ConnectSection />
+
+          <CallToAction
+            buttonText="Start your business profile"
+            onButtonClick={handleMemberSignupClick}
           />
         </Box>
 

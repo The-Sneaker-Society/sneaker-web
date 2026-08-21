@@ -1,99 +1,88 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Container, Grid, Typography, Button, TextField, useTheme } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import GroupsIcon from "@mui/icons-material/Groups";
+import { useNavigate } from "react-router-dom";
+import { useColors } from "../../theme/colors";
 
-const ConnectSection = () => {
-  const theme = useTheme();
+function ConnectSection() {
   const navigate = useNavigate();
-
-  const [animationActive, setAnimationActive] = useState(false);
-  const [isScrollingUp, setIsScrollingUp] = useState(false);
-
-  useEffect(() => {
-    let prevScrollY = window.pageYOffset;
-
-    const handleScroll = () => {
-      const currentScrollY = window.pageYOffset;
-      setIsScrollingUp(currentScrollY < prevScrollY);
-      prevScrollY = currentScrollY;
-
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const elementOffset = document.getElementById('connectSection').offsetTop;
-      const activationPoint = elementOffset - windowHeight * 0.9;
-      const deactivationPoint = elementOffset + windowHeight * 0.5;
-
-      if (scrollPosition > activationPoint && scrollPosition < deactivationPoint) {
-        setAnimationActive(true);
-      } else if (scrollPosition >= deactivationPoint) {
-        setAnimationActive(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  const connectSectionStyle = {
-    transform: animationActive ? 'translateX(0)' : isScrollingUp ? 'translateX(100%)' : 'translateX(-100%)',
-    transition: 'transform 0.5s ease-in-out',
-    opacity: animationActive ? 1 : 0,
-  };
+  const colors = useColors();
 
   return (
-    <Box id="connectSection" my={8} sx={{ textAlign: 'center', marginBottom: 'none', paddingBottom: '5rem', ...connectSectionStyle }}>
-      <Container>
-        <Grid container justifyContent="space-around" spacing={4}>
-          <Grid item xs={12} sm={6}>
+    <Box
+      component="section"
+      id="connectSection"
+      sx={{
+        bgcolor: colors.pageBg,
+        color: colors.textPrimary,
+        py: { xs: 7, md: 10 },
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box
+          sx={{
+            alignItems: "center",
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 2,
+            display: "grid",
+            gap: { xs: 4, md: 6 },
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "auto minmax(0, 1fr) auto",
+            },
+            p: { xs: 3, sm: 5, md: 6 },
+          }}
+        >
+          <Box
+            sx={{
+              alignItems: "center",
+              bgcolor: "primary.main",
+              borderRadius: "50%",
+              color: "primary.contrastText",
+              display: "flex",
+              height: 72,
+              justifyContent: "center",
+              width: 72,
+            }}
+          >
+            <GroupsIcon fontSize="large" />
+          </Box>
+
+          <Stack spacing={1.5}>
             <Typography
-              variant="h4"
-              fontWeight="bold"
-              gutterBottom
-              sx={{ fontSize: { xs: '1.8rem', sm: '2.2rem' }, lineHeight: 1.4 }}
+              color="primary.main"
+              fontWeight={800}
+              variant="overline"
             >
-              Connect With Us
+              Grow with the community
             </Typography>
-            <Typography
-              variant="body1"
-              sx={{ fontSize: { xs: '1rem', sm: '1.2rem' }, lineHeight: 1.6 }}
-            >
-              Discover our platform and get the latest news and promotions.
+
+            <Typography component="h2" variant="h3">
+              Connect with the people moving sneaker culture forward.
             </Typography>
-            <Box mt={2}>
-              <Button
-                variant="contained"
-                color="secondary"
-                size="large"
-                onClick={() => navigate('/')}
-              >
-                Explore Now
-              </Button>
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Box sx={{ width: '100%', overflow: 'hidden', paddingTop: '50%', position: 'relative', borderRadius: '4px' }}>
-              <img
-                src="https://via.placeholder.com/400x200"
-                alt="Connect With Us Image"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  borderRadius: '4px',
-                }}
-              />
-            </Box>
-          </Grid>
-        </Grid>
+
+            <Typography color={colors.textSecondary} variant="body1">
+              Discover the community side of The Sneaker Society, build
+              professional relationships, and find people who understand the
+              services, craftsmanship, and care behind every pair.
+            </Typography>
+          </Stack>
+
+          <Button
+            endIcon={<ArrowForwardIcon />}
+            onClick={() => navigate("/mysociety")}
+            sx={{ minWidth: { xs: "100%", md: 190 } }}
+            variant="contained"
+          >
+            Explore My Society
+          </Button>
+        </Box>
       </Container>
     </Box>
   );
-};
+}
 
 export default ConnectSection;
-

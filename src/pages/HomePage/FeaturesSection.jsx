@@ -1,108 +1,152 @@
-import React from 'react';
-import { Typography, Box, Grid } from '@mui/material';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
-import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
-import ScrollToNextIcon from './ScrollToNextIcon';
+import React from "react";
+import { Box, Container, Typography } from "@mui/material";
+import AnalyticsIcon from "@mui/icons-material/Analytics";
+import ConnectWithoutContactIcon from "@mui/icons-material/ConnectWithoutContact";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
+import { useColors } from "../../theme/colors";
 
-function FeaturesSection({ refFnc }) {
-  const features = [
-    {
-      title: 'Seamless Communication',
-      description:
-        'Connect effortlessly with sellers and buyers in real-time. Our platform ensures you never miss a beat in your sneaker needs. Say goodbye to endless email threads, Instagram DMs and missed opportunities!',
-      icon: (
-        <ConnectWithoutContactIcon style={{ fontSize: 48, color: 'clear' }} />
-      ),
-    },
-    {
-      title: 'Business Analytics',
-      description:
-        'Get ahead of the game with in-depth business analytics. Monitor your performance, track trends, and make data-driven decisions to boost your sneaker game.',
-      icon: <AnalyticsIcon style={{ fontSize: 48, color: 'clear' }} />,
-    },
-    {
-      title: 'Brand Building and Trust',
-      description:
-        'Establish your brand and gain trust within the sneaker community. Build a reputation that sets you apart as a trusted seller or buyer.',
-      icon: <VolunteerActivismIcon style={{ fontSize: 48, color: 'clear' }} />,
-    },
-    {
-      title: 'Detailed Intake Form',
-      description:
-        'Revamp your sneaker restoration process with our comprehensive intake form. Document every aspect of your beloved kicks, from wear and tear to your restoration goals, ensuring a personalized and meticulous restoration journey.',
-      icon: <ReceiptLongIcon style={{ fontSize: 48, color: 'clear' }} />,
-    },
-  ];
+const features = [
+  {
+    title: "Client communication in one place",
+    description:
+      "Keep service inquiries, client updates, and job conversations organized instead of losing details across DMs, text messages, and email threads.",
+    icon: ConnectWithoutContactIcon,
+  },
+  {
+    title: "Business analytics",
+    description:
+      "Understand demand, monitor your work, and use clear business insights to make stronger decisions as your sneaker-service operation grows.",
+    icon: AnalyticsIcon,
+  },
+  {
+    title: "A profile that builds trust",
+    description:
+      "Showcase your specialty, services, and professional identity so sneaker owners can confidently choose the right provider for their work.",
+    icon: VolunteerActivismIcon,
+  },
+  {
+    title: "Detailed service intake",
+    description:
+      "Capture the condition, requested work, notes, and service expectations before a cleaning, restoration, repair, custom project, or protective treatment begins.",
+    icon: ReceiptLongIcon,
+  },
+];
 
-  const FeatureBox = ({ icon, header, subHeading }) => {
-    return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        textAlign="left"
-        sx={{ paddingBottom: 3 }}
-      >
-        <Box
-          sx={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '50%',
-            bgcolor: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '1rem',
-            background: 'gold'
-          }}
-        >
-          {icon}
-        </Box>
-        <Typography variant="h2" paddingBottom={2} fontWeight="bold">
-          {header}
-        </Typography>
-        <Typography variant="h4">{subHeading}</Typography>
-      </Box>
-    );
-  };
+function FeatureCard({ feature, index }) {
+  const colors = useColors();
+  const Icon = feature.icon;
 
   return (
     <Box
+      component="article"
       sx={{
-        height: '100%',
-        color: 'white',
-        '@media (max-width: 1024px)': {
-          marginBottom: '40px', // Add space between sections for 1024px width
+        bgcolor: "background.paper",
+        border: 1,
+        borderColor: "divider",
+        borderRadius: 2,
+        color: colors.textPrimary,
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 290,
+        p: { xs: 3, md: 4 },
+        transition: (theme) =>
+          theme.transitions.create(
+            ["border-color", "box-shadow", "transform"],
+            { duration: theme.transitions.duration.short },
+          ),
+        "&:hover": {
+          borderColor: "primary.main",
+          boxShadow: 4,
+          transform: "translateY(-4px)",
         },
       }}
     >
-      <Typography
-        fontWeight="bold"
-        gutterBottom
+      <Box
         sx={{
-          fontSize: { xs: '3rem', sm: '5.2rem' },
-          lineHeight: 1.4,
+          alignItems: "center",
+          bgcolor: "primary.main",
+          borderRadius: "50%",
+          color: "primary.contrastText",
+          display: "flex",
+          height: 56,
+          justifyContent: "center",
+          mb: 4,
+          width: 56,
         }}
       >
-        Features
+        <Icon fontSize="medium" />
+      </Box>
+
+      <Typography
+        color="primary.main"
+        fontWeight={800}
+        sx={{ mb: 1 }}
+        variant="overline"
+      >
+        0{index + 1}
       </Typography>
-      <Box sx={{ textAlign: 'left', paddingX: '20px' }}>
-        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-          {features.map((feature) => (
-            <Grid item xs={12} md={6} key={feature.title}>
-              <FeatureBox
-                icon={feature.icon}
-                header={feature.title}
-                subHeading={feature.description}
-              />
-            </Grid>
+
+      <Typography component="h3" sx={{ mb: 1.5 }} variant="h4">
+        {feature.title}
+      </Typography>
+
+      <Typography color={colors.textSecondary} variant="body1">
+        {feature.description}
+      </Typography>
+    </Box>
+  );
+}
+
+function FeaturesSection() {
+  const colors = useColors();
+
+  return (
+    <Box
+      component="section"
+      id="Features"
+      sx={{
+        bgcolor: colors.pageBg,
+        color: colors.textPrimary,
+        py: { xs: 7, md: 10 },
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box sx={{ maxWidth: 720, mb: { xs: 5, md: 7 } }}>
+          <Typography
+            color="primary.main"
+            fontWeight={800}
+            sx={{ mb: 1 }}
+            variant="overline"
+          >
+            Built for the workflow
+          </Typography>
+
+          <Typography component="h2" sx={{ mb: 2 }} variant="h2">
+            Everything your sneaker-service business needs to stay organized.
+          </Typography>
+
+          <Typography color={colors.textSecondary} variant="body1">
+            Create a more professional experience for your clients while keeping
+            the operations behind every service simple, visible, and connected.
+          </Typography>
+        </Box>
+
+        <Box
+          sx={{
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "repeat(2, minmax(0, 1fr))",
+            },
+          }}
+        >
+          {features.map((feature, index) => (
+            <FeatureCard feature={feature} index={index} key={feature.title} />
           ))}
-        </Grid>
-      </Box>
-      <Box>
-        <ScrollToNextIcon scrollToNext={refFnc} />
-      </Box>
+        </Box>
+      </Container>
     </Box>
   );
 }
