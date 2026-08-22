@@ -1,92 +1,100 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Button, Box } from '@mui/material';
+import React from "react";
+import { Box, Button, Container, Typography } from "@mui/material";
+import { useColors } from "../../theme/colors";
 
-const CallToAction = ({
-  buttonText = 'Shop Now',
-  headingText = 'Unleash Your Inner Style',
-  descriptionText = 'Discover a wide range of trendy and comfortable shoes that make a statement.',
-  callToActionStyle = {},
-  headingStyle = {},
-  descriptionStyle = {},
-  buttonStyle = {},
-  scrollActivationFraction = 0.9,
-}) => {
-  const [animationActive, setAnimationActive] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const elementOffset = document.getElementById('callToAction').offsetTop;
-      const activationPoint = elementOffset - windowHeight * scrollActivationFraction;
-
-      if (scrollPosition > activationPoint) {
-        setAnimationActive(true);
-      } else {
-        setAnimationActive(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [scrollActivationFraction]);
-
-  const defaultCallToActionStyle = {
-    backgroundColor: '#f50057',
-    color: '#fff',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '48px',
-    borderRadius: '8px',
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
-    opacity: animationActive ? 1 : 0,
-    transform: animationActive ? 'translateY(0)' : 'translateY(100%)',
-    transition: 'transform 0.5s ease-in-out, opacity 0.5s ease-in-out',
-    ...callToActionStyle,
-  };
-
-  const defaultHeadingStyle = {
-    fontWeight: 'bold',
-    marginBottom: '16px',
-    textAlign: 'center',
-    ...headingStyle,
-  };
-
-  const defaultDescriptionStyle = {
-    marginBottom: '32px',
-    textAlign: 'center',
-    ...descriptionStyle,
-  };
-
-  const defaultButtonStyle = {
-    color: '#f50057',
-    backgroundColor: '#fff',
-    borderRadius: '20px',
-    padding: '12px 24px',
-    '&:hover': {
-      backgroundColor: '#f50057',
-      color: '#fff',
-    },
-    ...buttonStyle,
-  };
+function CallToAction({
+  buttonText = "Create your business profile",
+  descriptionText = "Join a community built for the people doing the work behind sneaker culture.",
+  headingText = "Ready to bring your sneaker service business together?",
+  onButtonClick,
+  buttonVariant = "contained",
+  sx = {},
+}) {
+  const colors = useColors();
 
   return (
-    <Box id="callToAction" style={defaultCallToActionStyle}>
-      <Typography variant="h5" style={defaultHeadingStyle}>
-        {headingText}
-      </Typography>
-      <Typography variant="body1" style={defaultDescriptionStyle}>
-        {descriptionText}
-      </Typography>
-      <Button variant="contained" style={defaultButtonStyle}>
-        {buttonText}
-      </Button>
+    <Box
+      component="section"
+      id="callToAction"
+      sx={{
+        bgcolor: colors.pageBg,
+        color: colors.textPrimary,
+        py: { xs: 7, md: 10 },
+        ...sx,
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box
+          sx={{
+            alignItems: "center",
+            bgcolor: "primary.main",
+            borderRadius: 2,
+            color: "primary.contrastText",
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "minmax(0, 1.25fr) auto",
+            },
+            overflow: "hidden",
+            p: { xs: 3, sm: 5, md: 6 },
+            position: "relative",
+          }}
+        >
+          <Box
+            sx={{
+              bgcolor: "background.paper",
+              borderRadius: "50%",
+              height: { xs: 180, md: 280 },
+              opacity: 0.1,
+              position: "absolute",
+              right: { xs: -80, md: -110 },
+              top: { xs: -100, md: -140 },
+              width: { xs: 180, md: 280 },
+            }}
+          />
+
+          <Box sx={{ position: "relative" }}>
+            <Typography component="h2" sx={{ mb: 1.5 }} variant="h2">
+              {headingText}
+            </Typography>
+
+            <Typography sx={{ maxWidth: 690 }} variant="body1">
+              {descriptionText}
+            </Typography>
+          </Box>
+
+          <Button
+            onClick={onButtonClick}
+            sx={{
+              bgcolor: "background.paper",
+              border: 2,
+              borderColor: "primary.main",
+              color: "primary.main",
+              fontWeight: 800,
+              minWidth: { xs: "100%", md: 220 },
+              position: "relative",
+
+              "&:hover": {
+                bgcolor: "action.hover",
+                borderColor: "primary.light",
+                color: "primary.light",
+              },
+
+              "&:focus-visible": {
+                outline: "3px solid",
+                outlineColor: "primary.contrastText",
+                outlineOffset: 3,
+              },
+            }}
+            variant="outlined"
+          >
+            {buttonText}
+          </Button>
+        </Box>
+      </Container>
     </Box>
   );
-};
+}
 
 export default CallToAction;

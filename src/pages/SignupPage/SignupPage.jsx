@@ -1,226 +1,327 @@
 import React, { useState } from "react";
-import { Formik, Form, useField } from "formik";
+import { Form, Formik, useField } from "formik";
 import {
-  Button,
-  Typography,
-  Grid,
-  TextField,
-  Container,
   Alert,
   Box,
+  Button,
+  CircularProgress,
+  Container,
+  Grid,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useMutation } from "@apollo/client";
-import { UPDATE_MEMBER } from "./signup";
 import { useUser } from "@clerk/clerk-react";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
-const FormikTextField = ({ name, ...props }) => {
+import { UPDATE_MEMBER } from "./signup";
+import { useColors } from "../../theme/colors";
+
+const FormikTextField = ({ name, helperText, ...props }) => {
   const [field, meta] = useField(name);
-
-  const isError = meta.touched && meta.error;
+  const hasError = Boolean(meta.touched && meta.error);
 
   return (
     <TextField
       {...field}
       {...props}
-      error={isError}
-      helperText={isError ? meta.error : props.helperText}
+      error={hasError}
+      helperText={hasError ? meta.error : helperText}
     />
   );
 };
 
+const validateMemberProfile = (values) => {
+  const errors = {};
+
+  if (!values.businessName.trim()) {
+    errors.businessName = "Business name is required";
+  }
+
+  if (!values.firstName.trim()) {
+    errors.firstName = "First name is required";
+  }
+
+  if (!values.lastName.trim()) {
+    errors.lastName = "Last name is required";
+  }
+
+  if (!values.zipcode.trim()) {
+    errors.zipcode = "ZIP code is required";
+  }
+
+  return errors;
+};
+
 const MemberSignupPage = ({ onComplete }) => {
-  const { user } = useUser();
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const navigate = useNavigate();
+  const colors = useColors();
+  const { isLoaded, user } = useUser();
+
   const [updateMember, { loading }] = useMutation(UPDATE_MEMBER, {
     onCompleted: () => {
-      onComplete();
+      if (typeof onComplete === "function") {
+        onComplete();
+        return;
+      }
+
+      navigate("/dashboard", { replace: true });
     },
   });
 
+  const email =
+    user?.primaryEmailAddress?.emailAddress ||
+    user?.emailAddresses?.[0]?.emailAddress ||
+    "";
+
   const handleSubmit = async (values) => {
     try {
+      setErrorMessage("");
+
       await updateMember({
         variables: {
           data: {
-            businessName: values.businessName,
-            firstName: values.firstName,
-            lastName: values.lastName,
-            addressLineOne: values.addressLineOne,
-            addressLineTwo: values.addressLineTwo,
-            zipcode: values.zipcode,
-            state: values.state,
-            phoneNumber: values.phoneNumber,
+            businessName: values.businessName.trim(),
+            firstName: values.firstName.trim(),
+            lastName: values.lastName.trim(),
+            addressLineOne: values.addressLineOne.trim(),
+            addressLineTwo: values.addressLineTwo.trim(),
+            zipcode: values.zipcode.trim(),
+            state: values.state.trim(),
+            phoneNumber: values.phoneNumber.trim(),
           },
         },
       });
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(
+        error?.graphQLErrors?.[0]?.message ||
+          error?.networkError?.message ||
+          error?.message ||
+          "We could not save your business profile. Please try again.",
+      );
     }
   };
 
-  const [errorMessage, setErrorMessage] = useState("");
-
-  if (loading) {
-    return <>loading</>;
+  if (!isLoaded) {
+    return (
+      <Box
+        sx={{
+          alignItems: "center",
+          bgcolor: colors.pageBg,
+          display: "flex",
+          justifyContent: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress color="primary" />
+      </Box>
+    );
   }
 
   return (
-    <Container
-      maxWidth="md"
-      sx={{ height: "100vh", display: "flex", alignItems: "start" }}
+    <Box
+      component="main"
+      sx={{
+        bgcolor: colors.pageBg,
+        color: colors.textPrimary,
+        minHeight: "100vh",
+        py: { xs: 3, sm: 5 },
+      }}
     >
-      <div
-        style={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          marginLeft: "20px",
-          width: "100%",
-        }}
-      >
-        <Typography
-          pb={2}
-          variant="h1"
-          sx={{
-            fontWeight: "bold",
-          }}
-        >
-          Contact Info
-        </Typography>
-        <Typography variant="p" mb={4}>
-          Lets gather some information about you!
-        </Typography>
-        <Formik
-          initialValues={{
-            email: user.emailAddresses || "",
-            businessName: "",
-            firstName: "",
-            lastName: "",
-            addressLineOne: "",
-            addressLineTwo: "",
-            zipcode: "",
-            state: "",
-            phoneNumber: "",
-          }}
-          onSubmit={handleSubmit}
-          validate={(values) => {
-            const errors = {};
+      <Container maxWidth="md">
+        <Stack spacing={2}>
+          <Button
+            component={RouterLink}
+            startIcon={<ArrowBackIcon />}
+            sx={{
+              alignSelf: "flex-start",
+              color: colors.textSecondary,
+              "&:hover": {
+                bgcolor: "action.hover",
+                color: colors.textPrimary,
+              },
+            }}
+            to="/"
+          >
+            Back to home
+          </Button>
 
-            if (!values.firstName) {
-              errors.firstName = "First Name is required";
-            }
+          <Paper
+            elevation={0}
+            sx={{
+              bgcolor: "background.paper",
+              border: 1,
+              borderColor: "divider",
+              borderRadius: 2,
+              p: { xs: 3, sm: 5 },
+            }}
+          >
+            <Stack spacing={1.5} sx={{ mb: 4 }}>
+              <Typography
+                color="primary.main"
+                fontWeight={800}
+                variant="overline"
+              >
+                Business profile setup
+              </Typography>
 
-            if (!values.lastName) {
-              errors.lastName = "Last Name is required";
-            }
+              <Typography component="h1" variant="h3">
+                Tell us about your business
+              </Typography>
 
-            if (!values.zipcode) {
-              errors.zipcode = "Zipcode is required";
-            }
+              <Typography color={colors.textSecondary} variant="body1">
+                This information helps you establish your professional profile
+                on The Sneaker Society. You can update details later.
+              </Typography>
+            </Stack>
 
-            return errors;
-          }}
-        >
-          {() => (
-            <Form>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <FormikTextField
-                    name="email"
-                    variant="outlined"
-                    disabled
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormikTextField
-                    name="businessName"
-                    label="Business Name (optional)"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormikTextField
-                    name="firstName"
-                    label="First Name"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
+            <Formik
+              enableReinitialize
+              initialValues={{
+                email,
+                businessName: "",
+                firstName: "",
+                lastName: "",
+                addressLineOne: "",
+                addressLineTwo: "",
+                zipcode: "",
+                state: "",
+                phoneNumber: "",
+              }}
+              onSubmit={handleSubmit}
+              validate={validateMemberProfile}
+            >
+              {({ isValid, dirty }) => (
+                <Form noValidate>
+                  <Grid container spacing={2.5}>
+                    <Grid item xs={12}>
+                      <FormikTextField
+                        disabled
+                        fullWidth
+                        label="Account email"
+                        name="email"
+                      />
+                    </Grid>
 
-                <Grid item xs={12} sm={6}>
-                  <FormikTextField
-                    name="lastName"
-                    label="Last Name"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormikTextField
-                    name="addressLineOne"
-                    label="Address Line 1"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormikTextField
-                    name="addressLineTwo"
-                    label="Address Line 2"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormikTextField
-                    name="zipcode"
-                    label="Zipcode"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormikTextField
-                    name="state"
-                    label="State"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormikTextField
-                    name="phoneNumber"
-                    label="Phone Number"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-              </Grid>
-              <Box sx={{ paddingTop: 2 }}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  sx={{
-                    color: "black",
-                    backgroundColor: "gold",
-                  }}
-                >
-                  Submit
-                </Button>
-              </Box>
-            </Form>
-          )}
-        </Formik>
-        {errorMessage ? (
-          <Alert severity="error" color="error">
-            {errorMessage}
-          </Alert>
-        ) : null}
-      </div>
-    </Container>
+                    <Grid item xs={12}>
+                      <FormikTextField
+                        autoComplete="organization"
+                        fullWidth
+                        label="Business name"
+                        name="businessName"
+                        required
+                      />
+                    </Grid>
+
+                    <Grid item sm={6} xs={12}>
+                      <FormikTextField
+                        autoComplete="given-name"
+                        fullWidth
+                        label="First name"
+                        name="firstName"
+                        required
+                      />
+                    </Grid>
+
+                    <Grid item sm={6} xs={12}>
+                      <FormikTextField
+                        autoComplete="family-name"
+                        fullWidth
+                        label="Last name"
+                        name="lastName"
+                        required
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <FormikTextField
+                        autoComplete="address-line1"
+                        fullWidth
+                        label="Address line 1"
+                        name="addressLineOne"
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <FormikTextField
+                        autoComplete="address-line2"
+                        fullWidth
+                        label="Address line 2"
+                        name="addressLineTwo"
+                      />
+                    </Grid>
+
+                    <Grid item sm={6} xs={12}>
+                      <FormikTextField
+                        autoComplete="postal-code"
+                        fullWidth
+                        inputProps={{ inputMode: "numeric" }}
+                        label="ZIP code"
+                        name="zipcode"
+                        required
+                      />
+                    </Grid>
+
+                    <Grid item sm={6} xs={12}>
+                      <FormikTextField
+                        autoComplete="address-level1"
+                        fullWidth
+                        label="State"
+                        name="state"
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <FormikTextField
+                        autoComplete="tel"
+                        fullWidth
+                        inputProps={{ inputMode: "tel" }}
+                        label="Phone number"
+                        name="phoneNumber"
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Button
+                        disabled={loading || !dirty || !isValid}
+                        fullWidth
+                        startIcon={
+                          loading ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : null
+                        }
+                        sx={{ minHeight: 48, mt: 1 }}
+                        type="submit"
+                        variant="contained"
+                      >
+                        {loading
+                          ? "Saving business profile..."
+                          : "Save and continue"}
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </Form>
+              )}
+            </Formik>
+
+            {errorMessage && (
+              <Alert
+                onClose={() => setErrorMessage("")}
+                severity="error"
+                sx={{ mt: 3 }}
+              >
+                {errorMessage}
+              </Alert>
+            )}
+          </Paper>
+        </Stack>
+      </Container>
+    </Box>
   );
 };
 

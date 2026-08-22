@@ -1,9 +1,13 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import "./App.css";
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { useMode, ColorModeContext, getDarkTheme } from "./theme/theme";
+
+import "./App.css";
+
+import { useMode, ColorModeContext } from "./theme/theme";
+
 import HomePage from "./pages/HomePage/HomePage";
+import AboutUs from "./pages/HomePage/AboutUs";
 import ErrorPage from "./pages/ErrorPage";
 import StripeSignupPage from "./pages/StripeSignUpPage/StripeSignupPage";
 import LoginPage from "./pages/Login/LoginPage";
@@ -28,34 +32,38 @@ function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+
         <div className="App">
           <div className="content-container">
             <Routes>
-              {/* Public Routes */}
+              {/* Public routes */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutUs />} />
               <Route path="/test" element={<LoginV2 />} />
-              <Route path="/" element={
-                <ThemeProvider theme={getDarkTheme()}>
-                  <CssBaseline />
-                  <HomePage />
-                </ThemeProvider>
-              } />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/login/sso-callback" element={<LoginSSOCallback />} />
+              <Route
+                path="/login/sso-callback"
+                element={<LoginSSOCallback />}
+              />
               <Route path="/logout" element={<LogoutPage />} />
-              <Route path="stripeOnboarding" element={<StripeSignupPage />} />
+              <Route path="/stripeOnboarding" element={<StripeSignupPage />} />
               <Route
                 path="/paymentSuccess/:contractId"
-                element={<PaymentStatus success={true} />}
+                element={<PaymentStatus success />}
               />
               <Route
                 path="/paymentFail/:contractId"
                 element={<PaymentStatus success={false} />}
               />
-              <Route path="member/signup" element={<SignupMember />} />
-              <Route path="user/signup" element={<SignUpUser />} />
-              <Route path="user/signup/callback" element={<UserSignupCallback />} />
+              <Route path="/member/signup" element={<SignupMember />} />
+              <Route path="/user/signup" element={<SignUpUser />} />
+              <Route
+                path="/user/signup/callback"
+                element={<UserSignupCallback />}
+              />
               <Route path="/mysociety" element={<MySociety />} />
 
+              {/* Shared protected dashboard route */}
               <Route
                 path="/dashboard"
                 element={
@@ -65,7 +73,7 @@ function App() {
                 }
               />
 
-              {/* Protected Routes - Member */}
+              {/* Protected member routes */}
               <Route
                 path="/member/*"
                 element={
@@ -75,7 +83,7 @@ function App() {
                 }
               />
 
-              {/* Protected Routes - User */}
+              {/* Protected client routes */}
               <Route
                 path="/user/*"
                 element={
@@ -85,7 +93,7 @@ function App() {
                 }
               />
 
-              {/* Error Page Route */}
+              {/* Fallback route */}
               <Route path="*" element={<ErrorPage />} />
             </Routes>
           </div>
