@@ -7,6 +7,7 @@ import "./App.css";
 import { useMode, ColorModeContext } from "./theme/theme";
 
 import HomePage from "./pages/HomePage/HomePage";
+import AboutUs from "./pages/HomePage/AboutUs";
 import ErrorPage from "./pages/ErrorPage";
 import StripeSignupPage from "./pages/StripeSignUpPage/StripeSignupPage";
 import LoginPage from "./pages/Login/LoginPage";
@@ -37,6 +38,7 @@ function App() {
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutUs />} />
               <Route path="/test" element={<LoginV2 />} />
               <Route path="/login" element={<LoginPage />} />
               <Route

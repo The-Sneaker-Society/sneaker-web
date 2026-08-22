@@ -1,283 +1,431 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   Container,
-  Typography,
-  Grid,
-  Paper,
   Divider,
-  Avatar,
+  Paper,
+  Stack,
+  Typography,
 } from "@mui/material";
-import { styled } from "@mui/system";
 import Header from "./Header";
 import Footer from "./Footer";
-import Sidebar from "./Sidebar";
+import { useColors } from "../../theme/colors";
 
-const CustomPaper = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.primary,
-  padding: theme.spacing(3),
-  minHeight: 300,
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  boxShadow: theme.shadows[3],
-}));
+const principles = [
+  {
+    number: "01",
+    title: "Respect the craft",
+    description:
+      "Sneaker cleaning, restoration, repair, customization, and protection work demand skill, attention, and care. The platform should reflect that professionalism.",
+  },
+  {
+    number: "02",
+    title: "Make business easier",
+    description:
+      "Independent service providers should spend less time tracking details across messages and more time delivering exceptional work for their clients.",
+  },
+  {
+    number: "03",
+    title: "Strengthen the community",
+    description:
+      "The sneaker industry grows when skilled professionals can build trust, share visibility, and connect with the people who value their work.",
+  },
+];
 
-const TestimonialPaper = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.primary,
-  padding: theme.spacing(3),
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  alignItems: "center",
-  boxShadow: theme.shadows[2],
-}));
+const testimonials = [
+  {
+    quote:
+      "The Sneaker Society gives me a more professional way to organize client requests and keep every restoration job on track.",
+    name: "Sneaker Service Professional",
+    role: "Restoration and Cleaning Business",
+  },
+  {
+    quote:
+      "Having one place for my services, client conversations, and business profile makes it easier to focus on the actual work.",
+    name: "Independent Business Owner",
+    role: "Custom Sneaker Specialist",
+  },
+  {
+    quote:
+      "The platform makes it easier for clients to understand what I offer and feel confident before they trust me with their sneakers.",
+    name: "Community Member",
+    role: "Sneaker Repair Provider",
+  },
+];
 
-const AboutUs = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+function SectionLabel({ children }) {
+  return (
+    <Typography
+      color="primary.main"
+      fontWeight={800}
+      sx={{ mb: 1 }}
+      variant="overline"
+    >
+      {children}
+    </Typography>
+  );
+}
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+function AboutUs() {
+  const colors = useColors();
+
+  const scrollToSection = (sectionId) => {
+    const section = document.getElementById(sectionId);
+
+    if (!section) {
+      return;
+    }
+
+    window.scrollTo({
+      top: section.offsetTop - 88,
+      behavior: "smooth",
+    });
   };
 
   return (
-    <>
-      <Header toggleSidebar={toggleSidebar} />
-      <Sidebar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-      <Box
-        sx={{
-          minHeight: "100vh",
-          pt: 8,
-          pb: 8,
-          backgroundColor: "black",
-          color: "white",
+    <Box
+      sx={{
+        bgcolor: colors.pageBg,
+        color: colors.textPrimary,
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Header
+        contactRef={() => scrollToSection("about-contact")}
+        featureRef={() => scrollToSection("about-mission")}
+        onButtonClick={() => {
+          window.location.assign("/member/signup");
         }}
-      >
-        <Container maxWidth="lg">
-          <Typography
-            variant="h2"
-            component="h1"
-            align="center"
-            gutterBottom
-            sx={{ fontWeight: "bold", mb: 4 }}
-          >
-            About Us
-          </Typography>
-          <Typography variant="h5" align="center" paragraph>
-            Discover the story behind our brand
-          </Typography>
-          <Divider sx={{ mb: 6, borderColor: "white" }} />
-          <Grid
-            container
-            spacing={4}
-            justifyContent="center"
-            sx={{ mt: { xs: 2, md: 4 }, mb: { xs: 2, md: 4 } }}
-          >
-            <Grid item xs={12} md={6}>
-              <CustomPaper>
-                <Typography
-                  variant="h4"
-                  component="h2"
-                  gutterBottom
-                  sx={{ fontWeight: "bold" }}
-                >
-                  Our Mission
-                </Typography>
-                <Typography variant="body1">
-                  Our mission is to create the best shoes with innovative
-                  designs, outstanding comfort, and top-notch quality. We strive
-                  to empower our customers by providing footwear that boosts
-                  their confidence and supports their active lifestyles.
-                </Typography>
-              </CustomPaper>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <CustomPaper>
-                <Typography
-                  variant="h4"
-                  component="h2"
-                  gutterBottom
-                  sx={{ fontWeight: "bold" }}
-                >
-                  Our Vision
-                </Typography>
-                <Typography variant="body1">
-                  We envision a world where everyone can have access to
-                  high-quality, stylish, and comfortable footwear. We believe in
-                  sustainable practices and are committed to making a positive
-                  impact on our planet and our communities.
-                </Typography>
-              </CustomPaper>
-            </Grid>
-          </Grid>
-          {/* <Typography
-  variant="h4"
-  component="h2"
-  align="center"
-  gutterBottom
-  sx={{ mt: 8, mb: 4, fontWeight: 'bold' }}
->
-  Our Stories
-</Typography> */}
-          <Grid
-            container
-            spacing={4}
-            justifyContent="center"
-            sx={{ mt: { xs: 2, md: 4 }, mb: { xs: 2, md: 4 } }}
-          >
-            <Grid
-              item
-              xs={12}
-              md={6}
-              sx={{ mt: 2, mb: 2, display: { xs: "none", md: "block" } }}
-            >
-              <Box
+        onLoginButtonClick={() => {
+          window.location.assign("/login");
+        }}
+        onRedirectClick={() => {
+          window.location.assign("/");
+        }}
+        pricingRef={() => scrollToSection("about-principles")}
+      />
+
+      <Box component="main" sx={{ flex: 1 }}>
+        <Box
+          component="section"
+          sx={{
+            bgcolor: colors.pageBg,
+            py: { xs: 7, md: 11 },
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box sx={{ maxWidth: 900 }}>
+              <SectionLabel>About The Sneaker Society</SectionLabel>
+
+              <Typography
+                component="h1"
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  height: "100%",
-                  minHeight: 400,
-                  backgroundImage: 'url("/images/our-story.jpg")',
-                  backgroundPosition: "center",
-                  backgroundSize: "cover",
-                  borderRadius: 1,
-                  border: "0.2px solid white",
-                  boxShadow:
-                    "0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)",
-                  mb: { xs: 2, md: 4 },
+                  fontSize: { xs: "2.8rem", sm: "3.8rem", md: "5rem" },
+                  letterSpacing: "-0.06em",
+                  lineHeight: 1.02,
+                  mb: 3,
                 }}
-              ></Box>
-            </Grid>
-            <Grid item xs={12} md={6} sx={{ mt: 2, mb: 2 }}>
-              <TestimonialPaper
-                sx={{
-                  backgroundColor: "black",
-                  color: "white",
-                  p: { xs: 2, md: 0 }, // Adds padding on smaller devices for a more comfortable reading
-                }}
+                variant="h1"
               >
-                <Typography
-                  variant="h4"
-                  component="h3"
-                  gutterBottom
-                  sx={{ fontWeight: "bold" }}
-                >
-                  Our Story
+                Built for the people who keep sneaker culture moving.
+              </Typography>
+
+              <Typography
+                color={colors.textSecondary}
+                sx={{
+                  fontSize: { xs: "1.05rem", md: "1.25rem" },
+                  maxWidth: 760,
+                }}
+                variant="body1"
+              >
+                The Sneaker Society is a business-management and community
+                platform for sneaker-service professionals. We help cleaners,
+                restorers, repair specialists, customizers, and protective
+                treatment providers organize work, build trust, and grow their
+                businesses.
+              </Typography>
+            </Box>
+          </Container>
+        </Box>
+
+        <Box
+          component="section"
+          id="about-mission"
+          sx={{
+            bgcolor: "background.paper",
+            borderBottom: 1,
+            borderColor: "divider",
+            borderTop: 1,
+            py: { xs: 7, md: 10 },
+            scrollMarginTop: "88px",
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box
+              sx={{
+                display: "grid",
+                gap: { xs: 4, md: 8 },
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "minmax(0, 0.85fr) minmax(0, 1.15fr)",
+                },
+              }}
+            >
+              <Box>
+                <SectionLabel>Our mission</SectionLabel>
+
+                <Typography component="h2" variant="h2">
+                  Give independent sneaker-service businesses a stronger
+                  foundation.
                 </Typography>
-                <Typography
-                  variant="body1"
+              </Box>
+
+              <Stack spacing={3}>
+                <Typography color={colors.textSecondary} variant="body1">
+                  Great sneaker work is personal. A customer trusts a
+                  professional with a pair that may carry financial value,
+                  memories, or real cultural significance. The business systems
+                  behind that work should be just as thoughtful.
+                </Typography>
+
+                <Typography color={colors.textSecondary} variant="body1">
+                  We are building The Sneaker Society to help providers manage
+                  their operations, present their services professionally, and
+                  create a clearer experience from the first client inquiry to
+                  the completed service.
+                </Typography>
+              </Stack>
+            </Box>
+          </Container>
+        </Box>
+
+        <Box
+          component="section"
+          id="about-principles"
+          sx={{
+            bgcolor: colors.pageBg,
+            py: { xs: 7, md: 10 },
+            scrollMarginTop: "88px",
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box sx={{ maxWidth: 700, mb: { xs: 5, md: 7 } }}>
+              <SectionLabel>What guides us</SectionLabel>
+
+              <Typography component="h2" sx={{ mb: 2 }} variant="h2">
+                A platform grounded in practical work and real community.
+              </Typography>
+
+              <Typography color={colors.textSecondary} variant="body1">
+                The product is designed around the work people already do every
+                day, with tools and connections that help service businesses
+                operate with more confidence.
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: "grid",
+                gap: 3,
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "repeat(3, minmax(0, 1fr))",
+                },
+              }}
+            >
+              {principles.map((principle) => (
+                <Paper
+                  elevation={0}
+                  key={principle.number}
                   sx={{
-                    textAlign: { xs: "justify", md: "left" },
-                    hyphens: "auto", // Automatically add hyphens when necessary
-                    wordWrap: "break-word", // Allow words to break and wrap onto the next line
+                    bgcolor: "background.paper",
+                    border: 1,
+                    borderColor: "divider",
+                    borderRadius: 2,
+                    minHeight: 260,
+                    p: 3,
                   }}
                 >
-                  Our brand was founded by two passionate individuals with a
-                  dream of creating the best possible footwear. Through hard
-                  work and innovation, we have become a leader in the industry,
-                  known for our stylish designs, unparalleled comfort, and
-                  commitment to sustainability. Our story is one of dedication,
-                  persistence, and constantly pushing the boundaries to bring
-                  our customers the best products possible.
-                </Typography>
-              </TestimonialPaper>
-            </Grid>
-          </Grid>
-          <Typography
-            variant="h4"
-            component="h2"
-            align="center"
-            gutterBottom
-            sx={{ mt: 8, mb: 4, fontWeight: "bold" }}
-          >
-            Testimonials
-          </Typography>
-          <Box sx={{ mt: 6, mb: 8 }}>
-            <Grid
-              container
-              spacing={4}
-              justifyContent="center"
-              sx={{ mt: { xs: 2, md: 4 }, mb: { xs: 2, md: 4 } }}
+                  <Typography
+                    color="primary.main"
+                    fontWeight={800}
+                    sx={{ mb: 4 }}
+                    variant="overline"
+                  >
+                    {principle.number}
+                  </Typography>
+
+                  <Typography component="h3" sx={{ mb: 1.5 }} variant="h5">
+                    {principle.title}
+                  </Typography>
+
+                  <Typography color={colors.textSecondary} variant="body2">
+                    {principle.description}
+                  </Typography>
+                </Paper>
+              ))}
+            </Box>
+          </Container>
+        </Box>
+
+        <Box
+          component="section"
+          sx={{
+            bgcolor: "background.paper",
+            borderBottom: 1,
+            borderColor: "divider",
+            borderTop: 1,
+            py: { xs: 7, md: 10 },
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box sx={{ maxWidth: 700, mb: { xs: 5, md: 7 } }}>
+              <SectionLabel>Community perspective</SectionLabel>
+
+              <Typography component="h2" sx={{ mb: 2 }} variant="h2">
+                Built around the people doing the work.
+              </Typography>
+
+              <Typography color={colors.textSecondary} variant="body1">
+                These are example statements until you replace them with
+                approved member feedback or verified customer testimonials.
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: "grid",
+                gap: 3,
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "repeat(3, minmax(0, 1fr))",
+                },
+              }}
             >
-              <Grid item xs={12} md={4} sx={{ mt: 2, mb: 2 }}>
-                {" "}
-                {/* Added top and bottom margin */}
-                <TestimonialPaper sx={{ height: "100%" }}>
-                  <Avatar
-                    src="/images/avatar1.jpg"
-                    alt="Testimonial"
-                    sx={{ width: 80, height: 80, mb: 2 }}
-                  />
+              {testimonials.map((testimonial) => (
+                <Paper
+                  elevation={0}
+                  key={testimonial.role}
+                  sx={{
+                    bgcolor: "background.default",
+                    border: 1,
+                    borderColor: "divider",
+                    borderRadius: 2,
+                    display: "flex",
+                    flexDirection: "column",
+                    minHeight: 270,
+                    p: 3,
+                  }}
+                >
                   <Typography
-                    variant="body1"
-                    align="center"
-                    sx={{ fontWeight: "bold", mb: 2 }}
+                    color="primary.main"
+                    component="span"
+                    sx={{
+                      fontSize: "3rem",
+                      fontWeight: 800,
+                      lineHeight: 0.8,
+                      mb: 2,
+                    }}
                   >
-                    John Doe
+                    “
                   </Typography>
-                  <Typography variant="body2" align="center">
-                    "The shoes from this brand have completely transformed my
-                    walking experience. They are incredibly comfortable and
-                    stylish. Highly recommended!"
-                  </Typography>
-                </TestimonialPaper>
-              </Grid>
-              <Grid item xs={12} md={4} sx={{ mt: 2, mb: 2 }}>
-                {" "}
-                {/* Added top and bottom margin */}
-                <TestimonialPaper sx={{ height: "100%" }}>
-                  <Avatar
-                    src="/images/avatar2.jpg"
-                    alt="Testimonial"
-                    sx={{ width: 80, height: 80, mb: 2 }}
-                  />
+
                   <Typography
+                    color={colors.textSecondary}
+                    sx={{ flex: 1 }}
                     variant="body1"
-                    align="center"
-                    sx={{ fontWeight: "bold", mb: 2 }}
                   >
-                    Jane Smith
+                    {testimonial.quote}
                   </Typography>
-                  <Typography variant="body2" align="center">
-                    "I've never been happier with a pair of shoes. The quality
-                    and craftsmanship are outstanding. I will definitely be a
-                    repeat customer!"
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Typography fontWeight={700} variant="body2">
+                    {testimonial.name}
                   </Typography>
-                </TestimonialPaper>
-              </Grid>
-              <Grid item xs={12} md={4} sx={{ mt: 2, mb: 2 }}>
-                {" "}
-                {/* Added top and bottom margin */}
-                <TestimonialPaper sx={{ height: "100%" }}>
-                  <Avatar
-                    src="/images/avatar3.jpg"
-                    alt="Testimonial"
-                    sx={{ width: 80, height: 80, mb: 2 }}
-                  />
-                  <Typography
-                    variant="body1"
-                    align="center"
-                    sx={{ fontWeight: "bold", mb: 2 }}
-                  >
-                    Lisa Johnson
+
+                  <Typography color={colors.textSecondary} variant="caption">
+                    {testimonial.role}
                   </Typography>
-                  <Typography variant="body2" align="center">
-                    "These shoes not only look great but also provide excellent
-                    support. I've received so many compliments whenever I wear
-                    them. Love them!"
-                  </Typography>
-                </TestimonialPaper>
-              </Grid>
-            </Grid>
-          </Box>
-        </Container>
+                </Paper>
+              ))}
+            </Box>
+          </Container>
+        </Box>
+
+        <Box
+          component="section"
+          id="about-contact"
+          sx={{
+            bgcolor: colors.pageBg,
+            py: { xs: 7, md: 10 },
+            scrollMarginTop: "88px",
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box
+              sx={{
+                alignItems: "center",
+                bgcolor: "primary.main",
+                borderRadius: 2,
+                color: "primary.contrastText",
+                display: "grid",
+                gap: 3,
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "minmax(0, 1fr) auto",
+                },
+                p: { xs: 3, sm: 5, md: 6 },
+              }}
+            >
+              <Box>
+                <Typography component="h2" sx={{ mb: 1.5 }} variant="h3">
+                  Ready to build your place in The Sneaker Society?
+                </Typography>
+
+                <Typography variant="body1">
+                  Create a professional business profile, organize your
+                  services, and become part of a network built for sneaker
+                  service professionals.
+                </Typography>
+              </Box>
+
+              <Box
+                component="a"
+                href="/member/signup"
+                sx={{
+                  alignItems: "center",
+                  bgcolor: "background.paper",
+                  border: 2,
+                  borderColor: "primary.main",
+                  color: "primary.main",
+                  display: "inline-flex",
+                  fontSize: "0.9375rem",
+                  fontWeight: 800,
+                  justifyContent: "center",
+                  minHeight: 48,
+                  minWidth: { xs: "100%", md: 220 },
+                  px: 3,
+                  textDecoration: "none",
+                  "&:hover": {
+                    bgcolor: "action.hover",
+                    borderColor: "primary.light",
+                    color: "primary.light",
+                  },
+                }}
+              >
+                Create your profile
+              </Box>
+            </Box>
+          </Container>
+        </Box>
       </Box>
+
       <Footer />
-    </>
+    </Box>
   );
-};
+}
 
 export default AboutUs;
