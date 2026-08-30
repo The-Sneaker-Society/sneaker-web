@@ -1,93 +1,100 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Container, Grid, Typography, Button, useTheme } from '@mui/material';
+import React from "react";
+import { Box, Button, Container, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useColors } from "../../theme/colors";
 
-const AboutSection = () => {
-  const theme = useTheme();
-
-  const [animationActive, setAnimationActive] = useState(false);
-  const [isScrollingUp, setIsScrollingUp] = useState(false);
-
-  useEffect(() => {
-    let prevScrollY = window.pageYOffset;
-
-    const handleScroll = () => {
-      const currentScrollY = window.pageYOffset;
-      setIsScrollingUp(currentScrollY < prevScrollY);
-      prevScrollY = currentScrollY;
-
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const elementOffset = document.getElementById('aboutSection').offsetTop;
-      const activationPoint = elementOffset - windowHeight * 0.9;
-      const deactivationPoint = elementOffset + windowHeight * 0.5;
-
-      if (scrollPosition > activationPoint && scrollPosition < deactivationPoint) {
-        setAnimationActive(true);
-      } else if (scrollPosition >= deactivationPoint) {
-        setAnimationActive(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  const aboutSectionStyle = {
-    transform: animationActive ? 'translateX(0)' : isScrollingUp ? 'translateX(100%)' : 'translateX(-100%)',
-    transition: 'transform 0.5s ease-in-out',
-    opacity: animationActive ? 1 : 0,
-  };
+function AboutSection() {
+  const navigate = useNavigate();
+  const colors = useColors();
 
   return (
-    <Box my={8} sx={{ textAlign: 'center' }}>
-      <Box id="aboutSection" style={{ ...aboutSectionStyle }}>
-        <Container>
-          <Grid container justifyContent="space-around" spacing={4}>
-            <Grid item xs={12} sm={6}>
-              <Typography
-                variant="h4"
-                fontWeight="bold"
-                gutterBottom
-                sx={{ fontSize: { xs: '1.8rem', sm: '2.2rem' }, lineHeight: 1.4 }}
-              >
-                About Us
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{ fontSize: { xs: '1rem', sm: '1.2rem' }, lineHeight: 1.6 }}
-              >
-                We are a leading shoe company providing the best footwear for all occasions. Our mission is to deliver exceptional quality and comfort to our customers.
-              </Typography>
-              <Box mt={2}>
-                <Button variant="contained" color="secondary" size="large">
-                  Read Our Story
-                </Button>
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ width: '100%', overflow: 'hidden', paddingTop: '50%', position: 'relative', borderRadius: '4px' }}>
-                <img
-                  src="https://via.placeholder.com/400x200"
-                  alt="About Us Image"
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    borderRadius: '4px',
-                  }}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
+    <Box
+      component="section"
+      id="aboutSection"
+      sx={{
+        bgcolor: colors.pageBg,
+        color: colors.textPrimary,
+        py: { xs: 7, md: 10 },
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box
+          sx={{
+            alignItems: "center",
+            display: "grid",
+            gap: { xs: 4, md: 8 },
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "minmax(0, 0.85fr) minmax(0, 1.15fr)",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              bgcolor: "primary.main",
+              borderRadius: 2,
+              color: "primary.contrastText",
+              display: "flex",
+              minHeight: { xs: 220, md: 320 },
+              p: { xs: 3, md: 5 },
+            }}
+          >
+            <Typography
+              component="span"
+              sx={{
+                alignSelf: "flex-end",
+                fontSize: { xs: "2.75rem", md: "4.25rem" },
+                fontWeight: 800,
+                letterSpacing: "-0.06em",
+                lineHeight: 0.98,
+              }}
+            >
+              Built by and for sneaker culture.
+            </Typography>
+          </Box>
+
+          <Box>
+            <Typography
+              color="primary.main"
+              fontWeight={800}
+              sx={{ mb: 1 }}
+              variant="overline"
+            >
+              About The Sneaker Society
+            </Typography>
+
+            <Typography component="h2" sx={{ mb: 2 }} variant="h2">
+              A better way to run sneaker-service businesses.
+            </Typography>
+
+            <Typography
+              color={colors.textSecondary}
+              sx={{ mb: 3 }}
+              variant="body1"
+            >
+              The Sneaker Society brings together the people who keep sneaker
+              culture moving: cleaners, restorers, repair specialists,
+              customizers, and providers of protective treatments.
+            </Typography>
+
+            <Typography
+              color={colors.textSecondary}
+              sx={{ mb: 4 }}
+              variant="body1"
+            >
+              We are building a practical platform for managing the work behind
+              each service while helping independent professionals build trust,
+              strengthen their brand, and connect with the wider community.
+            </Typography>
+
+            <Button onClick={() => navigate("/about")} variant="outlined">
+              Learn more about us
+            </Button>
+          </Box>
+        </Box>
+      </Container>
     </Box>
   );
-};
+}
 
 export default AboutSection;
