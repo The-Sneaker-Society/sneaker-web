@@ -1,18 +1,16 @@
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography, Button, Divider, CircularProgress } from "@mui/material";
-import { FiPercent, FiInfo, FiAlertCircle } from "react-icons/fi";
+import { FiInfo, FiAlertCircle } from "react-icons/fi";
 import { useColors } from "../../theme/colors";
 
-const STRIPE_PERCENT_FEE = 0.029;
-const STRIPE_FLAT_FEE = 0.30;
-const PLATFORM_FEE = 12;
+const PLATFORM_FEE_RATE = 0.15;
 
 const PricePreviewModal = ({ open, price, onConfirm, onClose, isProposing, hasPendingProposal }) => {
   const colors = useColors();
   if (!price) return null;
   const gross = price;
-  const stripeFee = gross ? Math.round((gross * STRIPE_PERCENT_FEE + STRIPE_FLAT_FEE) * 100) / 100 : 0;
-  const netPayout = gross ? gross - stripeFee - PLATFORM_FEE : 0;
+  const platformFee = gross ? Math.round(gross * PLATFORM_FEE_RATE * 100) / 100 : 0;
+  const netPayout = gross ? gross - platformFee : 0;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -30,26 +28,16 @@ const PricePreviewModal = ({ open, price, onConfirm, onClose, isProposing, hasPe
           <Divider />
 
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <FiPercent size={13} color={colors.textSecondary} />
-              <Typography sx={{ fontSize: "0.875rem", color: colors.textSecondary }}>Stripe processing fee (est.)</Typography>
-            </Box>
-            <Typography sx={{ fontSize: "0.875rem", color: colors.status.error, fontWeight: 500 }}>
-              -${stripeFee.toFixed(2)}
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Typography sx={{ fontSize: "0.875rem", color: colors.textSecondary }}>Platform fee</Typography>
             <Typography sx={{ fontSize: "0.875rem", color: colors.status.error, fontWeight: 500 }}>
-              -${PLATFORM_FEE.toFixed(2)}
+              -${platformFee.toFixed(2)}
             </Typography>
           </Box>
 
           <Divider />
 
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Typography sx={{ fontSize: "0.875rem", fontWeight: 700, color: colors.textPrimary }}>Your estimated payout</Typography>
+            <Typography sx={{ fontSize: "0.875rem", fontWeight: 700, color: colors.textPrimary }}>Your Guaranteed Payout</Typography>
             <Typography sx={{ fontSize: "1.1rem", fontWeight: 700, color: colors.status.completed }}>
               ${netPayout.toFixed(2)}
             </Typography>
@@ -67,7 +55,7 @@ const PricePreviewModal = ({ open, price, onConfirm, onClose, isProposing, hasPe
           <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, mt: 0.5, px: 0.5 }}>
             <FiInfo size={13} color={colors.textSecondary} style={{ flexShrink: 0, marginTop: 2 }} />
             <Typography sx={{ fontSize: "0.7rem", color: colors.textSecondary }}>
-              Stripe fee is estimated at 2.9% + $0.30. Actual fee may vary based on card type and region. You will receive the exact payout after the contract is completed and funds are released.
+              Shipping, insurance, and applicable taxes are handled separately and billed directly to the client.
             </Typography>
           </Box>
         </Box>

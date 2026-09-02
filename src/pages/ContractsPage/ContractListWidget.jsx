@@ -179,7 +179,7 @@ export const ContractListWidget = () => {
     id: c.id,
     clientName: c.name,
     status: c.status,
-    contractCreatedAt: format(new Date(Number(c.createdAt)), "MM-dd-yyyy"),
+    contractCreatedAt: format(new Date(Number(c.createdAt) || c.createdAt), "MM-dd-yyyy"),
   })) ?? [];
 
   // Apply filter

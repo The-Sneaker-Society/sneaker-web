@@ -8,7 +8,7 @@ const DashboardRouter = () => {
 
   useEffect(() => {
     if (user) {
-      const role = user.unsafeMetadata?.role;
+      const role = user.publicMetadata?.role || user.unsafeMetadata?.role;
       if (role === "member") {
         navigate("/member/dashboard");
       } else if (role === "client") {

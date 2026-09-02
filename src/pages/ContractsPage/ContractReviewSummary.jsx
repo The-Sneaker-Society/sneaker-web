@@ -45,11 +45,20 @@ const UPDATE_CONTRACT_MEMBER_NOTES = gql`
 const STATUS_COLORS = {
   PENDING_REVIEW: "#F59E0B",
   PRICE_PROPOSED: "#3B82F6",
+  AWAITING_PAYMENT: "#10B981",
+  READY_TO_SHIP: "#8B5CF6",
+  INBOUND_SHIPPED: "#6366F1",
+  ARRIVED_AT_MEMBER: "#F97316",
+  WORK_IN_PROGRESS: "#D4AC0D",
+  RETURN_SHIPPED: "#06B6D4",
+  DELIVERED_TO_USER: "#14B8A6",
+  COMPLETED: "#22C55E",
+  CANCELED: "#6B7280",
+  UNDER_MANUAL_REVIEW: "#EF4444",
+  // legacy fallbacks
   PRICE_ACCEPTED: "#10B981",
   WAITING_SHIPMENT: "#8B5CF6",
   SHIPPED: "#6366F1",
-  ARRIVED_AT_MEMBER: "#F97316",
-  WORK_IN_PROGRESS: "#D4AC0D",
   PROCESSING_RETURN: "#EC4899",
   SHIPPED_BACK: "#06B6D4",
   USER_RECEIVED: "#14B8A6",
@@ -240,7 +249,7 @@ const ContractReviewSummary = () => {
           {titleCase(`${contract.shoeDetails?.brand || ""} ${contract.shoeDetails?.model || ""}`)}
         </Typography>
         <Typography variant="body1" color="text.secondary" mt={0.5}>
-          Submitted {new Date(Number(contract.createdAt)).toLocaleDateString()}
+          Submitted {new Date(Number(contract.createdAt) || contract.createdAt).toLocaleDateString()}
         </Typography>
       </Paper>
 
@@ -455,8 +464,8 @@ const ContractReviewSummary = () => {
             <Box key={idx} sx={{ display: "flex", gap: 2, mb: idx < contract.timeline.length - 1 ? 2 : 0 }}>
               <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#6B7280", mt: 0.5, flexShrink: 0 }} />
               <Box>
-                <Typography variant="body2" fontWeight={600}>{entry.event.replace(/_/g, " ")}</Typography>
-                {entry.date && <Typography variant="caption" color="text.secondary">{new Date(Number(entry.date)).toLocaleString()}</Typography>}
+                <Typography variant="body2" fontWeight={600}>{(entry.event || "UNKNOWN").replace(/_/g, " ")}</Typography>
+                {entry.date && <Typography variant="caption" color="text.secondary">{new Date(Number(entry.date) || entry.date).toLocaleString()}</Typography>}
               </Box>
             </Box>
           ))
