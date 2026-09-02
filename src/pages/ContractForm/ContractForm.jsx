@@ -119,11 +119,11 @@ function IntakeServiceCard({ item, selected, onSelect, isCustom, fullWidth }) {
         "&:hover": { borderColor: isSelected ? "primary.main" : "text.secondary" },
       }}
     >
-      <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
-        <Typography fontWeight={700} sx={{ fontSize: "0.95rem" }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" gap={1} sx={{ minHeight: 38 }}>
+        <Typography fontWeight={700} sx={{ fontSize: "0.95rem", lineHeight: 1.2 }}>
           {item.name}
         </Typography>
-        {!isCustom && <Chip label={`$${item.price}`} size="small" sx={{ fontWeight: 800, fontSize: "1.05rem", bgcolor: "#FFD100", color: "#000", px: 1 }} />}
+        {!isCustom && <Chip label={`$${item.price}`} sx={{ fontWeight: 800, fontSize: "1.25rem", bgcolor: "#FFD100", color: "#000", px: 1.5, height: 32, "& .MuiChip-label": { px: 1, lineHeight: 1 } }} />}
         {isCustom && <Chip label="Custom" size="small" variant="outlined" />}
       </Box>
       {item.description ? (
