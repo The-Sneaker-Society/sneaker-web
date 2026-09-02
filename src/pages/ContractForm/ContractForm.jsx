@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper, Chip, Table, TableBody, TableRow, TableCell, Radio } from "@mui/material";
+import { FiGrid, FiList } from "react-icons/fi";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
@@ -93,10 +94,68 @@ const initialValues = {
   },
 };
 
+function IntakeServiceCard({ item, selected, onSelect, isCustom }) {
+  const isSelected = selected;
+  return (
+    <Paper
+      variant="outlined"
+      onClick={onSelect}
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        cursor: "pointer",
+        borderColor: isSelected ? "primary.main" : "divider",
+        borderWidth: isSelected ? 2 : 1,
+        bgcolor: isSelected ? "rgba(255,195,28,0.06)" : "background.paper",
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        minHeight: isCustom ? "auto" : 110,
+        gridColumn: isCustom ? { xs: "span 1", md: "span 2" } : "auto",
+        transition: "all 0.15s",
+        "&:hover": { borderColor: isSelected ? "primary.main" : "text.secondary" },
+      }}
+    >
+      <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
+        <Typography fontWeight={700} sx={{ fontSize: "0.95rem" }}>
+          {item.name}
+        </Typography>
+        {!isCustom && <Chip label={`$${item.price}`} size="small" sx={{ fontWeight: 700 }} />}
+        {isCustom && <Chip label="Custom" size="small" variant="outlined" />}
+      </Box>
+      {item.description ? (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.4 }}
+        >
+          {item.description}
+        </Typography>
+      ) : isCustom ? (
+        <Typography variant="body2" color="text.secondary">
+          Describe your repair — member will price it.
+        </Typography>
+      ) : null}
+      {isSelected && !isCustom && (
+        <Typography variant="caption" color="text.secondary">
+          Price hint: ${item.price} — member retains final price authority.
+        </Typography>
+      )}
+    </Paper>
+  );
+}
+
 export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
   const [selectedServiceId, setSelectedServiceId] = useState("__custom");
+  const [intakeViewMode, setIntakeViewMode] = useState(() => {
+    try {
+      return localStorage.getItem("serviceMenuIntakeView") || localStorage.getItem("serviceMenuView") || "grid";
+    } catch {
+      return "grid";
+    }
+  });
   const { memberId: memberIdParam } = useParams();
 
   const [createContract] = useMutation(CREATE_CONTRACT);
@@ -221,6 +280,15 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     });
   };
 
+  const persistIntakeView = (mode) => {
+    setIntakeViewMode(mode);
+    try {
+      localStorage.setItem("serviceMenuIntakeView", mode);
+    } catch {
+      // ignore
+    }
+  };
+
   const getStepContent = (step, formik) => {
     switch (step) {
       case 0:
@@ -229,34 +297,98 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
             {hasMenu && (
               <Box sx={{ mb: 3 }}>
                 <Paper variant="outlined" sx={{ p: 2 }}>
-                  <Typography variant="h6" fontWeight={600} mb={1}>
-                    Select a Service
-                  </Typography>
-                  <FormControl fullWidth size="small">
-                    <InputLabel id="service-menu-label">Service</InputLabel>
-                    <Select
-                      labelId="service-menu-label"
-                      value={selectedServiceId}
-                      label="Service"
-                      onChange={(e) => setSelectedServiceId(e.target.value)}
-                    >
+                  <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1} mb={1.5}>
+                    <Typography variant="h6" fontWeight={600}>
+                      Select a Service
+                    </Typography>
+                    <Box display="flex" gap={0.5} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1.5, overflow: "hidden" }}>
+                      <Button
+                        size="small"
+                        startIcon={<FiGrid size={14} />}
+                        onClick={() => persistIntakeView("grid")}
+                        variant={intakeViewMode === "grid" ? "contained" : "text"}
+                        sx={{ borderRadius: 0, minWidth: 70 }}
+                      >
+                        Grid
+                      </Button>
+                      <Button
+                        size="small"
+                        startIcon={<FiList size={14} />}
+                        onClick={() => persistIntakeView("list")}
+                        variant={intakeViewMode === "list" ? "contained" : "text"}
+                        sx={{ borderRadius: 0, minWidth: 70 }}
+                      >
+                        List
+                      </Button>
+                    </Box>
+                  </Box>
+                  {intakeViewMode === "grid" ? (
+                    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" }, gap: 1.5 }}>
                       {activeItems.map((item) => (
-                        <MenuItem key={item.id} value={item.id}>
-                          {item.name} — ${item.price}
-                          {item.description ? ` (${item.description})` : ""}
-                        </MenuItem>
+                        <IntakeServiceCard
+                          key={item.id}
+                          item={item}
+                          selected={selectedServiceId === item.id}
+                          onSelect={() => setSelectedServiceId(item.id)}
+                          isCustom={false}
+                        />
                       ))}
-                      <MenuItem value="__custom">Custom Request</MenuItem>
-                    </Select>
-                  </FormControl>
+                      <IntakeServiceCard
+                        item={{ name: "Custom Request", description: "Describe your repair — member will price it." }}
+                        selected={selectedServiceId === "__custom"}
+                        onSelect={() => setSelectedServiceId("__custom")}
+                        isCustom
+                      />
+                    </Box>
+                  ) : (
+                    <Table size="small">
+                      <TableBody>
+                        {activeItems.map((item) => (
+                          <TableRow
+                            key={item.id}
+                            hover
+                            selected={selectedServiceId === item.id}
+                            onClick={() => setSelectedServiceId(item.id)}
+                            sx={{ cursor: "pointer" }}
+                          >
+                            <TableCell padding="checkbox">
+                              <Radio checked={selectedServiceId === item.id} size="small" />
+                            </TableCell>
+                            <TableCell sx={{ fontWeight: 600 }}>{item.name}</TableCell>
+                            <TableCell>
+                              <Chip label={`$${item.price}`} size="small" />
+                            </TableCell>
+                            <TableCell sx={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {item.description || "—"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow
+                          hover
+                          selected={selectedServiceId === "__custom"}
+                          onClick={() => setSelectedServiceId("__custom")}
+                          sx={{ cursor: "pointer" }}
+                        >
+                          <TableCell padding="checkbox">
+                            <Radio checked={selectedServiceId === "__custom"} size="small" />
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Custom Request</TableCell>
+                          <TableCell>
+                            <Chip label="Custom" size="small" variant="outlined" />
+                          </TableCell>
+                          <TableCell>Describe your repair below</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  )}
                   {selectedItem && (
-                    <Typography variant="body2" color="text.secondary" mt={1}>
-                      Price hint: ${selectedItem.price} — member retains final price authority. You can still add notes below.
+                    <Typography variant="body2" color="text.secondary" mt={1.5}>
+                      Selected: {selectedItem.name} — price hint ${selectedItem.price}. Member retains final price authority.
                     </Typography>
                   )}
                   {selectedServiceId === "__custom" && (
-                    <Typography variant="body2" color="text.secondary" mt={1}>
-                      Describe your custom request below.
+                    <Typography variant="body2" color="text.secondary" mt={1.5}>
+                      Describe your custom request in notes below.
                     </Typography>
                   )}
                 </Paper>

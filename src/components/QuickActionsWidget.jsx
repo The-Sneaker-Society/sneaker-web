@@ -1,13 +1,14 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { FiFileText, FiMessageSquare, FiClipboard, FiCreditCard } from "react-icons/fi";
+import { FiFileText, FiMessageSquare, FiClipboard, FiCreditCard, FiGrid } from "react-icons/fi";
 import { useColors } from "../theme/colors";
 
 const ACTIONS = [
   { icon: FiFileText,      label: "Contracts",       path: "/member/contracts"        },
   { icon: FiMessageSquare, label: "Messages",         path: "/member/messages"         },
   { icon: FiClipboard,     label: "Preview Intake",  path: "/member/preview-contract" },
+  { icon: FiGrid,          label: "Manage Services", path: "/member/services"         },
   { icon: FiCreditCard,    label: "Subscription",    path: "/member/subscriptions"    },
 ];
 
@@ -78,7 +79,7 @@ export default function QuickActionsWidget() {
       >
         Quick Actions
       </Typography>
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(4, 1fr)" }, gap: 1.5 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(5, 1fr)" }, gap: 1.5 }}>
         {ACTIONS.map(({ icon, label, path }) => (
           <ActionTile
             key={label}
