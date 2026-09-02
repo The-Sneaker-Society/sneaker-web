@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper } from "@mui/material";
+import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
@@ -25,6 +25,19 @@ const GET_MEMBER_CONTRACT_STATUS = gql`
   query GetMemberContractStatus($memberId: ID!) {
     member(id: $memberId) {
       contractsDisabled
+    }
+  }
+`;
+
+const GET_SERVICE_MENU = gql`
+  query GetServiceMenu($memberId: ID!) {
+    getServiceMenu(memberId: $memberId) {
+      id
+      name
+      price
+      description
+      isActive
+      sortOrder
     }
   }
 `;
@@ -83,6 +96,7 @@ const initialValues = {
 export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
+  const [selectedServiceId, setSelectedServiceId] = useState("__custom");
   const { memberId: memberIdParam } = useParams();
 
   const [createContract] = useMutation(CREATE_CONTRACT);
@@ -96,6 +110,14 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   } = useQuery(GET_MEMBER_CONTRACT_STATUS, {
     variables: { memberId },
     skip: isPreview,
+  });
+
+  const {
+    data: menuData,
+    error: menuError,
+  } = useQuery(GET_SERVICE_MENU, {
+    variables: { memberId },
+    skip: isPreview || !memberId,
   });
 
   if (isPreview && !memberIdProp) return <div>Unauthorized preview access</div>;
@@ -143,6 +165,11 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     setActiveStep((prevStep) => prevStep - 1);
   };
 
+  const serviceMenu = menuData?.getServiceMenu || [];
+  const activeItems = serviceMenu.filter((i) => i.isActive);
+  const hasMenu = !menuError && activeItems.length > 0;
+  const selectedItem = activeItems.find((i) => i.id === selectedServiceId) || null;
+
   const handleSubmit = async (values) => {
     const {
       brand,
@@ -159,6 +186,11 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
       clientNotes,
       photos,
     } = values.shoeDetails;
+
+    const selectedServiceMenuItem =
+      hasMenu && selectedItem
+        ? { id: selectedItem.id, name: selectedItem.name, price: selectedItem.price }
+        : null;
 
     await createContract({
       variables: {
@@ -183,6 +215,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
             previousRepairsNotes,
             photos: photos,
           },
+          ...(selectedServiceMenuItem ? { selectedServiceMenuItem } : {}),
         },
       },
     });
@@ -191,7 +224,47 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const getStepContent = (step, formik) => {
     switch (step) {
       case 0:
-        return <ShoeInfoStep formik={formik} />;
+        return (
+          <>
+            {hasMenu && (
+              <Box sx={{ mb: 3 }}>
+                <Paper variant="outlined" sx={{ p: 2 }}>
+                  <Typography variant="h6" fontWeight={600} mb={1}>
+                    Select a Service
+                  </Typography>
+                  <FormControl fullWidth size="small">
+                    <InputLabel id="service-menu-label">Service</InputLabel>
+                    <Select
+                      labelId="service-menu-label"
+                      value={selectedServiceId}
+                      label="Service"
+                      onChange={(e) => setSelectedServiceId(e.target.value)}
+                    >
+                      {activeItems.map((item) => (
+                        <MenuItem key={item.id} value={item.id}>
+                          {item.name} — ${item.price}
+                          {item.description ? ` (${item.description})` : ""}
+                        </MenuItem>
+                      ))}
+                      <MenuItem value="__custom">Custom Request</MenuItem>
+                    </Select>
+                  </FormControl>
+                  {selectedItem && (
+                    <Typography variant="body2" color="text.secondary" mt={1}>
+                      Price hint: ${selectedItem.price} — member retains final price authority. You can still add notes below.
+                    </Typography>
+                  )}
+                  {selectedServiceId === "__custom" && (
+                    <Typography variant="body2" color="text.secondary" mt={1}>
+                      Describe your custom request below.
+                    </Typography>
+                  )}
+                </Paper>
+              </Box>
+            )}
+            <ShoeInfoStep formik={formik} showClientNotes={hasMenu ? selectedServiceId === "__custom" : true} selectedItem={selectedItem} />
+          </>
+        );
       case 1:
         return <ImageUploadStep formik={formik} />;
       case 2:

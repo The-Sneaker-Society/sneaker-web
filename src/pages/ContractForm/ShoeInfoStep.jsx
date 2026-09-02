@@ -34,7 +34,7 @@ const FormikTextField = ({ name, ...props }) => {
 
 const soleConditionOptions = ["None", "Light wear", "Heavy wear", "Poor"];
 
-const ShoeInfoStep = ({ formik }) => {
+const ShoeInfoStep = ({ formik, showClientNotes = true, selectedItem }) => {
   return (
     <Box>
       <Box textAlign="center" mb={4}>

@@ -9,6 +9,7 @@ import { Box, TextField, Typography, useTheme } from "@mui/material";
 import Form from "../../membersettingsform";
 import PricingCard from "../../pricing";
 import ChangeUsername from "../../updateusername";
+import ServiceMenuEditor from "./ServiceMenuEditor";
 
 const MemberSettings = () => {
   const theme = useTheme();
@@ -56,6 +57,20 @@ const MemberSettings = () => {
             features="Chat widget"
             buttonText="Choose Plan"
           />
+        </AccordionDetails>
+      </Accordion>
+      <Accordion defaultExpanded>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography
+            variant="h3"
+            color={colors.grey[100]}
+            sx={{ m: "15px 0 5px 20px", fontWeight: "bold" }}
+          >
+            Service Menu
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ServiceMenuEditor />
         </AccordionDetails>
       </Accordion>
 
