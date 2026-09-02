@@ -21,6 +21,7 @@ import { GET_CONTRACT_BY_ID } from "../../context/graphql/getContractDetails";
 import StyledButton from "../../pages/HomePage/StyledButton";
 import ShippingInfoModal from "../../components/ShippingInfoModal";
 import ImagePreviewDialog from "../../components/ImagePreviewDialog";
+import { STATUS_UI_CONFIG } from "../../utils/statusConfig";
 
 const SECTION_LABELS = {
   leftSide: "Left Side",
@@ -71,49 +72,11 @@ export const ContractDetailsPage = () => {
   };
 
   const renderStatusBadge = (status) => {
-    let backgroundColor = "";
-    switch (status) {
-      case "PENDING_REVIEW":
-        backgroundColor = "#F59E0B";
-        break;
-      case "PRICE_PROPOSED":
-        backgroundColor = "#3B82F6";
-        break;
-      case "PRICE_ACCEPTED":
-        backgroundColor = "#10B981";
-        break;
-      case "WAITING_SHIPMENT":
-        backgroundColor = "#8B5CF6";
-        break;
-      case "SHIPPED":
-        backgroundColor = "#6366F1";
-        break;
-      case "ARRIVED_AT_MEMBER":
-        backgroundColor = "#F97316";
-        break;
-      case "WORK_IN_PROGRESS":
-        backgroundColor = "#D4AC0D";
-        break;
-      case "PROCESSING_RETURN":
-        backgroundColor = "#EC4899";
-        break;
-      case "SHIPPED_BACK":
-        backgroundColor = "#06B6D4";
-        break;
-      case "USER_RECEIVED":
-        backgroundColor = "#14B8A6";
-        break;
-      case "PAYOUT_RELEASED":
-        backgroundColor = "#22C55E";
-        break;
-      default:
-        backgroundColor = "#6B7280";
-    }
-
+    const cfg = STATUS_UI_CONFIG[status] ?? { label: status, color: "#6B7280" };
     return (
       <Box
         sx={{
-          backgroundColor,
+          backgroundColor: cfg.color,
           borderRadius: 1,
           px: 2,
           py: 0.5,
@@ -122,7 +85,7 @@ export const ContractDetailsPage = () => {
           fontWeight: "bold",
         }}
       >
-        {status}
+        {cfg.label}
       </Box>
     );
   };
