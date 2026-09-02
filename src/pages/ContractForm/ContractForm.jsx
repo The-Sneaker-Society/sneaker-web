@@ -123,7 +123,7 @@ function IntakeServiceCard({ item, selected, onSelect, isCustom, fullWidth }) {
         <Typography fontWeight={700} sx={{ fontSize: "0.95rem" }}>
           {item.name}
         </Typography>
-        {!isCustom && <Chip label={`$${item.price}`} size="small" sx={{ fontWeight: 700 }} />}
+        {!isCustom && <Chip label={`$${item.price}`} size="small" sx={{ fontWeight: 800, fontSize: "1.05rem", bgcolor: "#FFD100", color: "#000", px: 1 }} />}
         {isCustom && <Chip label="Custom" size="small" variant="outlined" />}
       </Box>
       {item.description ? (
@@ -136,7 +136,7 @@ function IntakeServiceCard({ item, selected, onSelect, isCustom, fullWidth }) {
         </Typography>
       ) : isCustom ? (
         <Typography variant="body2" color="text.secondary">
-          Describe your repair — member will price it.
+          Don’t see what you need? Submit a custom request.
         </Typography>
       ) : null}
       {isSelected && !isCustom && (
@@ -176,7 +176,7 @@ function ServiceSelectionStep({ activeItems, selectedServiceId, setSelectedServi
             />
           ))}
           <IntakeServiceCard
-            item={{ name: "Custom Request", description: "Describe your repair — member will price it." }}
+            item={{ name: "Custom Request", description: "Don't see what you need? Submit a custom request — describe what you're looking for and the member will price it." }}
             selected={selectedServiceId === "__custom"}
             onSelect={() => setSelectedServiceId("__custom")}
             isCustom
@@ -185,11 +185,6 @@ function ServiceSelectionStep({ activeItems, selectedServiceId, setSelectedServi
         {selectedItem && (
           <Typography variant="body2" color="text.secondary" mt={1.5}>
             Selected: {selectedItem.name} — price hint ${selectedItem.price}. Member retains final price authority.
-          </Typography>
-        )}
-        {selectedServiceId === "__custom" && (
-          <Typography variant="body2" color="text.secondary" mt={1.5}>
-            Describe your custom request in the next step.
           </Typography>
         )}
       </Paper>
