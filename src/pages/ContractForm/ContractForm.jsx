@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper, Chip, Table, TableBody, TableRow, TableCell, Radio } from "@mui/material";
-import { FiGrid, FiList } from "react-icons/fi";
+import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper, Chip } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
@@ -98,7 +97,7 @@ const initialValues = {
   },
 };
 
-function IntakeServiceCard({ item, selected, onSelect, isCustom }) {
+function IntakeServiceCard({ item, selected, onSelect, isCustom, fullWidth }) {
   const isSelected = selected;
   return (
     <Paper
@@ -115,7 +114,7 @@ function IntakeServiceCard({ item, selected, onSelect, isCustom }) {
         flexDirection: "column",
         gap: 1,
         minHeight: isCustom ? "auto" : 110,
-        gridColumn: isCustom ? { xs: "span 1", md: "span 2" } : "auto",
+        gridColumn: isCustom || fullWidth ? { xs: "span 1", md: "span 2" } : "auto",
         transition: "all 0.15s",
         "&:hover": { borderColor: isSelected ? "primary.main" : "text.secondary" },
       }}
@@ -149,7 +148,8 @@ function IntakeServiceCard({ item, selected, onSelect, isCustom }) {
   );
 }
 
-function ServiceSelectionStep({ activeItems, selectedServiceId, setSelectedServiceId, intakeViewMode, persistIntakeView, selectedItem }) {
+function ServiceSelectionStep({ activeItems, selectedServiceId, setSelectedServiceId, selectedItem }) {
+  const isSingle = activeItems.length === 1;
   return (
     <Box>
       <Box textAlign="center" mb={3}>
@@ -161,90 +161,27 @@ function ServiceSelectionStep({ activeItems, selectedServiceId, setSelectedServi
         </Typography>
       </Box>
       <Paper variant="outlined" sx={{ p: 2 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1} mb={1.5}>
-          <Typography variant="h6" fontWeight={600}>
-            Available Services
-          </Typography>
-          <Box display="flex" gap={0.5} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1.5, overflow: "hidden" }}>
-            <Button
-              size="small"
-              startIcon={<FiGrid size={14} />}
-              onClick={() => persistIntakeView("grid")}
-              variant={intakeViewMode === "grid" ? "contained" : "text"}
-              sx={{ borderRadius: 0, minWidth: 70 }}
-            >
-              Grid
-            </Button>
-            <Button
-              size="small"
-              startIcon={<FiList size={14} />}
-              onClick={() => persistIntakeView("list")}
-              variant={intakeViewMode === "list" ? "contained" : "text"}
-              sx={{ borderRadius: 0, minWidth: 70 }}
-            >
-              List
-            </Button>
-          </Box>
-        </Box>
-        {intakeViewMode === "grid" ? (
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" }, gap: 1.5 }}>
-            {activeItems.map((item) => (
-              <IntakeServiceCard
-                key={item.id}
-                item={item}
-                selected={selectedServiceId === item.id}
-                onSelect={() => setSelectedServiceId(item.id)}
-                isCustom={false}
-              />
-            ))}
+        <Typography variant="h6" fontWeight={600} mb={1.5}>
+          Available Services
+        </Typography>
+        <Box sx={{ display: "grid", gridTemplateColumns: isSingle ? "1fr" : { xs: "1fr", md: "repeat(2, 1fr)" }, gap: 1.5 }}>
+          {activeItems.map((item) => (
             <IntakeServiceCard
-              item={{ name: "Custom Request", description: "Describe your repair — member will price it." }}
-              selected={selectedServiceId === "__custom"}
-              onSelect={() => setSelectedServiceId("__custom")}
-              isCustom
+              key={item.id}
+              item={item}
+              selected={selectedServiceId === item.id}
+              onSelect={() => setSelectedServiceId(item.id)}
+              isCustom={false}
+              fullWidth={isSingle}
             />
-          </Box>
-        ) : (
-          <Table size="small">
-            <TableBody>
-              {activeItems.map((item) => (
-                <TableRow
-                  key={item.id}
-                  hover
-                  selected={selectedServiceId === item.id}
-                  onClick={() => setSelectedServiceId(item.id)}
-                  sx={{ cursor: "pointer" }}
-                >
-                  <TableCell padding="checkbox">
-                    <Radio checked={selectedServiceId === item.id} size="small" />
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>{item.name}</TableCell>
-                  <TableCell>
-                    <Chip label={`$${item.price}`} size="small" />
-                  </TableCell>
-                  <TableCell sx={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {item.description || "—"}
-                  </TableCell>
-                </TableRow>
-              ))}
-              <TableRow
-                hover
-                selected={selectedServiceId === "__custom"}
-                onClick={() => setSelectedServiceId("__custom")}
-                sx={{ cursor: "pointer" }}
-              >
-                <TableCell padding="checkbox">
-                  <Radio checked={selectedServiceId === "__custom"} size="small" />
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Custom Request</TableCell>
-                <TableCell>
-                  <Chip label="Custom" size="small" variant="outlined" />
-                </TableCell>
-                <TableCell>Describe your repair below</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        )}
+          ))}
+          <IntakeServiceCard
+            item={{ name: "Custom Request", description: "Describe your repair — member will price it." }}
+            selected={selectedServiceId === "__custom"}
+            onSelect={() => setSelectedServiceId("__custom")}
+            isCustom
+          />
+        </Box>
         {selectedItem && (
           <Typography variant="body2" color="text.secondary" mt={1.5}>
             Selected: {selectedItem.name} — price hint ${selectedItem.price}. Member retains final price authority.
@@ -264,13 +201,6 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
   const [selectedServiceId, setSelectedServiceId] = useState("__custom");
-  const [intakeViewMode, setIntakeViewMode] = useState(() => {
-    try {
-      return localStorage.getItem("serviceMenuIntakeView") || localStorage.getItem("serviceMenuView") || "grid";
-    } catch {
-      return "grid";
-    }
-  });
   const { memberId: memberIdParam } = useParams();
 
   const [createContract] = useMutation(CREATE_CONTRACT);
@@ -402,15 +332,6 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     });
   };
 
-  const persistIntakeView = (mode) => {
-    setIntakeViewMode(mode);
-    try {
-      localStorage.setItem("serviceMenuIntakeView", mode);
-    } catch {
-      // ignore
-    }
-  };
-
   const getStepContent = (step, formik) => {
     if (hasMenu) {
       switch (step) {
@@ -420,8 +341,6 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
               activeItems={activeItems}
               selectedServiceId={selectedServiceId}
               setSelectedServiceId={setSelectedServiceId}
-              intakeViewMode={intakeViewMode}
-              persistIntakeView={persistIntakeView}
               selectedItem={selectedItem}
             />
           );
