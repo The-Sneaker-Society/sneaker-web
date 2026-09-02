@@ -117,7 +117,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     error: menuError,
   } = useQuery(GET_SERVICE_MENU, {
     variables: { memberId },
-    skip: isPreview || !memberId,
+    skip: !memberId,
   });
 
   if (isPreview && !memberIdProp) return <div>Unauthorized preview access</div>;
