@@ -262,7 +262,7 @@ function ServiceSelectionStep({ activeItems, selectedServiceId, setSelectedServi
 export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
-  const [selectedServiceId, setSelectedServiceId] = useState("__custom");
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
   const { memberId: memberIdParam } = useParams();
 
   const [createContract] = useMutation(CREATE_CONTRACT);
@@ -305,8 +305,8 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const shoeInfoSchema = buildShoeInfoSchema(requireNotes);
 
   const validationSchemas = hasMenu
-    ? [Yup.object().shape({}), shoeInfoSchema]
-    : [shoeInfoSchema];
+    ? [Yup.object().shape({}), shoeInfoSchema, Yup.object().shape({}), Yup.object().shape({})]
+    : [shoeInfoSchema, Yup.object().shape({}), Yup.object().shape({})];
 
   const handleNext = (values, { setTouched, setSubmitting }) => {
     setTouched({});
@@ -367,9 +367,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     } = values.shoeDetails;
 
     const selectedServiceMenuItem =
-      hasMenu && selectedItem
-        ? { id: selectedItem.id, name: selectedItem.name, price: selectedItem.price }
-        : null;
+      hasMenu && selectedItem ? { id: selectedItem.id } : null;
 
     await createContract({
       variables: {

@@ -95,13 +95,14 @@ const ServiceMenuEditor = () => {
   };
 
   const move = (idx, dir) => {
-    const newItems = [...items];
+    if (saving) return;
     const target = idx + dir;
-    if (target < 0 || target >= newItems.length) return;
-    const [moved] = newItems.splice(idx, 1);
-    newItems.splice(target, 0, moved);
-    newItems.forEach((it, i) => (it.sortOrder = i));
-    setItems(newItems);
+    if (target < 0 || target >= items.length) return;
+    const shallow = items.map((it) => ({ ...it }));
+    const [moved] = shallow.splice(idx, 1);
+    shallow.splice(target, 0, moved);
+    const next = shallow.map((it, i) => ({ ...it, sortOrder: i }));
+    setItems(next);
   };
 
   const handleSave = async () => {
@@ -209,20 +210,20 @@ const ServiceMenuEditor = () => {
                 />
               </TableCell>
               <TableCell>
-                <Switch checked={Boolean(it.isActive)} onChange={(e) => handleChange(idx, "isActive", e.target.checked)} />
+                <Switch checked={Boolean(it.isActive)} onChange={(e) => handleChange(idx, "isActive", e.target.checked)} disabled={saving} />
               </TableCell>
               <TableCell>
                 <Box display="flex" gap={0.5}>
-                  <Button size="small" disabled={idx === 0} onClick={() => move(idx, -1)}>
+                  <Button size="small" disabled={saving || idx === 0} onClick={() => move(idx, -1)}>
                     ↑
                   </Button>
-                  <Button size="small" disabled={idx === items.length - 1} onClick={() => move(idx, 1)}>
+                  <Button size="small" disabled={saving || idx === items.length - 1} onClick={() => move(idx, 1)}>
                     ↓
                   </Button>
                 </Box>
               </TableCell>
               <TableCell>
-                <Button size="small" color="error" onClick={() => handleRemove(idx)}>
+                <Button size="small" color="error" onClick={() => handleRemove(idx)} disabled={saving}>
                   Remove
                 </Button>
               </TableCell>
@@ -232,7 +233,7 @@ const ServiceMenuEditor = () => {
       </Table>
 
       <Box display="flex" gap={1} mt={2} flexWrap="wrap">
-        <Button variant="outlined" onClick={handleAdd} disabled={items.length >= 12}>
+        <Button variant="outlined" onClick={handleAdd} disabled={saving || items.length >= 12}>
           Add Service {items.length >= 12 ? "(max 12)" : ""}
         </Button>
         <Button variant="contained" onClick={handleSave} disabled={saving}>

@@ -55,7 +55,7 @@ const UPSERT_SERVICE_MENU = gql`
   }
 `;
 
-function ServiceCard({ item, idx, total, colors, onEdit, onDelete, onToggleActive, onMove }) {
+function ServiceCard({ item, idx, total, colors, onEdit, onDelete, onToggleActive, onMove, saving }) {
   return (
     <Paper
       variant="outlined"
@@ -128,24 +128,25 @@ function ServiceCard({ item, idx, total, colors, onEdit, onDelete, onToggleActiv
             checked={Boolean(item.isActive)}
             onChange={() => onToggleActive(idx)}
             inputProps={{ "aria-label": "Active" }}
+            disabled={saving}
           />
         </Box>
         <Box display="flex" gap={0.5} alignItems="center">
           <Tooltip title="Edit">
-            <IconButton size="small" onClick={() => onEdit(idx)} sx={{ border: `1px solid ${colors.borderSubtle}` }}>
+            <IconButton size="small" onClick={() => onEdit(idx)} disabled={saving} sx={{ border: `1px solid ${colors.borderSubtle}` }}>
               <FiEdit2 size={14} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete">
-            <IconButton size="small" color="error" onClick={() => onDelete(idx)} sx={{ border: `1px solid ${colors.borderSubtle}` }}>
+            <IconButton size="small" color="error" onClick={() => onDelete(idx)} disabled={saving} sx={{ border: `1px solid ${colors.borderSubtle}` }}>
               <FiTrash2 size={14} />
             </IconButton>
           </Tooltip>
           <Box display="flex" flexDirection="column" ml={0.5}>
-            <IconButton size="small" disabled={idx === 0} onClick={() => onMove(idx, -1)} sx={{ p: 0.3 }}>
+            <IconButton size="small" disabled={saving || idx === 0} onClick={() => onMove(idx, -1)} sx={{ p: 0.3 }}>
               <FiChevronUp size={14} />
             </IconButton>
-            <IconButton size="small" disabled={idx === total - 1} onClick={() => onMove(idx, 1)} sx={{ p: 0.3 }}>
+            <IconButton size="small" disabled={saving || idx === total - 1} onClick={() => onMove(idx, 1)} sx={{ p: 0.3 }}>
               <FiChevronDown size={14} />
             </IconButton>
           </Box>
@@ -284,19 +285,20 @@ export default function MemberServicesPage() {
   };
 
   const handleToggleActive = async (idx) => {
+    if (saving) return;
     const next = items.map((it, i) => (i === idx ? { ...it, isActive: !it.isActive } : it));
-    // optimistic
     setItems(next);
     await handlePersist(next);
   };
 
   const handleMove = async (idx, dir) => {
+    if (saving) return;
     const target = idx + dir;
     if (target < 0 || target >= items.length) return;
-    const next = [...items];
-    const [moved] = next.splice(idx, 1);
-    next.splice(target, 0, moved);
-    next.forEach((it, i) => (it.sortOrder = i));
+    const shallow = items.map((it) => ({ ...it }));
+    const [moved] = shallow.splice(idx, 1);
+    shallow.splice(target, 0, moved);
+    const next = shallow.map((it, i) => ({ ...it, sortOrder: i }));
     setItems(next);
     await handlePersist(next);
   };
@@ -404,6 +406,7 @@ export default function MemberServicesPage() {
               onDelete={handleDelete}
               onToggleActive={handleToggleActive}
               onMove={handleMove}
+              saving={saving}
             />
           ))}
         </Box>
@@ -434,18 +437,18 @@ export default function MemberServicesPage() {
                     {it.description || <Typography variant="caption" color="text.secondary" fontStyle="italic">—</Typography>}
                   </TableCell>
                   <TableCell>
-                    <Switch checked={Boolean(it.isActive)} onChange={() => handleToggleActive(idx)} size="small" />
+                    <Switch checked={Boolean(it.isActive)} onChange={() => handleToggleActive(idx)} size="small" disabled={saving} />
                   </TableCell>
                   <TableCell>
                     <Box display="flex" gap={0.5}>
-                      <Button size="small" disabled={idx === 0} onClick={() => handleMove(idx, -1)}>↑</Button>
-                      <Button size="small" disabled={idx === items.length - 1} onClick={() => handleMove(idx, 1)}>↓</Button>
+                      <Button size="small" disabled={saving || idx === 0} onClick={() => handleMove(idx, -1)}>↑</Button>
+                      <Button size="small" disabled={saving || idx === items.length - 1} onClick={() => handleMove(idx, 1)}>↓</Button>
                     </Box>
                   </TableCell>
                   <TableCell>
                     <Box display="flex" gap={0.5}>
-                      <Button size="small" onClick={() => openEdit(idx)}>Edit</Button>
-                      <Button size="small" color="error" onClick={() => handleDelete(idx)}>Delete</Button>
+                      <Button size="small" onClick={() => openEdit(idx)} disabled={saving}>Edit</Button>
+                      <Button size="small" color="error" onClick={() => handleDelete(idx)} disabled={saving}>Delete</Button>
                     </Box>
                   </TableCell>
                 </TableRow>
