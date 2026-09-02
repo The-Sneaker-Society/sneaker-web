@@ -43,25 +43,29 @@ const GET_SERVICE_MENU = gql`
   }
 `;
 
-const ShoeInfoSchema = Yup.object().shape({
-  declaredMarketValue: Yup.number()
-    .typeError("Must be a number")
-    .required("Declared market value is required")
-    .positive("Must be a positive number"),
-  shoeDetails: Yup.object().shape({
-    brand: Yup.string().required("Brand is required"),
-    model: Yup.string().required("Model is required"),
-    color: Yup.string().required("Color is required"),
-    material: Yup.string().required("Material is required"),
-    size: Yup.string().required("Size is required"),
-    soleCondition: Yup.string().required("Sole condition is required"),
-    previousRepairsNotes: Yup.string().when("previousRepairs", {
-      is: true,
-      then: (schema) => schema.required("Please describe the previous repairs"),
+function buildShoeInfoSchema(requireNotes) {
+  return Yup.object().shape({
+    declaredMarketValue: Yup.number()
+      .typeError("Must be a number")
+      .required("Declared market value is required")
+      .positive("Must be a positive number"),
+    shoeDetails: Yup.object().shape({
+      brand: Yup.string().required("Brand is required"),
+      model: Yup.string().required("Model is required"),
+      color: Yup.string().required("Color is required"),
+      material: Yup.string().required("Material is required"),
+      size: Yup.string().required("Size is required"),
+      soleCondition: Yup.string().required("Sole condition is required"),
+      previousRepairsNotes: Yup.string().when("previousRepairs", {
+        is: true,
+        then: (schema) => schema.required("Please describe the previous repairs"),
+      }),
+      clientNotes: requireNotes
+        ? Yup.string().required("Please explain your repair request")
+        : Yup.string().notRequired(),
     }),
-    clientNotes: Yup.string().required("Please explain your repair request"),
-  }),
-});
+  });
+}
 
 const initialValues = {
   declaredMarketValue: "2900",
@@ -145,6 +149,117 @@ function IntakeServiceCard({ item, selected, onSelect, isCustom }) {
   );
 }
 
+function ServiceSelectionStep({ activeItems, selectedServiceId, setSelectedServiceId, intakeViewMode, persistIntakeView, selectedItem }) {
+  return (
+    <Box>
+      <Box textAlign="center" mb={3}>
+        <Typography variant="h4" fontWeight={700}>
+          Select a Service
+        </Typography>
+        <Typography variant="body1" color="text.secondary" mt={0.5}>
+          Choose a service or request something custom
+        </Typography>
+      </Box>
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1} mb={1.5}>
+          <Typography variant="h6" fontWeight={600}>
+            Available Services
+          </Typography>
+          <Box display="flex" gap={0.5} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1.5, overflow: "hidden" }}>
+            <Button
+              size="small"
+              startIcon={<FiGrid size={14} />}
+              onClick={() => persistIntakeView("grid")}
+              variant={intakeViewMode === "grid" ? "contained" : "text"}
+              sx={{ borderRadius: 0, minWidth: 70 }}
+            >
+              Grid
+            </Button>
+            <Button
+              size="small"
+              startIcon={<FiList size={14} />}
+              onClick={() => persistIntakeView("list")}
+              variant={intakeViewMode === "list" ? "contained" : "text"}
+              sx={{ borderRadius: 0, minWidth: 70 }}
+            >
+              List
+            </Button>
+          </Box>
+        </Box>
+        {intakeViewMode === "grid" ? (
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" }, gap: 1.5 }}>
+            {activeItems.map((item) => (
+              <IntakeServiceCard
+                key={item.id}
+                item={item}
+                selected={selectedServiceId === item.id}
+                onSelect={() => setSelectedServiceId(item.id)}
+                isCustom={false}
+              />
+            ))}
+            <IntakeServiceCard
+              item={{ name: "Custom Request", description: "Describe your repair — member will price it." }}
+              selected={selectedServiceId === "__custom"}
+              onSelect={() => setSelectedServiceId("__custom")}
+              isCustom
+            />
+          </Box>
+        ) : (
+          <Table size="small">
+            <TableBody>
+              {activeItems.map((item) => (
+                <TableRow
+                  key={item.id}
+                  hover
+                  selected={selectedServiceId === item.id}
+                  onClick={() => setSelectedServiceId(item.id)}
+                  sx={{ cursor: "pointer" }}
+                >
+                  <TableCell padding="checkbox">
+                    <Radio checked={selectedServiceId === item.id} size="small" />
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{item.name}</TableCell>
+                  <TableCell>
+                    <Chip label={`$${item.price}`} size="small" />
+                  </TableCell>
+                  <TableCell sx={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {item.description || "—"}
+                  </TableCell>
+                </TableRow>
+              ))}
+              <TableRow
+                hover
+                selected={selectedServiceId === "__custom"}
+                onClick={() => setSelectedServiceId("__custom")}
+                sx={{ cursor: "pointer" }}
+              >
+                <TableCell padding="checkbox">
+                  <Radio checked={selectedServiceId === "__custom"} size="small" />
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Custom Request</TableCell>
+                <TableCell>
+                  <Chip label="Custom" size="small" variant="outlined" />
+                </TableCell>
+                <TableCell>Describe your repair below</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        )}
+        {selectedItem && (
+          <Typography variant="body2" color="text.secondary" mt={1.5}>
+            Selected: {selectedItem.name} — price hint ${selectedItem.price}. Member retains final price authority.
+          </Typography>
+        )}
+        {selectedServiceId === "__custom" && (
+          <Typography variant="body2" color="text.secondary" mt={1.5}>
+            Describe your custom request in the next step.
+          </Typography>
+        )}
+      </Paper>
+    </Box>
+  );
+}
+
 export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
@@ -179,6 +294,32 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     skip: !memberId,
   });
 
+  const serviceMenu = menuData?.getServiceMenu || [];
+  const activeItems = serviceMenu.filter((i) => i.isActive);
+  const hasMenu = !menuError && activeItems.length > 0;
+  const selectedItem = activeItems.find((i) => i.id === selectedServiceId) || null;
+
+  const steps = hasMenu
+    ? ["Select Service", "Shoe Information", "Image Upload", "Confirmation"]
+    : ["Shoe Information", "Image Upload", "Confirmation"];
+
+  const requireNotes = !hasMenu || selectedServiceId === "__custom";
+  const shoeInfoSchema = buildShoeInfoSchema(requireNotes);
+
+  const validationSchemas = hasMenu
+    ? [Yup.object().shape({}), shoeInfoSchema]
+    : [shoeInfoSchema];
+
+  const handleNext = (values, { setTouched, setSubmitting }) => {
+    setTouched({});
+    setSubmitting(false);
+    setActiveStep((prevStep) => prevStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevStep) => prevStep - 1);
+  };
+
   if (isPreview && !memberIdProp) return <div>Unauthorized preview access</div>;
 
   if (showIntro) {
@@ -209,25 +350,6 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     if (statusError) return <div>Error: {statusError.message}</div>;
     if (statusData?.member?.contractsDisabled) return <NotAcceptingContracts />;
   };
-
-  const steps = ["Shoe Information", "Image Upload", "Confirmation"];
-
-  const validationSchemas = [ShoeInfoSchema];
-
-  const handleNext = (values, { setTouched, setSubmitting }) => {
-    setTouched({});
-    setSubmitting(false);
-    setActiveStep((prevStep) => prevStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
-  };
-
-  const serviceMenu = menuData?.getServiceMenu || [];
-  const activeItems = serviceMenu.filter((i) => i.isActive);
-  const hasMenu = !menuError && activeItems.length > 0;
-  const selectedItem = activeItems.find((i) => i.id === selectedServiceId) || null;
 
   const handleSubmit = async (values) => {
     const {
@@ -290,113 +412,32 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   };
 
   const getStepContent = (step, formik) => {
+    if (hasMenu) {
+      switch (step) {
+        case 0:
+          return (
+            <ServiceSelectionStep
+              activeItems={activeItems}
+              selectedServiceId={selectedServiceId}
+              setSelectedServiceId={setSelectedServiceId}
+              intakeViewMode={intakeViewMode}
+              persistIntakeView={persistIntakeView}
+              selectedItem={selectedItem}
+            />
+          );
+        case 1:
+          return <ShoeInfoStep formik={formik} showClientNotes={selectedServiceId === "__custom"} selectedItem={selectedItem} />;
+        case 2:
+          return <ImageUploadStep formik={formik} />;
+        case 3:
+          return <ConfirmationStep formik={formik} />;
+        default:
+          return "Unknown step";
+      }
+    }
     switch (step) {
       case 0:
-        return (
-          <>
-            {hasMenu && (
-              <Box sx={{ mb: 3 }}>
-                <Paper variant="outlined" sx={{ p: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1} mb={1.5}>
-                    <Typography variant="h6" fontWeight={600}>
-                      Select a Service
-                    </Typography>
-                    <Box display="flex" gap={0.5} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1.5, overflow: "hidden" }}>
-                      <Button
-                        size="small"
-                        startIcon={<FiGrid size={14} />}
-                        onClick={() => persistIntakeView("grid")}
-                        variant={intakeViewMode === "grid" ? "contained" : "text"}
-                        sx={{ borderRadius: 0, minWidth: 70 }}
-                      >
-                        Grid
-                      </Button>
-                      <Button
-                        size="small"
-                        startIcon={<FiList size={14} />}
-                        onClick={() => persistIntakeView("list")}
-                        variant={intakeViewMode === "list" ? "contained" : "text"}
-                        sx={{ borderRadius: 0, minWidth: 70 }}
-                      >
-                        List
-                      </Button>
-                    </Box>
-                  </Box>
-                  {intakeViewMode === "grid" ? (
-                    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" }, gap: 1.5 }}>
-                      {activeItems.map((item) => (
-                        <IntakeServiceCard
-                          key={item.id}
-                          item={item}
-                          selected={selectedServiceId === item.id}
-                          onSelect={() => setSelectedServiceId(item.id)}
-                          isCustom={false}
-                        />
-                      ))}
-                      <IntakeServiceCard
-                        item={{ name: "Custom Request", description: "Describe your repair — member will price it." }}
-                        selected={selectedServiceId === "__custom"}
-                        onSelect={() => setSelectedServiceId("__custom")}
-                        isCustom
-                      />
-                    </Box>
-                  ) : (
-                    <Table size="small">
-                      <TableBody>
-                        {activeItems.map((item) => (
-                          <TableRow
-                            key={item.id}
-                            hover
-                            selected={selectedServiceId === item.id}
-                            onClick={() => setSelectedServiceId(item.id)}
-                            sx={{ cursor: "pointer" }}
-                          >
-                            <TableCell padding="checkbox">
-                              <Radio checked={selectedServiceId === item.id} size="small" />
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: 600 }}>{item.name}</TableCell>
-                            <TableCell>
-                              <Chip label={`$${item.price}`} size="small" />
-                            </TableCell>
-                            <TableCell sx={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {item.description || "—"}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        <TableRow
-                          hover
-                          selected={selectedServiceId === "__custom"}
-                          onClick={() => setSelectedServiceId("__custom")}
-                          sx={{ cursor: "pointer" }}
-                        >
-                          <TableCell padding="checkbox">
-                            <Radio checked={selectedServiceId === "__custom"} size="small" />
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: 600 }}>Custom Request</TableCell>
-                          <TableCell>
-                            <Chip label="Custom" size="small" variant="outlined" />
-                          </TableCell>
-                          <TableCell>Describe your repair below</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  )}
-                  {selectedItem && (
-                    <Typography variant="body2" color="text.secondary" mt={1.5}>
-                      Selected: {selectedItem.name} — price hint ${selectedItem.price}. Member retains final price authority.
-                    </Typography>
-                  )}
-                  {selectedServiceId === "__custom" && (
-                    <Typography variant="body2" color="text.secondary" mt={1.5}>
-                      Describe your custom request in notes below.
-                    </Typography>
-                  )}
-                </Paper>
-              </Box>
-            )}
-            <ShoeInfoStep formik={formik} showClientNotes={hasMenu ? selectedServiceId === "__custom" : true} selectedItem={selectedItem} />
-          </>
-        );
+        return <ShoeInfoStep formik={formik} showClientNotes={true} selectedItem={null} />;
       case 1:
         return <ImageUploadStep formik={formik} />;
       case 2:
@@ -404,6 +445,13 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
       default:
         return "Unknown step";
     }
+  };
+
+  const isNextDisabled = (formik) => {
+    if (formik.isSubmitting) return true;
+    if (isPreview && activeStep === steps.length - 1) return true;
+    if (hasMenu && activeStep === 0 && !selectedServiceId) return true;
+    return false;
   };
 
   return (
@@ -445,7 +493,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
                     type="submit"
                     variant="contained"
                     color="primary"
-                    disabled={formik.isSubmitting || (isPreview && activeStep === steps.length - 1)}
+                    disabled={isNextDisabled(formik)}
                   >
                     {activeStep === steps.length - 1 ? "Submit" : "Next"}
                   </Button>
