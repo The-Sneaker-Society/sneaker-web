@@ -5,13 +5,33 @@ import { format } from "date-fns";
 const getEventDisplay = (eventType) => {
     const eventMap = {
         CONTRACT_CREATED: "Contract Created",
+        CHAT_INITIATED: "Chat Initiated",
+        PRICE_PROPOSED_BY_MEMBER: "Price Proposed",
+        PRICE_REPROPOSED: "Price Reproposed",
+        PAYMENT_COMPLETED: "Payment Completed",
+        INBOUND_LABEL_GENERATED: "Inbound Label Generated",
+        OUTBOUND_LABEL_GENERATED: "Outbound Label Generated",
+        INBOUND_SHIPPED: "Inbound Shipped",
+        INBOUND_DELIVERED: "Inbound Delivered",
+        UNBOXING_PHOTOS_UPLOADED: "Unboxing Photos Uploaded",
+        WORK_STARTED: "Work Started",
+        RETURN_SHIPPED: "Return Shipped",
+        RETURN_DELIVERED: "Return Delivered",
+        REVIEW_WINDOW_OPENED: "Review Window Opened",
+        PAYOUT_RELEASED: "Payout Released",
+        CONTRACT_COMPLETED: "Contract Completed",
+        CONTRACT_CANCELED: "Contract Canceled",
+        DISPUTE_OPENED: "Dispute Opened",
+        DISPUTE_RESOLVED: "Dispute Resolved",
+        // legacy fallbacks
         MEMBER_REVIEWED: "Member Reviewed",
         PRICE_PROPOSED: "Price Proposed",
         PRICE_ACCEPTED: "Price Accepted",
-        SHIPPED_BY_CLIENT: "Shipped By Client"
+        SHIPPED_BY_CLIENT: "Shipped By Client",
+        PAYMENT_RECEIVED: "Payment Completed",
     };
 
-    return eventMap[eventType];
+    return eventMap[eventType] ?? eventType;
 };
 
 const TimelineItem = ({ event, date, isLast }) => {
