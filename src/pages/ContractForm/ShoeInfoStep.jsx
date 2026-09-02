@@ -34,7 +34,7 @@ const FormikTextField = ({ name, ...props }) => {
 
 const soleConditionOptions = ["None", "Light wear", "Heavy wear", "Poor"];
 
-const ShoeInfoStep = ({ formik }) => {
+const ShoeInfoStep = ({ formik, showClientNotes = true, selectedItem }) => {
   return (
     <Box>
       <Box textAlign="center" mb={4}>
@@ -232,14 +232,35 @@ const ShoeInfoStep = ({ formik }) => {
         <Typography variant="h5" fontWeight={600} mb={2}>
           Additional Details
         </Typography>
-        <FormikTextField
-          fullWidth
-          multiline
-          rows={6}
-          label="Notes about your sneakers"
-          name="shoeDetails.clientNotes"
-          size="small"
-        />
+        {showClientNotes ? (
+          <FormikTextField
+            fullWidth
+            multiline
+            rows={6}
+            label="Notes about your sneakers"
+            name="shoeDetails.clientNotes"
+            size="small"
+            required
+            placeholder="Describe your repair request"
+          />
+        ) : (
+          <>
+            {selectedItem && (
+              <Typography variant="body2" color="text.secondary" mb={1.5}>
+                Service selected: {selectedItem.name} — ${selectedItem.price}. Member retains final price authority. Add optional notes below if needed.
+              </Typography>
+            )}
+            <FormikTextField
+              fullWidth
+              multiline
+              rows={6}
+              label="Additional notes (optional)"
+              name="shoeDetails.clientNotes"
+              size="small"
+              placeholder="Optional additional notes"
+            />
+          </>
+        )}
 
         <Divider sx={{ my: 3 }} />
 

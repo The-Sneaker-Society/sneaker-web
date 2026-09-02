@@ -18,6 +18,7 @@ import TheVault from "../pages/Vault/TheVault";
 import ChatSidebar from "../pages/Chats/ChatSidebar";
 import MemberSettings from "../pages/membersettings";
 import PreviewContractPage from "../pages/ContractForm/PreviewContractPage";
+import MemberServicesPage from "../pages/MemberServices/MemberServicesPage";
 import OnboardingGuard from "../components/OnboardingGuard";
 
 const MemberRoutes = () => {
@@ -136,6 +137,14 @@ const MemberRoutes = () => {
             element={
               <Layout>
                 <PreviewContractPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="services"
+            element={
+              <Layout>
+                <MemberServicesPage />
               </Layout>
             }
           />
