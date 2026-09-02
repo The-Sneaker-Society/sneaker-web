@@ -132,13 +132,13 @@ function IntakeServiceCard({ item, selected, onSelect, isCustom, fullWidth }) {
       }}
     >
       <Box display="flex" justifyContent="space-between" alignItems="center" gap={1} sx={{ minHeight: 38 }}>
-        <Typography fontWeight={700} sx={{ fontSize: "0.95rem", lineHeight: 1.2 }}>
+        <Typography fontWeight={800} sx={{ fontSize: "1.35rem", lineHeight: 1.2 }}>
           {item.name}
         </Typography>
         {!isCustom ? (
-          <Box display="flex" flexDirection="column" alignItems="center" gap={0.35}>
+          <Box display="flex" flexDirection="column" alignItems="center" gap={0.75}>
             <Chip label={`$${item.price}`} sx={{ fontWeight: 800, fontSize: "1.35rem", bgcolor: "#FFD100", color: "#000", px: 2.5, height: 34, minWidth: 84, "& .MuiChip-label": { px: 1.2, lineHeight: 1 } }} />
-            <Typography variant="caption" sx={{ fontSize: "0.68rem", color: "text.secondary", opacity: 0.65, lineHeight: 1, textAlign: "center", letterSpacing: "0.02em" }}>
+            <Typography variant="caption" sx={{ fontSize: "0.68rem", color: "text.secondary", opacity: 0.65, lineHeight: 1, textAlign: "center", letterSpacing: "0.02em", mt: 0.25 }}>
               plus taxes and shipping
             </Typography>
           </Box>
@@ -416,7 +416,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
         case 2:
           return <ImageUploadStep formik={formik} />;
         case 3:
-          return <ConfirmationStep formik={formik} />;
+          return <ConfirmationStep selectedItem={selectedItem} hasMenu={hasMenu} />;
         default:
           return "Unknown step";
       }
@@ -427,7 +427,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
       case 1:
         return <ImageUploadStep formik={formik} />;
       case 2:
-        return <ConfirmationStep formik={formik} />;
+        return <ConfirmationStep selectedItem={null} hasMenu={false} />;
       default:
         return "Unknown step";
     }

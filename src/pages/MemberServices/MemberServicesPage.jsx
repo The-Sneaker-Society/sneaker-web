@@ -73,7 +73,7 @@ function ServiceCard({ item, idx, total, colors, onEdit, onDelete, onToggleActiv
       }}
     >
       <Box display="flex" justifyContent="space-between" alignItems="center" gap={1} sx={{ minHeight: 32 }}>
-        <Typography fontWeight={700} sx={{ fontSize: "1rem", lineHeight: 1.3, flex: 1, pr: 1 }}>
+        <Typography fontWeight={800} sx={{ fontSize: "1.35rem", lineHeight: 1.3, flex: 1, pr: 1 }}>
           {item.name}
         </Typography>
         <Chip

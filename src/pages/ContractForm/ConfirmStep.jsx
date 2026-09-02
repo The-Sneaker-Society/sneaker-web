@@ -11,7 +11,7 @@ import {
   Chip,
   useTheme,
 } from "@mui/material";
-import { FiZoomIn } from "react-icons/fi";
+import { FiZoomIn, FiInfo } from "react-icons/fi";
 import { useFormikContext } from "formik";
 import ImagePreviewDialog from "../../components/ImagePreviewDialog";
 
@@ -53,7 +53,7 @@ const SHOE_FIELDS = [
   { label: "Return Timeframe", key: "returnTimeframe" },
 ];
 
-const ConfirmationStep = () => {
+const ConfirmationStep = ({ selectedItem, hasMenu }) => {
   const { values } = useFormikContext();
   const theme = useTheme();
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -68,6 +68,49 @@ const ConfirmationStep = () => {
           Please check everything before submitting
         </Typography>
       </Box>
+
+      {hasMenu && (
+        <Paper variant="outlined" sx={{ p: 3, mb: 3, borderColor: selectedItem ? "primary.main" : "divider", bgcolor: selectedItem ? "rgba(255,195,28,0.04)" : "background.paper" }}>
+          <Typography variant="h4" fontWeight={600} mb={2}>
+            Selected Service
+          </Typography>
+          {selectedItem ? (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
+                <Typography fontWeight={800} sx={{ fontSize: "1.15rem" }}>
+                  {selectedItem.name}
+                </Typography>
+                <Box display="flex" flexDirection="column" alignItems="center" gap={0.35}>
+                  <Chip label={`$${selectedItem.price}`} sx={{ fontWeight: 800, fontSize: "1.15rem", bgcolor: "#FFD100", color: "#000", px: 1.5, height: 28 }} />
+                  <Typography variant="caption" sx={{ fontSize: "0.65rem", color: "text.secondary", opacity: 0.65, textAlign: "center" }}>
+                    plus taxes and shipping
+                  </Typography>
+                </Box>
+              </Box>
+              <Box display="flex" alignItems="center" gap={0.75} sx={{ mt: 1.5, px: 1.25, py: 1, borderRadius: 1.5, bgcolor: "rgba(255,195,28,0.08)", border: "1px solid rgba(255,195,28,0.25)" }}>
+                <FiInfo size={13} style={{ flexShrink: 0, color: "#E6BC00" }} />
+                <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, lineHeight: 1.4 }}>
+                  Estimate — starting at <strong>${selectedItem.price}</strong>. Final price may be higher or lower after member review.
+                </Typography>
+              </Box>
+              {selectedItem.description && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, fontStyle: "italic" }}>
+                  {selectedItem.description}
+                </Typography>
+              )}
+            </Box>
+          ) : (
+            <Box sx={{ p: 2, border: "1px dashed", borderColor: "divider", borderRadius: 2, textAlign: "center", bgcolor: "rgba(0,0,0,0.02)" }}>
+              <Typography variant="h6" fontWeight={700}>
+                Custom Request
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mt={0.5}>
+                You’ll describe your custom needs — member will provide a tailored quote.
+              </Typography>
+            </Box>
+          )}
+        </Paper>
+      )}
 
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Typography variant="h4" fontWeight={600} mb={2}>
