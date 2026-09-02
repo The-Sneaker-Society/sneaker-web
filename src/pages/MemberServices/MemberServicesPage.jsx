@@ -19,10 +19,11 @@ import {
   TableCell,
   TableBody,
   Tooltip,
+  Snackbar,
 } from "@mui/material";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
-import { FiGrid, FiList, FiEdit2, FiTrash2, FiChevronUp, FiChevronDown, FiExternalLink } from "react-icons/fi";
+import { FiGrid, FiList, FiEdit2, FiTrash2, FiChevronUp, FiChevronDown, FiExternalLink, FiPlus } from "react-icons/fi";
 import { useColors } from "../../theme/colors";
 
 const GET_SERVICE_MENU = gql`
@@ -71,18 +72,20 @@ function ServiceCard({ item, idx, total, colors, onEdit, onDelete, onToggleActiv
         "&:hover": { borderColor: colors.borderSecondary, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" },
       }}
     >
-      <Box display="flex" justifyContent="space-between" alignItems="flex-start" gap={1}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" gap={1} sx={{ minHeight: 32 }}>
         <Typography fontWeight={700} sx={{ fontSize: "1rem", lineHeight: 1.3, flex: 1, pr: 1 }}>
           {item.name}
         </Typography>
         <Chip
           label={`$${item.price}`}
-          size="small"
           sx={{
-            fontWeight: 700,
-            bgcolor: colors.isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-            color: colors.textPrimary,
-            border: `1px solid ${colors.borderSubtle}`,
+            fontWeight: 800,
+            fontSize: "1.15rem",
+            bgcolor: "#FFD100",
+            color: "#000",
+            px: 1,
+            height: 28,
+            "& .MuiChip-label": { px: 1, lineHeight: 1 },
           }}
         />
       </Box>
@@ -319,8 +322,7 @@ export default function MemberServicesPage() {
             </Button>
           </Box>
         </Box>
-        <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
-          <Box
+        <Box
             sx={{
               display: "flex",
               border: `1px solid ${colors.borderSubtle}`,
@@ -347,14 +349,40 @@ export default function MemberServicesPage() {
               List
             </Button>
           </Box>
-          <Button variant="contained" onClick={openAdd} disabled={items.length >= 12 || saving}>
-            Add Service {items.length >= 12 ? "(max 12)" : ""}
-          </Button>
-        </Box>
       </Box>
 
-      {saveError && <Alert severity="error" sx={{ mb: 2 }}>{saveError}</Alert>}
-      {saveSuccess && <Alert severity="success" sx={{ mb: 2 }}>Menu saved.</Alert>}
+      <Box display="flex" justifyContent="flex-end" mb={2}>
+        <Button
+          variant="contained"
+          startIcon={<FiPlus size={16} />}
+          onClick={openAdd}
+          disabled={items.length >= 12 || saving}
+          sx={{ fontWeight: 700, px: 2.5 }}
+        >
+          Add Service {items.length >= 12 ? "(max 12)" : ""}
+        </Button>
+      </Box>
+
+      <Snackbar
+        open={Boolean(saveError)}
+        autoHideDuration={4000}
+        onClose={() => setSaveError(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert severity="error" onClose={() => setSaveError(null)} sx={{ width: "100%" }}>
+          {saveError}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={saveSuccess}
+        autoHideDuration={2500}
+        onClose={() => setSaveSuccess(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert severity="success" onClose={() => setSaveSuccess(false)} sx={{ width: "100%" }}>
+          Menu saved.
+        </Alert>
+      </Snackbar>
 
       {items.length === 0 ? (
         <Alert severity="info" sx={{ mb: 2 }}>
@@ -400,7 +428,7 @@ export default function MemberServicesPage() {
                   <TableCell>{idx + 1}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{it.name}</TableCell>
                   <TableCell>
-                    <Chip label={`$${it.price}`} size="small" />
+                    <Chip label={`$${it.price}`} sx={{ fontWeight: 800, bgcolor: "#FFD100", color: "#000" }} size="small" />
                   </TableCell>
                   <TableCell sx={{ maxWidth: 240, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {it.description || <Typography variant="caption" color="text.secondary" fontStyle="italic">—</Typography>}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper, Chip } from "@mui/material";
+import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper, Chip, Avatar } from "@mui/material";
+import { FiInfo, FiArrowRight, FiStar } from "react-icons/fi";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
@@ -23,7 +24,7 @@ const CREATE_CONTRACT = gql`
 
 const GET_MEMBER_CONTRACT_STATUS = gql`
   query GetMemberContractStatus($memberId: ID!) {
-    member(id: $memberId) {
+    memberById(id: $memberId) {
       contractsDisabled
     }
   }
@@ -38,6 +39,17 @@ const GET_SERVICE_MENU = gql`
       description
       isActive
       sortOrder
+    }
+  }
+`;
+
+const GET_MEMBER_FOR_CUSTOM = gql`
+  query GetMemberForCustom($memberId: ID!) {
+    memberById(id: $memberId) {
+      id
+      firstName
+      lastName
+      businessName
     }
   }
 `;
@@ -123,8 +135,16 @@ function IntakeServiceCard({ item, selected, onSelect, isCustom, fullWidth }) {
         <Typography fontWeight={700} sx={{ fontSize: "0.95rem", lineHeight: 1.2 }}>
           {item.name}
         </Typography>
-        {!isCustom && <Chip label={`$${item.price}`} sx={{ fontWeight: 800, fontSize: "1.25rem", bgcolor: "#FFD100", color: "#000", px: 1.5, height: 32, "& .MuiChip-label": { px: 1, lineHeight: 1 } }} />}
-        {isCustom && <Chip label="Custom" size="small" variant="outlined" />}
+        {!isCustom ? (
+          <Box display="flex" flexDirection="column" alignItems="center" gap={0.35}>
+            <Chip label={`$${item.price}`} sx={{ fontWeight: 800, fontSize: "1.35rem", bgcolor: "#FFD100", color: "#000", px: 2.5, height: 34, minWidth: 84, "& .MuiChip-label": { px: 1.2, lineHeight: 1 } }} />
+            <Typography variant="caption" sx={{ fontSize: "0.68rem", color: "text.secondary", opacity: 0.65, lineHeight: 1, textAlign: "center", letterSpacing: "0.02em" }}>
+              plus taxes and shipping
+            </Typography>
+          </Box>
+        ) : (
+          <Chip label="Custom" size="small" variant="outlined" />
+        )}
       </Box>
       {item.description ? (
         <Typography
@@ -139,17 +159,14 @@ function IntakeServiceCard({ item, selected, onSelect, isCustom, fullWidth }) {
           Don’t see what you need? Submit a custom request.
         </Typography>
       ) : null}
-      {isSelected && !isCustom && (
-        <Typography variant="caption" color="text.secondary">
-          Price hint: ${item.price} — member retains final price authority.
-        </Typography>
-      )}
     </Paper>
   );
 }
 
-function ServiceSelectionStep({ activeItems, selectedServiceId, setSelectedServiceId, selectedItem }) {
+function ServiceSelectionStep({ activeItems, selectedServiceId, setSelectedServiceId, selectedItem, member }) {
   const isSingle = activeItems.length === 1;
+  const memberName = member?.firstName || member?.businessName || "your member";
+  const initials = ((member?.firstName?.[0] || member?.businessName?.[0] || "M") + (member?.lastName?.[0] || "")).toUpperCase().slice(0, 2);
   return (
     <Box>
       <Box textAlign="center" mb={3}>
@@ -175,18 +192,68 @@ function ServiceSelectionStep({ activeItems, selectedServiceId, setSelectedServi
               fullWidth={isSingle}
             />
           ))}
-          <IntakeServiceCard
-            item={{ name: "Custom Request", description: "Don't see what you need? Submit a custom request — describe what you're looking for and the member will price it." }}
-            selected={selectedServiceId === "__custom"}
-            onSelect={() => setSelectedServiceId("__custom")}
-            isCustom
-          />
         </Box>
         {selectedItem && (
-          <Typography variant="body2" color="text.secondary" mt={1.5}>
-            Selected: {selectedItem.name} — price hint ${selectedItem.price}. Member retains final price authority.
-          </Typography>
+          <Box display="flex" alignItems="center" gap={0.75} sx={{ mt: 1.5, px: 1.25, py: 1, borderRadius: 1.5, bgcolor: "rgba(255,195,28,0.08)", border: "1px solid rgba(255,195,28,0.25)" }}>
+            <FiInfo size={13} style={{ flexShrink: 0, color: "#E6BC00" }} />
+            <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, lineHeight: 1.4 }}>
+              Estimate — {selectedItem.name} starting at <strong>${selectedItem.price}</strong>. Final price may be higher or lower after member review.
+            </Typography>
+          </Box>
         )}
+      </Paper>
+      <Paper
+        variant="outlined"
+        onClick={() => setSelectedServiceId("__custom")}
+        sx={{
+          p: 2.5,
+          mt: 2,
+          cursor: "pointer",
+          borderStyle: selectedServiceId === "__custom" ? "solid" : "dashed",
+          borderColor: selectedServiceId === "__custom" ? "primary.main" : "divider",
+          borderWidth: selectedServiceId === "__custom" ? 2 : 1,
+          bgcolor: selectedServiceId === "__custom" ? "rgba(255,195,28,0.12)" : "transparent",
+          background: selectedServiceId === "__custom" ? "linear-gradient(135deg, rgba(255,209,0,0.12), transparent)" : "transparent",
+          boxShadow: selectedServiceId === "__custom" ? "0 2px 12px rgba(255,209,0,0.15)" : "none",
+          "&:hover": { borderColor: "primary.main", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" },
+        }}
+      >
+        <Box display="flex" alignItems="center" gap={2}>
+          <Avatar sx={{ width: 52, height: 52, bgcolor: "#FFD100", color: "#000", fontWeight: 800, flexShrink: 0, border: "2px solid #E6BC00", boxShadow: "0 2px 8px rgba(255,209,0,0.3)" }}>{initials}</Avatar>
+          <Box flex={1} textAlign="left">
+            <Box display="flex" alignItems="center" gap={1} flexWrap="wrap" mb={0.25}>
+              <FiStar size={16} style={{ color: "#FFD100", flexShrink: 0 }} />
+              <Typography variant="h6" fontWeight={800} sx={{ lineHeight: 1.2, fontSize: "1.1rem" }}>
+                Want something unique?
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ lineHeight: 1.4, fontWeight: 600, color: "text.primary" }}>
+              {memberName} will build your <Box component="span" sx={{ color: "#E6BC00", fontWeight: 800 }}>custom quote — fast.</Box>
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedServiceId("__custom");
+            }}
+            sx={{
+              bgcolor: "#FFD100",
+              color: "#000",
+              fontWeight: 800,
+              fontSize: "1.05rem",
+              px: 3.5,
+              py: 1.2,
+              borderRadius: 2,
+              textTransform: "none",
+              boxShadow: "none",
+              flexShrink: 0,
+              "&:hover": { bgcolor: "#E6BC00", boxShadow: "none" },
+            }}
+          >
+            Custom Intake
+          </Button>
+        </Box>
       </Paper>
     </Box>
   );
@@ -218,6 +285,12 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     variables: { memberId },
     skip: !memberId,
   });
+
+  const { data: memberData } = useQuery(GET_MEMBER_FOR_CUSTOM, {
+    variables: { memberId },
+    skip: !memberId,
+  });
+  const member = memberData?.memberById;
 
   const serviceMenu = menuData?.getServiceMenu || [];
   const activeItems = serviceMenu.filter((i) => i.isActive);
@@ -273,7 +346,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   if (!isPreview) {
     if (statusLoading) return <LoadingCircle />;
     if (statusError) return <div>Error: {statusError.message}</div>;
-    if (statusData?.member?.contractsDisabled) return <NotAcceptingContracts />;
+    if (statusData?.memberById?.contractsDisabled) return <NotAcceptingContracts />;
   };
 
   const handleSubmit = async (values) => {
@@ -337,6 +410,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
               selectedServiceId={selectedServiceId}
               setSelectedServiceId={setSelectedServiceId}
               selectedItem={selectedItem}
+              member={member}
             />
           );
         case 1:
