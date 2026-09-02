@@ -15,7 +15,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return;
 
-    const role = user?.unsafeMetadata?.role;
+    const role = user?.publicMetadata?.role || user?.unsafeMetadata?.role;
     if (role) {
       navigate("/dashboard");
     } else {

@@ -10,7 +10,7 @@ export default function SignUpCallback() {
     if (hasRun.current || !user) return;
     hasRun.current = true;
 
-    const role = user?.unsafeMetadata?.role;
+    const role = user?.publicMetadata?.role || user?.unsafeMetadata?.role;
     if (role === "member") {
       window.location.href = "/member/generate";
     } else if (role === "client") {

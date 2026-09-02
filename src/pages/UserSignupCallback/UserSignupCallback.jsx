@@ -13,7 +13,7 @@ export default function UserSignupCallback() {
       if (hasRun.current || !user) return;
       hasRun.current = true;
 
-      const role = user?.unsafeMetadata?.role;
+      const role = user?.publicMetadata?.role || user?.unsafeMetadata?.role;
       if (role) {
         navigate("/user/dashboard", { replace: true });
       } else {

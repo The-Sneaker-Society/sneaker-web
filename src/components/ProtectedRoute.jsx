@@ -20,7 +20,7 @@ export const ProtectedRoute = ({
   }
 
   if (requireRole) {
-    const userRole = clerkUser?.unsafeMetadata?.role;
+    const userRole = clerkUser?.publicMetadata?.role || clerkUser?.unsafeMetadata?.role;
     const allowedRoles = Array.isArray(requireRole) ? requireRole : [requireRole];
 
     if (!allowedRoles.includes(userRole)) {
