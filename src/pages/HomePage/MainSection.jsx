@@ -1,87 +1,101 @@
-import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TypeAnimation } from 'react-type-animation';
+import React from "react";
+import { Box, Container, Stack, Typography } from "@mui/material";
+import { useColors } from "../../theme/colors";
 
-function MainSection({ scrollToNext }) {
+function MainSection() {
+  const colors = useColors();
+
+  const highlights = [
+    {
+      title: "Stay organized",
+      description:
+        "Keep client details, service requests, agreements, and progress in one working system.",
+    },
+    {
+      title: "Build trust",
+      description:
+        "Present a professional business profile and keep your service workflow visible to clients.",
+    },
+    {
+      title: "Grow your network",
+      description:
+        "Connect with other cleaners, restorers, customizers, repair experts, and sneaker professionals.",
+    },
+  ];
+
   return (
     <Box
+      component="section"
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 'calc(100vh - 100px)',
-        backgroundColor: 'red',
-        color: 'white',
-        textAlign: 'center',
-        pt: { xs: '100px', md: 0 },
+        bgcolor: colors.pageBg,
+        color: colors.textPrimary,
+        py: { xs: 7, md: 10 },
       }}
     >
-      {/* <Typography
-        variant="h2"
-        component="h1"
-        sx={{
-          fontWeight: '700',
-          fontSize: { lg: '96px', md: '4rem', sm: '3rem', xs: '3rem' },
-          marginTop: { xs: '20px', md: '0' },
-          marginBottom: '32px',
-          wordWrap: 'break-word',
-          lineHeight: { xs: 1.2, sm: 1.3 },
-        }}
-      >
-        <TypeAnimation
-          sequence={[
-            'Elevate your Collection',
-            1000,
-            'Streamline your Process',
-            1000,
-            'Build your Brand',
-            1000,
-          ]}
-          speed={50}
-          wrapper="div"
-          repeat={Infinity}
-        />
-      </Typography>
-      <Typography
-        variant="h6"
-        sx={{
-          fontWeight: '400',
-          fontSize: { xs: '16px', md: '1.25rem' },
-          maxWidth: '800px',
-          marginBottom: '48px',
-        }}
-      >
-        Your all-in-one solution: Where restoration experts elevate their brand
-        while customers easily find top-tier restoration services.
-      </Typography> */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '100%',
-          background: 'purple',
-        }}
-      >
-        <Button variant="outlined">Business</Button>
-        <Button variant="outlined">Customer</Button>
-      </Box>
+      <Container maxWidth="lg">
+        <Stack alignItems="center" spacing={2} textAlign="center">
+          <Typography color="primary.main" fontWeight={800} variant="overline">
+            One platform, built for the culture
+          </Typography>
 
-      <Box
-        display="flex"
-        justifyContent="center"
-        width="100%"
-        sx={{
-          cursor: 'pointer',
-          backgroundColor: 'green',
-        }}
-        onClick={scrollToNext}
-      >
-        <ExpandMoreIcon sx={{ fontSize: '2rem' }} />
-      </Box>
+          <Typography component="h2" maxWidth={720} variant="h2">
+            Spend less time chasing details and more time delivering great work.
+          </Typography>
+
+          <Typography
+            color={colors.textSecondary}
+            maxWidth={660}
+            variant="body1"
+          >
+            The Sneaker Society gives independent sneaker-service businesses a
+            shared home for operations, customer relationships, and industry
+            connection.
+          </Typography>
+        </Stack>
+
+        <Box
+          sx={{
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "repeat(3, minmax(0, 1fr))",
+            },
+            mt: { xs: 5, md: 7 },
+          }}
+        >
+          {highlights.map((highlight, index) => (
+            <Box
+              key={highlight.title}
+              sx={{
+                bgcolor: "background.paper",
+                border: 1,
+                borderColor: "divider",
+                borderRadius: 2,
+                minHeight: 220,
+                p: 3,
+              }}
+            >
+              <Typography
+                color="primary.main"
+                fontWeight={800}
+                sx={{ mb: 4 }}
+                variant="overline"
+              >
+                0{index + 1}
+              </Typography>
+
+              <Typography component="h3" sx={{ mb: 1.5 }} variant="h5">
+                {highlight.title}
+              </Typography>
+
+              <Typography color={colors.textSecondary} variant="body2">
+                {highlight.description}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Container>
     </Box>
   );
 }

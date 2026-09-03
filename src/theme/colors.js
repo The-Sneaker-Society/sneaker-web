@@ -1,42 +1,46 @@
-import { useTheme } from '@mui/material';
-import { tokens } from './theme';
-
-export const getColors = (mode) => {
-  const palette = tokens(mode);
-  const isDark = mode === 'dark';
-
-  return {
-    mode,
-    isDark,
-
-    sidebarBg: isDark ? '#fff' : '#000',
-    widgetBg: isDark ? '#000' : '#fff',
-
-    textPrimary: isDark ? '#fff' : '#000',
-    textSecondary: isDark ? '#aaa' : '#666',
-    textInverse: isDark ? '#000' : '#fff',
-    sidebarText: isDark ? '#000' : '#fff',
-
-    border: isDark ? '#fff' : '#000',
-    borderSecondary: isDark ? '#666' : '#999',
-    borderSubtle: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
-
-    status: {
-      notStarted: '#E67E22',
-      inProgress: '#D4AC0D',
-      completed: '#2ECC71',
-      pending: '#3498DB',
-      error: '#e74c3c',
-    },
-
-    accent: palette,
-    primary: palette.yellowAccent[500],
-    secondary: palette.greenAccent[500],
-    warning: '#ffc31c',
-  };
-};
+import { useTheme } from "@mui/material/styles";
 
 export const useColors = () => {
   const theme = useTheme();
-  return getColors(theme.palette.mode);
+
+  return {
+    mode: theme.palette.mode,
+    isDark: theme.palette.mode === "dark",
+
+    pageBg: theme.palette.background.default,
+    surfaceBg: theme.palette.background.paper,
+
+    sidebarBg: theme.palette.background.paper,
+    widgetBg: theme.palette.background.paper,
+
+    textPrimary: theme.palette.text.primary,
+    textSecondary: theme.palette.text.secondary,
+
+    textInverse: theme.palette.getContrastText(theme.palette.background.paper),
+
+    sidebarText: theme.palette.text.primary,
+
+    border: theme.palette.divider,
+    borderSecondary: theme.palette.text.secondary,
+    borderSubtle: theme.palette.divider,
+
+    primary: theme.palette.primary.main,
+    primaryLight: theme.palette.primary.light,
+    primaryDark: theme.palette.primary.dark,
+
+    secondary: theme.palette.secondary.main,
+
+    success: theme.palette.success.main,
+    warning: theme.palette.warning.main,
+    error: theme.palette.error.main,
+    info: theme.palette.info.main,
+
+    status: {
+      notStarted: theme.palette.error.main,
+      inProgress: theme.palette.warning.main,
+      completed: theme.palette.success.main,
+      pending: theme.palette.info.main,
+      error: theme.palette.error.main,
+    },
+  };
 };

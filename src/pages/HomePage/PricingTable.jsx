@@ -1,71 +1,94 @@
-import React from 'react';
-import { Typography, Button, Box } from '@mui/material';
-import { Check } from '@mui/icons-material';
-import StyledButton from './StyledButton';
+import React from "react";
+import { Box, Container, Stack, Typography } from "@mui/material";
+import PricingCard from "./PricingCard";
+import { useColors } from "../../theme/colors";
 
-const PricingTable = ({ features, onButtonClick }) => {
+function PricingTable({ onMemberSignupClick, onUserSignupClick }) {
+  const colors = useColors();
+
   return (
     <Box
+      component="section"
       sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        '@media (max-width: 1024px)': {
-          marginBottom: '40px', // Add space between sections for 1024px width
-        },
+        bgcolor: colors.pageBg,
+        color: colors.textPrimary,
+        py: { xs: 7, md: 10 },
       }}
     >
-      <Box
-        sx={{
-          width: '20rem',
-          p: 8,
-          textAlign: 'center',
-          borderRadius: '1.5rem',
-          border: '1px solid white',
-          color: 'white',
-        }}
-      >
+      <Container maxWidth="lg">
+        <Stack alignItems="center" spacing={2} textAlign="center">
+          <Typography color="primary.main" fontWeight={800} variant="overline">
+            Simple, transparent pricing
+          </Typography>
+
+          <Typography component="h2" variant="h2">
+            Choose how you want to use The Sneaker Society.
+          </Typography>
+
+          <Typography
+            color={colors.textSecondary}
+            maxWidth={640}
+            variant="body1"
+          >
+            Start as a sneaker-service business owner to manage work and build
+            your presence, or create a client account to discover trusted
+            professionals.
+          </Typography>
+        </Stack>
+
         <Box
           sx={{
-            pt: 2,
-            display: 'flex',
-            alignItems: 'baseline',
-            justifyContent: 'center',
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "repeat(2, minmax(0, 1fr))",
+            },
+            margin: "0 auto",
+            maxWidth: 920,
+            mt: { xs: 5, md: 7 },
           }}
         >
-          <Typography variant="h1">$</Typography>
-          <Typography variant="h2" sx={{ fontSize: '3rem', fontWeight: '600' }}>
-            7.99
-          </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-            / month
-          </Typography>
-        </Box>
-        <hr sx={{ mt: 4, border: '5px solid' }} />
-        <Box sx={{ pt: 4 }}>
-          {features.map((feat, index) => (
-            <Typography
-              key={index}
-              sx={{
-                fontWeight: 'semibold',
-                display: 'flex',
-                alignItems: 'center',
-                textLeft: 'left',
-                pt: 5,
-              }}
-            >
-              <Check sx={{ pr: 1 }} />
-              {feat}
-            </Typography>
-          ))}
+          <PricingCard
+            benefits={[
+              "Professional business profile",
+              "Client and service-request management",
+              "Contracts and job workflow tools",
+              "Access to the business-owner community",
+            ]}
+            buttonText="Start as a business"
+            description="For sneaker cleaners, restorers, customizers, repair professionals, and service providers."
+            highlighted
+            onButtonClick={onMemberSignupClick}
+            price="7.99"
+            title="Business Member"
+          />
 
-          <Box pt={4}>
-            <StyledButton onClick={onButtonClick}>Choose Plan</StyledButton>
-          </Box>
+          <PricingCard
+            benefits={[
+              "Browse participating sneaker-service professionals",
+              "Submit service inquiries",
+              "Track your service relationship",
+              "Connect with local and specialty providers",
+            ]}
+            buttonText="Create a client account"
+            description="For sneaker owners looking to find, connect with, and work with service professionals."
+            onButtonClick={onUserSignupClick}
+            price="0"
+            title="Client Account"
+          />
         </Box>
-      </Box>
+
+        <Typography
+          color={colors.textSecondary}
+          sx={{ display: "block", mt: 3, textAlign: "center" }}
+          variant="caption"
+        >
+          Pricing and included features can be updated as the platform evolves.
+        </Typography>
+      </Container>
     </Box>
   );
-};
+}
 
 export default PricingTable;
