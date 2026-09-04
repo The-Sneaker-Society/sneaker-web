@@ -24,6 +24,7 @@ const SignUpUser = () => {
       await openSignUp({
         strategy: "oauth_google",
         unsafeMetadata: { role: "client" },
+        publicMetadata: { role: "client" },
         forceRedirectUrl: "user/signup-info",
         signInForceRedirectUrl: "user/dashboard",
         signInUrl: "/login",
