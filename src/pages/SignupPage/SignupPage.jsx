@@ -38,6 +38,14 @@ const MemberSignupPage = ({ onComplete }) => {
 
   const handleSubmit = async (values) => {
     try {
+      // Never provision a row for a role-less identity: without a Clerk
+      // role the backend context cannot authorize anything afterwards.
+      const clerkRole =
+        user?.publicMetadata?.role ?? user?.unsafeMetadata?.role;
+      if (!clerkRole) {
+        setErrorMessage("Signup incomplete (missing role). Please sign up again.");
+        return;
+      }
       await updateMember({
         variables: {
           data: {
@@ -46,6 +54,8 @@ const MemberSignupPage = ({ onComplete }) => {
             lastName: values.lastName,
             addressLineOne: values.addressLineOne,
             addressLineTwo: values.addressLineTwo,
+            city: values.city,
+            country: values.country || "US",
             zipcode: values.zipcode,
             state: values.state,
             phoneNumber: values.phoneNumber,
@@ -99,6 +109,8 @@ const MemberSignupPage = ({ onComplete }) => {
             lastName: "",
             addressLineOne: "",
             addressLineTwo: "",
+            city: "",
+            country: "US",
             zipcode: "",
             state: "",
             phoneNumber: "",
@@ -117,6 +129,10 @@ const MemberSignupPage = ({ onComplete }) => {
 
             if (!values.zipcode) {
               errors.zipcode = "Zipcode is required";
+            }
+
+            if (!values.city) {
+              errors.city = "City is required for shipping labels";
             }
 
             return errors;
@@ -188,6 +204,23 @@ const MemberSignupPage = ({ onComplete }) => {
                     label="State"
                     variant="outlined"
                     fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormikTextField
+                    name="city"
+                    label="City"
+                    variant="outlined"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormikTextField
+                    name="country"
+                    label="Country"
+                    variant="outlined"
+                    fullWidth
+                    helperText="US by default"
                   />
                 </Grid>
                 <Grid item xs={12}>

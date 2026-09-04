@@ -21,6 +21,9 @@ const SignUpUser = () => {
     try {
       setError("");
 
+      // NOTE: only unsafeMetadata is accepted by the browser SDK —
+      // publicMetadata must be set server-side (Clerk Backend API).
+      // Role precedence (public ?? unsafe) is resolved in chicago auth.js.
       await openSignUp({
         strategy: "oauth_google",
         unsafeMetadata: { role: "client" },
@@ -29,11 +32,10 @@ const SignUpUser = () => {
         signInUrl: "/login",
       });
 
-      if (!createdUserId) {
-        throw new Error("Signup failed, no user ID returned.");
-      }
+      // openSignUp redirects to the OAuth flow and returns void — no
+      // user ID to check here. Failures surface via the catch below.
     } catch (err) {
-      setError(error.message);
+      setError(err.message);
     }
   };
 
