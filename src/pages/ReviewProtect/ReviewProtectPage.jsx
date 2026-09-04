@@ -29,7 +29,7 @@ import { GET_CHECKOUT_BY_ORDER_REF } from "../../context/graphql/getContractDeta
 // Mirrors backend plan-shipping.md §2.1. Totals always come from live
 // Shippo quotes (server re-resolves on submit), so this preview can never
 // spoof the Stripe total. Thresholds gate the toggles only.
-const INSURANCE_THRESHOLD = 1000;
+const INSURANCE_THRESHOLD = 300;
 const SIGNATURE_THRESHOLD = 500;
 
 const CREATE_CONTRACT_CHECKOUT = gql`
@@ -123,9 +123,15 @@ const ReviewProtectPage = () => {
 
   const options = ratesData?.shippingRateOptions?.options ?? [];
   const selected = options[Math.min(selectedIdx, Math.max(options.length - 1, 0))] || null;
-  const roundTrip = selected?.roundTripTotal || 0;
+  const rawRoundTrip = selected?.roundTripTotal || 0;
   const embeddedInsurance = selected?.insuranceTotal || 0;
-  const total = (Number(servicePrice) || 0) + roundTrip;
+  // Pure postage excluding insurance
+  const purePostage = Math.round((rawRoundTrip - embeddedInsurance) * 100) / 100;
+  // When under threshold, Sneaker Society covers insurance — user pays pure postage.
+  // When at/above threshold, user pays insurance unless declined.
+  const customerShippingFee = purePostage;
+  const customerInsuranceFee = insuranceToggleable && !declined ? embeddedInsurance : 0;
+  const total = (Number(servicePrice) || 0) + customerShippingFee + customerInsuranceFee;
 
   const client = contract?.client;
   const addressIncomplete =
@@ -448,7 +454,7 @@ const ReviewProtectPage = () => {
                       {o.carrier} {o.service}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {o.etaDays != null ? `~${o.etaDays} days` : "Standard delivery"} — {money(o.roundTripTotal)} round trip
+                      {o.etaDays != null ? `~${o.etaDays} days` : "Standard delivery"} — {money(Math.round((o.roundTripTotal - (o.insuranceTotal || 0)) * 100) / 100)} round trip
                     </Typography>
                   </Box>
                 </Box>
@@ -471,12 +477,16 @@ const ReviewProtectPage = () => {
         </Box>
         <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, mb: 1 }}>
           <Typography variant="body1" sx={{ minWidth: 0 }}>Shipping{selected ? ` (${selected.carrier} ${selected.service})` : ""}</Typography>
-          <Typography variant="h6" fontWeight={600} sx={{ whiteSpace: "nowrap" }}>{money(roundTrip)}</Typography>
+          <Typography variant="h6" fontWeight={600} sx={{ whiteSpace: "nowrap" }}>{money(customerShippingFee)}</Typography>
         </Box>
         <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, mb: 1 }}>
           <Typography variant="body1" sx={{ minWidth: 0 }}>Package Protection</Typography>
           <Typography variant="h6" fontWeight={600} sx={{ whiteSpace: "nowrap", color: (declined && insuranceToggleable) ? "text.secondary" : "text.primary" }}>
-            {(declined && insuranceToggleable) ? "Declined" : "Included"}
+            {declined && insuranceToggleable
+              ? "Declined"
+              : insuranceToggleable
+                ? money(customerInsuranceFee)
+                : "Included"}
           </Typography>
         </Box>
         <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, mb: 1 }}>

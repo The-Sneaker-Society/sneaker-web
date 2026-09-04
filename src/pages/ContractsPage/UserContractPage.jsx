@@ -166,10 +166,15 @@ const UserContractPage = () => {
                 <Typography variant="body2" color="text.secondary">Shipping (Round Trip)</Typography>
                 <Typography variant="body2" fontWeight={600}>{money(contract.shippingFee || 0)}</Typography>
               </Box>
-              {contract.insuranceFee > 0 && (
+              {contract.insuranceFee > 0 ? (
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                   <Typography variant="body2" color="text.secondary">Shipping Insurance</Typography>
                   <Typography variant="body2" fontWeight={600}>{money(contract.insuranceFee)}</Typography>
+                </Box>
+              ) : !contract.insuranceDeclined && (
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary">Package Protection</Typography>
+                  <Typography variant="body2" fontWeight={600} color="success.main">Included (On Us)</Typography>
                 </Box>
               )}
               <Divider sx={{ my: 1.5 }} />
