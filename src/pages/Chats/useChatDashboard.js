@@ -8,6 +8,9 @@ const GET_CHAT_BY_ID = gql`
       id
       name
       contractId
+      contract {
+        orderRef
+      }
       member {
         id
         firstName
