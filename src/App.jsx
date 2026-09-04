@@ -12,7 +12,6 @@ import SignupMember from "./pages/SignUpMemberPage/SignUpMemberPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import PaymentStatus from "./pages/PaymentStatus/PaymentStatus";
 import SignUpUser from "./pages/Signup User/SignupUser";
-import { LoginV2 } from "./pages/Login/LoginV2";
 import UserSignupCallback from "./pages/UserSignupCallback/UserSignupCallback";
 import SignUpCallback from "./pages/SignUpCallback/SignUpCallback";
 import LoginSSOCallback from "./pages/LoginSSOCallback/LoginSSOCallback";
@@ -32,7 +31,6 @@ function App() {
           <div className="content-container">
             <Routes>
               {/* Public Routes */}
-              <Route path="/test" element={<LoginV2 />} />
               <Route path="/" element={
                 <ThemeProvider theme={getDarkTheme()}>
                   <CssBaseline />

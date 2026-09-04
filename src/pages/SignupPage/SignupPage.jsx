@@ -38,6 +38,14 @@ const MemberSignupPage = ({ onComplete }) => {
 
   const handleSubmit = async (values) => {
     try {
+      // Never provision a row for a role-less identity: without a Clerk
+      // role the backend context cannot authorize anything afterwards.
+      const clerkRole =
+        user?.publicMetadata?.role ?? user?.unsafeMetadata?.role;
+      if (!clerkRole) {
+        setErrorMessage("Signup incomplete (missing role). Please sign up again.");
+        return;
+      }
       await updateMember({
         variables: {
           data: {
