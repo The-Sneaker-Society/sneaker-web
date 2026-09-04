@@ -45,7 +45,7 @@ const MemberRoutes = () => {
             }
           />
           <Route
-            path="contract/:id"
+            path="contract/:orderRef"
             element={
               <Layout>
                 <ContractReviewSummary />

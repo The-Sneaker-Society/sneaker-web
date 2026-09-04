@@ -11,6 +11,7 @@ const GET_CONTRACT_LIST = gql`
   query GetContractList {
     getContractList {
       id
+      orderRef
       name
       status
       createdAt
@@ -177,6 +178,7 @@ export const ContractListWidget = () => {
 
   const allContracts = data?.getContractList.map((c) => ({
     id: c.id,
+    orderRef: c.orderRef || null,
     clientName: c.name,
     status: c.status,
     contractCreatedAt: format(new Date(Number(c.createdAt) || c.createdAt), "MM-dd-yyyy"),
@@ -213,8 +215,8 @@ export const ContractListWidget = () => {
     { field: "contractCreatedAt", headerName: "Created", flex: 1 },
   ];
 
-  const handleRowClick = (row) => {
-    navigate(`/member/contract/${row.id}`);
+  const handleRowClick = (params) => {
+    navigate(`/member/contract/${params.row.orderRef || params.row.id}`);
   };
 
   return (
