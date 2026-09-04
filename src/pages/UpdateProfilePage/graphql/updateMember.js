@@ -15,6 +15,8 @@ export const CURRENT_MEMBER = gql`
       lastName
       addressLineOne
       addressLineTwo
+      city
+      country
       zipcode
       state
       phoneNumber

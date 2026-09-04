@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper, Chip, Avatar } from "@mui/material";
+import { Box, Stepper, Step, StepLabel, Button, Alert, Typography, Paper, Chip, Avatar, keyframes } from "@mui/material";
 import { FiInfo, FiArrowRight, FiStar } from "react-icons/fi";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -9,7 +9,7 @@ import ImageUploadStep from "./ImageUploadStep";
 import ConfirmationStep from "./ConfirmStep";
 import TimelineCarousel from "./TimelineCarousel";
 import ShoeAnimation from "./ShoeAnimation";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import NotAcceptingContracts from "../../components/NotAcceptingContracts";
 import { LoadingCircle } from "../../components/LoadingCircle";
@@ -28,6 +28,18 @@ const GET_MEMBER_CONTRACT_STATUS = gql`
       contractsDisabled
     }
   }
+`;
+
+const profileEntrance = keyframes`
+  0% { transform: scale(0.5) translateY(50px); opacity: 0; }
+  35% { transform: scale(1.05) translateY(50px); opacity: 1; }
+  50% { transform: scale(1) translateY(50px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+`;
+
+const contentEntrance = keyframes`
+  0% { transform: translateY(-20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 `;
 
 const GET_SERVICE_MENU = gql`
@@ -263,7 +275,10 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
   const [selectedServiceId, setSelectedServiceId] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
   const { memberId: memberIdParam } = useParams();
+  const navigate = useNavigate();
 
   const [createContract] = useMutation(CREATE_CONTRACT);
 
@@ -286,7 +301,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     skip: !memberId,
   });
 
-  const { data: memberData } = useQuery(GET_MEMBER_FOR_CUSTOM, {
+  const { data: memberData, loading: memberLoading } = useQuery(GET_MEMBER_FOR_CUSTOM, {
     variables: { memberId },
     skip: !memberId,
   });
@@ -320,34 +335,86 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
 
   if (isPreview && !memberIdProp) return <div>Unauthorized preview access</div>;
 
+  if (statusLoading || memberLoading) return <LoadingCircle />;
+
+  if (!isPreview) {
+    if (statusError) return <div>Error: {statusError.message}</div>;
+    if (statusData?.memberById?.contractsDisabled) return <NotAcceptingContracts />;
+  }
+
   if (showIntro) {
     return (
-      <Box sx={{ width: "100%", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", px: { xs: 2, sm: 4 } }}>
-        <Paper variant="outlined" sx={{ p: 5, maxWidth: 640, textAlign: "center" }}>
-          <ShoeAnimation isPreview={isPreview} />
-          <Typography variant="h3" fontWeight={700} mb={1}>
-            Start Your Request
-          </Typography>
-          <Typography variant="body1" color="text.secondary" mb={4}>
-            Tell us about your sneakers, upload photos, describe what you want done, and we'll take it from there.
-          </Typography>
-          <Box sx={{ width: "100%", mb: 4, mt: 5 }}>
-            <TimelineCarousel />
+      <Box sx={{ width: "100%", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", px: { xs: 2, sm: 4 }, py: 4, overflow: "auto" }}>
+        <Paper variant="outlined" sx={{ p: { xs: 3, sm: 5 }, maxWidth: 640, textAlign: "center", my: "auto" }}>
+          
+          {member && (
+            <Box sx={{ 
+              mx: "auto", width: "fit-content", minWidth: { xs: "100%", sm: 300 },
+              mb: 4, p: 3, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", 
+              bgcolor: "rgba(128, 128, 128, 0.04)", borderRadius: 3, border: "1px solid", borderColor: "divider",
+              animation: `${profileEntrance} 1.6s cubic-bezier(0.25, 1, 0.5, 1) forwards`
+            }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={800} textTransform="uppercase" letterSpacing="0.12em" mb={2}>
+                Requesting service from
+              </Typography>
+              <Box sx={{ width: 72, height: 72, borderRadius: "50%", bgcolor: "#FFD100", display: "flex", alignItems: "center", justifyContent: "center", mb: 2, boxShadow: "0 4px 14px rgba(255,209,0,0.3)" }}>
+                <Typography variant="h4" fontWeight={800} color="#000">
+                  {member?.firstName?.charAt(0) || ""}{member?.lastName?.charAt(0) || ""}
+                </Typography>
+              </Box>
+              <Typography variant="h5" fontWeight={800} mb={0.5}>
+                {`${member?.firstName || ""} ${member?.lastName || ""}`.trim() || "Unknown"}
+              </Typography>
+            </Box>
+          )}
+
+          <Box sx={{ 
+            opacity: 0,
+            animation: `${contentEntrance} 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards`, 
+            animationDelay: member ? "1.6s" : "0s"
+          }}>
+            <ShoeAnimation isPreview={isPreview} />
+            <Typography variant="h3" fontWeight={700} mb={1}>
+              Start Your Request
+            </Typography>
+            <Typography variant="body1" color="text.secondary" mb={4}>
+              Tell us about your sneakers, upload photos, describe what you want done, and we'll take it from there.
+            </Typography>
+            <Box sx={{ width: "100%", mb: 4, mt: 5 }}>
+              <TimelineCarousel />
+            </Box>
+            <Box sx={{ mt: 5 }} />
+            <Button variant="contained" color="primary" size="large" onClick={() => setShowIntro(false)}>
+              Get Started
+            </Button>
           </Box>
-          <Box sx={{ mt: 5 }} />
-          <Button variant="contained" color="primary" size="large" onClick={() => setShowIntro(false)}>
-            Get Started
-          </Button>
         </Paper>
       </Box>
     );
   }
 
-  if (!isPreview) {
-    if (statusLoading) return <LoadingCircle />;
-    if (statusError) return <div>Error: {statusError.message}</div>;
-    if (statusData?.memberById?.contractsDisabled) return <NotAcceptingContracts />;
-  };
+  if (submitted) {
+    return (
+      <Box sx={{ width: "100%", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", px: { xs: 2, sm: 4 } }}>
+        <Paper variant="outlined" sx={{ p: 5, maxWidth: 560, textAlign: "center" }}>
+          <Typography variant="h4" fontWeight={800} mb={1}>
+            Request sent!
+          </Typography>
+          <Typography variant="body1" color="text.secondary" mb={4}>
+            The member has your sneakers on their radar. You&apos;ll see the price proposal in your chat — review it there when it arrives.
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => navigate("/user/dashboard", { replace: true })}
+            sx={{ bgcolor: "#FFD100", color: "#000", fontWeight: 700, "&:hover": { bgcolor: "#E6BC00" } }}
+          >
+            Back to Dashboard
+          </Button>
+        </Paper>
+      </Box>
+    );
+  }
 
   const handleSubmit = async (values) => {
     const {
@@ -369,33 +436,39 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     const selectedServiceMenuItem =
       hasMenu && selectedItem ? { id: selectedItem.id } : null;
 
-    await createContract({
-      variables: {
-        data: {
-          memberId,
-          declaredMarketValue: parseFloat(values.declaredMarketValue),
-          boxIncluded: values.boxIncluded,
-          repairDetails: {
-            clientNotes,
+    try {
+      setSubmitError(null);
+      await createContract({
+        variables: {
+          data: {
+            memberId,
+            declaredMarketValue: parseFloat(values.declaredMarketValue),
+            boxIncluded: values.boxIncluded,
+            repairDetails: {
+              clientNotes,
+            },
+            shoeDetails: {
+              brand,
+              model,
+              color,
+              size,
+              soleCondition,
+              material,
+              year,
+              returnTimeframe,
+              odorLevel,
+              previousRepairs,
+              previousRepairsNotes,
+              photos: photos,
+            },
+            ...(selectedServiceMenuItem ? { selectedServiceMenuItem } : {}),
           },
-          shoeDetails: {
-            brand,
-            model,
-            color,
-            size,
-            soleCondition,
-            material,
-            year,
-            returnTimeframe,
-            odorLevel,
-            previousRepairs,
-            previousRepairsNotes,
-            photos: photos,
-          },
-          ...(selectedServiceMenuItem ? { selectedServiceMenuItem } : {}),
         },
-      },
-    });
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err.message);
+    }
   };
 
   const getStepContent = (step, formik) => {
@@ -455,6 +528,11 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
         ))}
       </Stepper>
       <Box sx={{ flex: 1, overflowY: "auto", px: { xs: 2, sm: 4 }, mt: 4 }}>
+        {submitError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            Couldn&apos;t submit your request: {submitError}
+          </Alert>
+        )}
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchemas[activeStep]}

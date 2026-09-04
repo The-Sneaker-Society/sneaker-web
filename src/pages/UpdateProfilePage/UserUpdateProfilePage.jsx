@@ -11,8 +11,31 @@ import {
   Grid,
   Alert,
 } from "@mui/material";
-import { CURRENT_MEMBER, UPDATE_MEMBER } from "./graphql/updateMember";
-import { useQuery, useMutation } from "@apollo/client";
+import { gql, useQuery, useMutation } from "@apollo/client";
+
+const CURRENT_USER_PROFILE = gql`
+  query CurrentUserProfile {
+    currentUser {
+      id
+      email
+      firstName
+      lastName
+      addressLineOne
+      addressLineTwo
+      city
+      country
+      zipcode
+      state
+      phoneNumber
+    }
+  }
+`;
+
+const UPDATE_USER_PROFILE = gql`
+  mutation UpdateUserProfile($data: UpdateUserInput!) {
+    updateUser(data: $data)
+  }
+`;
 
 const FormikTextField = ({ name, ...props }) => {
   const [field, meta] = useField(name);
@@ -28,14 +51,16 @@ const FormikTextField = ({ name, ...props }) => {
   );
 };
 
-const UpdateProfilePage = () => {
-  const {
-    data: currentMemberData,
-    loading: currentMemberLoading,
-    error: currentMemberError,
-    refetch,
-  } = useQuery(CURRENT_MEMBER);
-  const [updateMember] = useMutation(UPDATE_MEMBER);
+/**
+ * Client-side counterpart to the member UpdateProfilePage (which queries
+ * currentMember). Users previously landed on the member form and ate
+ * role-guard errors.
+ */
+const UserUpdateProfilePage = () => {
+  const { data, loading, error, refetch } = useQuery(CURRENT_USER_PROFILE, {
+    fetchPolicy: "network-only",
+  });
+  const [updateUser] = useMutation(UPDATE_USER_PROFILE);
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
@@ -53,7 +78,7 @@ const UpdateProfilePage = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const { data } = await updateMember({
+      const { data: result } = await updateUser({
         variables: {
           data: {
             firstName: values.firstName,
@@ -67,39 +92,35 @@ const UpdateProfilePage = () => {
             phoneNumber: values.phoneNumber,
           },
         },
-        update: (cache, { data: { updateMember } }) => {
-          cache.writeQuery({
-            query: CURRENT_MEMBER,
-            data: { currentMember: updateMember },
-          });
-        },
       });
 
-      if (data.updateMember) {
+      if (result.updateUser) {
         setSuccessMessage("Profile updated successfully");
         setErrorMessage(null);
-        refetch(); // Refetch the current member data
+        refetch();
       } else {
         throw new Error("Failed to update profile");
       }
-    } catch (error) {
-      setErrorMessage(error.message);
+    } catch (err) {
+      setErrorMessage(err.message);
       setSuccessMessage(null);
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (currentMemberLoading) {
+  if (loading) {
     return <CircularProgress />;
   }
-  if (currentMemberError) {
+  if (error) {
     return (
       <Alert severity="error">
         Error loading profile data. Please try again later.
       </Alert>
     );
   }
+
+  const profile = data?.currentUser;
 
   return (
     <Container
@@ -126,6 +147,9 @@ const UpdateProfilePage = () => {
         >
           Update Profile
         </Typography>
+        <Typography variant="body2" color="text.secondary" mb={3}>
+          Street, city, and zip are required for shipping labels.
+        </Typography>
         {errorMessage && (
           <Alert severity="error" sx={{ width: "100%", marginBottom: 2 }}>
             {errorMessage}
@@ -138,18 +162,16 @@ const UpdateProfilePage = () => {
         )}
         <Formik
           initialValues={{
-            email: currentMemberData?.currentMember?.email || "",
-            firstName: currentMemberData?.currentMember?.firstName || "",
-            lastName: currentMemberData?.currentMember?.lastName || "",
-            addressLineOne:
-              currentMemberData?.currentMember?.addressLineOne || "",
-            addressLineTwo:
-              currentMemberData?.currentMember?.addressLineTwo || "",
-            city: currentMemberData?.currentMember?.city || "",
-            country: currentMemberData?.currentMember?.country || "US",
-            zipcode: currentMemberData?.currentMember?.zipcode || "",
-            state: currentMemberData?.currentMember?.state || "",
-            phoneNumber: currentMemberData?.currentMember?.phoneNumber || "",
+            email: profile?.email || "",
+            firstName: profile?.firstName || "",
+            lastName: profile?.lastName || "",
+            addressLineOne: profile?.addressLineOne || "",
+            addressLineTwo: profile?.addressLineTwo || "",
+            city: profile?.city || "",
+            country: profile?.country || "US",
+            zipcode: profile?.zipcode || "",
+            state: profile?.state || "",
+            phoneNumber: profile?.phoneNumber || "",
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
@@ -201,22 +223,6 @@ const UpdateProfilePage = () => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormikTextField
-                    name="zipcode"
-                    label="Zipcode"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormikTextField
-                    name="state"
-                    label="State"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormikTextField
                     name="city"
                     label="City"
                     variant="outlined"
@@ -232,6 +238,22 @@ const UpdateProfilePage = () => {
                     helperText="US by default"
                   />
                 </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormikTextField
+                    name="zipcode"
+                    label="Zipcode"
+                    variant="outlined"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormikTextField
+                    name="state"
+                    label="State"
+                    variant="outlined"
+                    fullWidth
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <FormikTextField
                     name="phoneNumber"
@@ -241,22 +263,14 @@ const UpdateProfilePage = () => {
                   />
                 </Grid>
               </Grid>
-              <Box>
+              <Box sx={{ paddingTop: 2 }}>
                 <Button
                   type="submit"
                   variant="contained"
                   disabled={isSubmitting}
-                  sx={{
-                    color: "black",
-                    backgroundColor: "gold",
-                    marginTop: "30px",
-                  }}
+                  sx={{ color: "black", backgroundColor: "gold" }}
                 >
-                  {isSubmitting ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "Update Profile"
-                  )}
+                  {isSubmitting ? "Saving…" : "Save"}
                 </Button>
               </Box>
             </Form>
@@ -267,4 +281,4 @@ const UpdateProfilePage = () => {
   );
 };
 
-export default UpdateProfilePage;
+export default UserUpdateProfilePage;
