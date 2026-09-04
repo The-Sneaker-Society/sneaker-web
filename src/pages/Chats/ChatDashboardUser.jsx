@@ -40,6 +40,9 @@ export const ChatDashboardUser = () => {
       setIsSending={setIsSending}
       currentUser={currentUser?.id}
       otherUserName={chat?.member?.firstName || "Chat"}
+      contractId={chat?.contractId}
+      contractOrderRef={chat?.contract?.orderRef}
+      canCheckout
     />
   );
 };

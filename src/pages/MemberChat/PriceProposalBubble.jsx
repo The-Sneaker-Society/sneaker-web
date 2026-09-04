@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { FiDollarSign, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const statusConfig = {
   pending: { label: "Pending", icon: FiClock, color: "#F59E0B" },
@@ -8,13 +9,17 @@ const statusConfig = {
   expired: { label: "Expired", icon: FiAlertCircle, color: "#EF4444" },
 };
 
-const PriceProposalBubble = ({ metadata, isMine }) => {
+const PriceProposalBubble = ({ metadata, isMine, contractId, contractOrderRef, canCheckout }) => {
+  const navigate = useNavigate();
   const { price, checkoutUrl, status, expiresAt } = metadata || {};
   const isExpired =
     status === "pending" && expiresAt && new Date(expiresAt) < new Date();
   const effectiveStatus = isExpired || status === "superseded" ? "expired" : status;
   const config = statusConfig[effectiveStatus] || statusConfig.pending;
   const StatusIcon = config.icon;
+  const reviewRef = contractOrderRef || contractId;
+  const showReviewProtect =
+    canCheckout && reviewRef && status === "pending" && !isExpired;
 
   return (
     <Box
@@ -40,11 +45,9 @@ const PriceProposalBubble = ({ metadata, isMine }) => {
           ${price?.toLocaleString()}
         </Typography>
 
-        {checkoutUrl && status === "pending" && !isExpired && (
+        {showReviewProtect ? (
           <Button
-            href={checkoutUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            onClick={() => navigate(`/user/review-protect/${reviewRef}`)}
             fullWidth
             sx={{
               mt: 0.5,
@@ -58,8 +61,30 @@ const PriceProposalBubble = ({ metadata, isMine }) => {
               "&:hover": { bgcolor: "#E6BC00" },
             }}
           >
-            Pay Now
+            Review &amp; Protect →
           </Button>
+        ) : (
+          checkoutUrl && status === "pending" && !isExpired && (
+            <Button
+              href={checkoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              fullWidth
+              sx={{
+                mt: 0.5,
+                bgcolor: "#FFD100",
+                color: "#000",
+                fontWeight: 700,
+                fontSize: "0.8rem",
+                textTransform: "none",
+                borderRadius: 2,
+                py: 0.75,
+                "&:hover": { bgcolor: "#E6BC00" },
+              }}
+            >
+              Pay Now
+            </Button>
+          )
         )}
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.25 }}>

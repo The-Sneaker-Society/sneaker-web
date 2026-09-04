@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
 import { format } from "date-fns";
+import { useColors } from "../theme/colors";
 
 const getEventDisplay = (eventType) => {
     const eventMap = {
@@ -9,6 +10,9 @@ const getEventDisplay = (eventType) => {
         PRICE_PROPOSED_BY_MEMBER: "Price Proposed",
         PRICE_REPROPOSED: "Price Reproposed",
         PAYMENT_COMPLETED: "Payment Completed",
+        SHIPPING_SELECTED: "Shipping Selected",
+        INSURANCE_DECLINED: "Insurance Declined",
+        LABEL_GENERATION_FAILED: "Label Delayed",
         INBOUND_LABEL_GENERATED: "Inbound Label Generated",
         OUTBOUND_LABEL_GENERATED: "Outbound Label Generated",
         INBOUND_SHIPPED: "Inbound Shipped",
@@ -31,70 +35,54 @@ const getEventDisplay = (eventType) => {
         PAYMENT_RECEIVED: "Payment Completed",
     };
 
-    return eventMap[eventType] ?? eventType;
+    return eventMap[eventType] ?? String(eventType || "").replace(/_/g, " ").toLowerCase();
 };
 
-const TimelineItem = ({ event, date, isLast }) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+const formatTimestamp = (timestamp) => {
+    const d = new Date(Number(timestamp) || timestamp);
+    if (Number.isNaN(d.getTime())) return "—";
+    try {
+        return format(d, "MM/dd/yyyy h:mma");
+    } catch {
+        return "—";
+    }
+};
 
+const TimelineItem = ({ event, date, isLast, colors }) => {
     return (
-        <Box
-            sx={{
-                display: "flex",
-                position: "relative",
-                marginBottom: "60px",
-            }}
-        >
-            <Box sx={{ position: "relative", width: "20px", mr: "30px" }}>
+        <Box sx={{ display: "flex", position: "relative", mb: isLast ? 0 : 2.5 }}>
+            <Box sx={{ position: "relative", width: "16px", mr: 2, flexShrink: 0 }}>
                 <Box
                     sx={{
-                        width: "20px",
-                        height: "20px",
+                        width: "12px",
+                        height: "12px",
                         borderRadius: "50%",
-                        bgcolor: "#FFFFFF",
+                        bgcolor: "#FFD100",
                         zIndex: 2,
                         position: "absolute",
-                        top: "10px",
+                        top: "4px",
+                        left: "2px",
                     }}
                 />
-
                 {!isLast && (
                     <Box
                         sx={{
                             width: "2px",
-                            height: "120px",
-                            bgcolor: "#FFFFFF",
+                            bgcolor: colors.borderSubtle,
                             position: "absolute",
-                            top: "40px",
-                            left: "9px",
+                            top: "22px",
+                            bottom: "-14px",
+                            left: "7px",
                             zIndex: 1,
                         }}
                     />
                 )}
             </Box>
-
-            <Box>
-                <Typography
-                    variant="h2"
-                    fontWeight="bold"
-                    color="#FFFFFF"
-                    sx={{
-                        fontSize: isMobile ? "2rem" : "2.5rem",
-                        lineHeight: 1.2,
-                    }}
-                >
+            <Box sx={{ pb: isLast ? 0 : 0.5 }}>
+                <Typography sx={{ fontSize: "0.85rem", fontWeight: 700, color: colors.textPrimary, lineHeight: 1.3 }}>
                     {event}
                 </Typography>
-                <Typography
-                    color="#FFFFFF"
-                    sx={{
-                        opacity: 0.7,
-                        fontSize: isMobile ? "1.5rem" : "2rem",
-                        marginTop: "5px",
-                        textAlign: "left",
-                    }}
-                >
+                <Typography sx={{ color: colors.textSecondary, fontSize: "0.75rem", mt: 0.25 }}>
                     {date}
                 </Typography>
             </Box>
@@ -102,73 +90,46 @@ const TimelineItem = ({ event, date, isLast }) => {
     );
 };
 
-const Timeline = () => {
+/**
+ * Shared journey rail. Pass real events [{ event, date }]; renders newest
+ * last. Theme-aware and embeddable — replaces ad-hoc timeline lists.
+ */
+const Timeline = ({ events = [] }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-    const formatTimestamp = (timestamp) => {
-        return format(new Date(timestamp), "MM/dd/yyyy h:mma");
-    };
-
-    const timelineData = [
-        {
-            event: "CONTRACT_CREATED",
-            timestamp: "2024-02-12T13:00:00Z"
-        },
-        {
-            event: "MEMBER_REVIEWED",
-            timestamp: "2024-02-16T15:45:00Z"
-        },
-        {
-            event: "PRICE_PROPOSED",
-            timestamp: "2024-02-16T15:45:00Z"
-        },
-        {
-            event: "PRICE_ACCEPTED",
-            timestamp: "2024-02-21T12:45:00Z"
-        },
-        {
-            event: "SHIPPED_BY_CLIENT",
-            timestamp: "2024-02-26T04:45:00Z"
-        }
-    ];
+    const colors = useColors();
 
     const sortedTimelineEvents = useMemo(() => {
-        return [...timelineData]
-            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-            .map(item => ({
-                title: getEventDisplay(item.event),
-                date: formatTimestamp(item.timestamp)
+        return [...(events || [])]
+            .filter((item) => item && (item.event || item.title))
+            .sort((a, b) => new Date(a.date || a.timestamp) - new Date(b.date || b.timestamp))
+            .map((item) => ({
+                title: item.title || getEventDisplay(item.event),
+                date: formatTimestamp(item.date || item.timestamp),
             }));
-    }, [timelineData]);
+    }, [events]);
+
+    if (sortedTimelineEvents.length === 0) {
+        return (
+            <Typography sx={{ fontSize: "0.85rem", color: colors.textSecondary }}>
+                No updates yet.
+            </Typography>
+        );
+    }
 
     return (
-        <Box sx={{ maxWidth: "750px", margin: "0 auto", padding: isMobile ? "0 20px" : "0 40px" }}>
-            <Typography
-                variant="h1"
-                fontWeight="bold"
-                color="#FFFFFF"
-                textAlign="left"
-                marginBottom="40px"
-                sx={{
-                    fontSize: isMobile ? "3.5rem" : "5rem",
-                }}
-            >
-                Timeline
-            </Typography>
-
-            <Box sx={{ width: "100%", height: "400px", overflowY: "scroll" }}>
-                {sortedTimelineEvents.map((event, index) => (
-                    <TimelineItem
-                        key={index}
-                        event={event.title}
-                        date={event.date}
-                        isLast={index === sortedTimelineEvents.length - 1}
-                    />
-                ))}
-            </Box>
+        <Box sx={{ width: "100%", maxHeight: isMobile ? 320 : 420, overflowY: "auto", pr: 1 }}>
+            {sortedTimelineEvents.map((event, index) => (
+                <TimelineItem
+                    key={index}
+                    event={event.title}
+                    date={event.date}
+                    isLast={index === sortedTimelineEvents.length - 1}
+                    colors={colors}
+                />
+            ))}
         </Box>
     );
 };
 
-export default Timeline; 
+export default Timeline;

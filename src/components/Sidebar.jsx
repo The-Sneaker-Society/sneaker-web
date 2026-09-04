@@ -7,7 +7,7 @@ import {
   SettingsOutlined,
   DirectionsRunOutlined,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useColors } from "../theme/colors";
 import SidebarItem from "./SidebarItem";
 import ThemeToggle from "./ThemeToggle";
@@ -21,8 +21,17 @@ const Sidebar = ({
 }) => {
   const colors = useColors();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // Layout is shared across sections — derive the section from the URL so
+  // users never see member routes (every one 401s on role guards).
+  const isUserSection = pathname.startsWith("/user");
 
-  const navItems = (
+  const navItems = isUserSection ? (
+    <>
+      <SidebarItem text="Dashboard"  icon={<DirectionsRunOutlined />} onClick={() => navigate("/user/dashboard")} />
+      <SidebarItem text="My Society" icon={<DirectionsRunOutlined />} onClick={() => navigate("/mysociety")} />
+    </>
+  ) : (
     <>
       <SidebarItem text="My Society"  icon={<DirectionsRunOutlined />} onClick={() => navigate("/member/my-society")} />
       <SidebarItem text="Groups"      icon={<GroupsOutlined />}         onClick={() => navigate("/member/groups")} />
@@ -33,7 +42,11 @@ const Sidebar = ({
 
   const settingsItem = (
     <Box sx={{ padding: 2, borderTop: `1px solid ${colors.border}` }}>
-      <SidebarItem text="Settings" icon={<SettingsOutlined />} onClick={() => navigate("/member/settings")} />
+      <SidebarItem
+        text="Settings"
+        icon={<SettingsOutlined />}
+        onClick={() => navigate(isUserSection ? "/user/update-profile" : "/member/settings")}
+      />
     </Box>
   );
 
@@ -44,7 +57,7 @@ const Sidebar = ({
         src={colors.isDark ? LogoBlack : LogoWhite}
         alt="Logo"
         sx={{ width: "80%", maxWidth: "300px", height: "auto", my: 4, cursor: "pointer" }}
-        onClick={() => navigate("/member/dashboard")}
+        onClick={() => navigate(isUserSection ? "/user/dashboard" : "/member/dashboard")}
       />
       <Box sx={{ position: "absolute", top: 8, right: 8 }}>
         <ThemeToggle />

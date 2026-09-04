@@ -25,6 +25,10 @@ const Chat = ({
   isProposing,
   currentUser,
   otherUserName,
+  contractId,
+  canCheckout,
+  canPropose,
+  contractOrderRef,
 }) => {
   const navigate = useNavigate();
   const [newMessage, setNewMessage] = useState("");
@@ -167,7 +171,13 @@ const Chat = ({
                 >
                   {isMine ? "M" : initials || "?"}
                 </Avatar>
-                <PriceProposalBubble metadata={message.metadata} isMine={isMine} />
+                <PriceProposalBubble
+                  metadata={message.metadata}
+                  isMine={isMine}
+                  contractId={contractId}
+                  contractOrderRef={contractOrderRef}
+                  canCheckout={canCheckout}
+                />
               </Box>
             );
           }
@@ -222,6 +232,7 @@ const Chat = ({
       </Box>
 
       <Box sx={{ px: 2.5, py: 2, borderTop: 1, borderColor: "divider", bgcolor: "background.paper" }}>
+        {canPropose && (
         <Collapse in={showPriceInput}>
           <Box sx={{ display: "flex", gap: 1, mb: 1.5, alignItems: "center" }}>
             <TextField
@@ -266,6 +277,7 @@ const Chat = ({
             </IconButton>
           </Box>
         </Collapse>
+        )}
 
         <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
           <TextField
@@ -286,6 +298,7 @@ const Chat = ({
               },
             }}
           />
+          {canPropose && (
           <Button
             onClick={() => setShowPriceInput((v) => !v)}
             sx={{
@@ -301,6 +314,7 @@ const Chat = ({
           >
             <FiDollarSign size={18} />
           </Button>
+          )}
           <IconButton
             onClick={handleSend}
             disabled={!newMessage.trim() || isSending}
@@ -319,6 +333,7 @@ const Chat = ({
         </Box>
       </Box>
 
+      {canPropose && (
       <PricePreviewModal
         open={showPreviewModal}
         price={pendingPrice}
@@ -327,6 +342,7 @@ const Chat = ({
         isProposing={isProposing}
         hasPendingProposal={hasPendingProposal}
       />
+      )}
     </Box>
   );
 };

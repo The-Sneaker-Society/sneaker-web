@@ -14,6 +14,7 @@ import {
   Chip,
   TextField,
   Button,
+  Divider,
 } from "@mui/material";
 import {
   FiZoomIn,
@@ -22,11 +23,13 @@ import {
   FiSave,
   FiPackage,
   FiMail,
+  FiPrinter,
 } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, gql } from "@apollo/client";
-import { GET_CONTRACT_BY_ID } from "../../context/graphql/getContractDetails";
+import { GET_CONTRACT_BY_ID, GET_CONTRACT_BY_ORDER_REF } from "../../context/graphql/getContractDetails";
 import ImagePreviewDialog from "../../components/ImagePreviewDialog";
+import Timeline from "../../components/Timeline";
 
 const INITIATE_CONTRACT_CHAT = gql`
   mutation InitiateContractChat($contractId: ID!) {
@@ -90,7 +93,7 @@ const MemberNotesCard = ({ contract, contractId }) => {
   const [feedback, setFeedback] = useState(null);
 
   const [updateNotes, { loading: saving }] = useMutation(UPDATE_CONTRACT_MEMBER_NOTES, {
-    refetchQueries: [{ query: GET_CONTRACT_BY_ID, variables: { id: contractId } }],
+    refetchQueries: [{ query: GET_CONTRACT_BY_ORDER_REF, variables: { orderRef: contract?.orderRef } }],
   });
 
   const handleSave = async () => {
@@ -168,14 +171,14 @@ const MemberNotesCard = ({ contract, contractId }) => {
 };
 
 const ContractReviewSummary = () => {
-  const { id } = useParams();
+  const { orderRef } = useParams();
   const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [previewUrl, setPreviewUrl] = useState(null);
 
-  const { loading, error, data } = useQuery(GET_CONTRACT_BY_ID, {
-    variables: { id },
+  const { loading, error, data } = useQuery(GET_CONTRACT_BY_ORDER_REF, {
+    variables: { orderRef },
     fetchPolicy: "cache-and-network",
   });
 
@@ -189,13 +192,17 @@ const ContractReviewSummary = () => {
       return;
     }
     try {
-      const { data: chatData } = await initiateChat({ variables: { contractId: id } });
+      const { data: chatData } = await initiateChat({ variables: { contractId: contract.id } });
       const chatId = chatData?.initiateContractChat?.id;
       if (chatId) navigate(`/member/chats/${chatId}`);
     } catch {
-      if (contract?.chatId) navigate(`/member/chats/${contract.chatId}`);
     }
   };
+
+  const needsLabelPoll = contract && !contract.outboundLabelUrl && [
+    "AWAITING_SHIPMENT", "IN_TRANSIT_TO_RESTORER", "IN_RESTORATION",
+    "PENDING_FINAL_APPROVAL", "COMPLETED", "IN_TRANSIT_TO_USER"
+  ].includes(contract.status);
 
   if (loading) {
     return (
@@ -250,18 +257,6 @@ const ContractReviewSummary = () => {
         </Typography>
         <Typography variant="body1" color="text.secondary" mt={0.5}>
           Submitted {new Date(Number(contract.createdAt) || contract.createdAt).toLocaleDateString()}
-        </Typography>
-      </Paper>
-
-      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h5" fontWeight={600} mb={2}>
-          Client
-        </Typography>
-        <Typography variant="h6" fontWeight={600}>
-          {`${contract.client?.firstName || ""} ${contract.client?.lastName || ""}`}
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {contract.client?.email || "N/A"}
         </Typography>
       </Paper>
 
@@ -373,7 +368,24 @@ const ContractReviewSummary = () => {
 
   const rightContent = (
     <Box>
-      <MemberNotesCard contract={contract} contractId={id} />
+      <Paper variant="outlined" sx={{ p: { xs: 3, md: 4 }, mb: 3, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", bgcolor: "rgba(128, 128, 128, 0.04)" }}>
+        <Typography variant="caption" color="text.secondary" fontWeight={800} textTransform="uppercase" letterSpacing="0.12em" mb={2}>
+          Contract For
+        </Typography>
+        <Box sx={{ width: 64, height: 64, borderRadius: "50%", bgcolor: "#111", display: "flex", alignItems: "center", justifyContent: "center", mb: 1.5, boxShadow: "0 4px 14px rgba(0,0,0,0.15)" }}>
+          <Typography variant="h5" fontWeight={800} color="#FFF">
+            {contract.client?.firstName?.charAt(0) || ""}{contract.client?.lastName?.charAt(0) || ""}
+          </Typography>
+        </Box>
+        <Typography variant="h6" fontWeight={800} mb={1.5}>
+          {`${contract.client?.firstName || ""} ${contract.client?.lastName || ""}`.trim() || "Unknown"}
+        </Typography>
+        <Button variant="outlined" size="small" sx={{ borderRadius: 6, textTransform: "none", fontWeight: 700, px: 3, color: "text.primary", borderColor: "divider" }}>
+          View Profile
+        </Button>
+      </Paper>
+
+      <MemberNotesCard contract={contract} contractId={contract.id} />
 
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
@@ -398,6 +410,36 @@ const ContractReviewSummary = () => {
         ) : (
           <Typography variant="body2" color="text.disabled">Not yet shipped</Typography>
         )}
+        <Box sx={{ mt: 3 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            disabled={!contract.outboundLabelUrl}
+            startIcon={
+              contract.outboundLabelUrl ? <FiPrinter size={18} /> : 
+              (needsLabelPoll ? <CircularProgress size={16} color="inherit" /> : <FiPrinter size={18} />)
+            }
+            onClick={() => contract.outboundLabelUrl && window.open(contract.outboundLabelUrl, "_blank", "noopener")}
+            sx={{
+              py: 1.25,
+              bgcolor: contract.outboundLabelUrl ? "#FFD100" : "action.disabledBackground",
+              color: contract.outboundLabelUrl ? "#000" : "text.disabled",
+              fontWeight: 700,
+              textTransform: "none",
+              fontSize: "1rem",
+              "&:hover": { bgcolor: contract.outboundLabelUrl ? "#E6BC00" : undefined },
+            }}
+          >
+            {contract.outboundLabelUrl 
+              ? "Print Return Label" 
+              : (needsLabelPoll ? "Processing Label..." : "Label Unavailable")}
+          </Button>
+          {!contract.outboundLabelUrl && needsLabelPoll && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", textAlign: "center", mt: 1 }}>
+              Usually takes under a minute. This page will automatically refresh.
+            </Typography>
+          )}
+        </Box>
       </Paper>
 
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
@@ -430,7 +472,7 @@ const ContractReviewSummary = () => {
           }}
         >
           <FiMessageCircle size={20} />
-          {contract?.chatId ? "Go to Chat" : chatLoading ? "Starting..." : "Initiate Chat"}
+          {chatLoading ? "Starting..." : `Message ${contract.client?.firstName || "User"}`}
         </Box>
       </Paper>
 
@@ -455,23 +497,10 @@ const ContractReviewSummary = () => {
       </Paper>
 
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-          <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: statusColor }} />
-          <Typography variant="h6" fontWeight={600}>Timeline</Typography>
-        </Box>
-        {contract.timeline?.length > 0 ? (
-          contract.timeline.map((entry, idx) => (
-            <Box key={idx} sx={{ display: "flex", gap: 2, mb: idx < contract.timeline.length - 1 ? 2 : 0 }}>
-              <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#6B7280", mt: 0.5, flexShrink: 0 }} />
-              <Box>
-                <Typography variant="body2" fontWeight={600}>{(entry.event || "UNKNOWN").replace(/_/g, " ")}</Typography>
-                {entry.date && <Typography variant="caption" color="text.secondary">{new Date(Number(entry.date) || entry.date).toLocaleString()}</Typography>}
-              </Box>
-            </Box>
-          ))
-        ) : (
-          <Typography variant="body2" color="text.disabled">No timeline events</Typography>
-        )}
+        <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+          Timeline
+        </Typography>
+        <Timeline events={contract.timeline ?? []} />
       </Paper>
     </Box>
   );

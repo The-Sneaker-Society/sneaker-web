@@ -42,6 +42,8 @@ export const ChatDashboardMember = () => {
       isProposing={isProposing}
       currentUser={currentUser?.id}
       otherUserName={chat?.user?.email || "Chat"}
+      contractId={chat?.contractId}
+      canPropose
     />
   );
 };

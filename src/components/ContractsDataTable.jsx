@@ -3,11 +3,20 @@ import { DataGrid } from '@mui/x-data-grid';
 import { Chip, Skeleton, Box } from '@mui/material';
 
 const statusColors = {
-  Pending: 'warning',
-  Completed: 'success',
-  Cancelled: 'error',
-  InProgress: 'info',
-  // Add more statuses as needed
+  PENDING_REVIEW: 'warning',
+  PRICE_PROPOSED: 'info',
+  AWAITING_PAYMENT: 'info',
+  READY_TO_SHIP: 'info',
+  INBOUND_SHIPPED: 'info',
+  ARRIVED_AT_MEMBER: 'info',
+  WORK_IN_PROGRESS: 'info',
+  RETURN_SHIPPED: 'info',
+  DELIVERED_TO_USER: 'info',
+  COMPLETED: 'success',
+  CANCELED: 'default',
+  UNDER_MANUAL_REVIEW: 'error',
+  paid: 'success',
+  unpaid: 'warning',
 };
 
 const columns = [
@@ -15,6 +24,20 @@ const columns = [
   {
     field: 'status',
     headerName: 'Status',
+    flex: 1,
+    sortable: true,
+    renderCell: (params) => (
+      <Chip
+        label={String(params.value || '').replace(/_/g, ' ').toLowerCase()}
+        color={statusColors[params.value] || 'default'}
+        size="small"
+        sx={{ borderRadius: 2, fontWeight: 500, textTransform: 'capitalize' }}
+      />
+    ),
+  },
+  {
+    field: 'payment',
+    headerName: 'Payment',
     flex: 1,
     sortable: true,
     renderCell: (params) => (
@@ -30,14 +53,7 @@ const columns = [
   { field: 'memberName', headerName: 'Member Name', flex: 1, sortable: true },
 ];
 
-// Example rows (replace with real data as needed)
-const rows = [
-  { id: 1, shoeName: 'Air Max 90', status: 'Pending', createdAt: '2025-08-01', memberName: 'Alex Yates' },
-  { id: 2, shoeName: 'Jordan 1', status: 'Completed', createdAt: '2025-07-28', memberName: 'Sam Smith' },
-];
-
-
-const ContractsDataTable = ({ data = rows, onSelectionModelChange, selectionModel, loading = false }) => {
+const ContractsDataTable = ({ data = [], onSelectionModelChange, selectionModel, loading = false }) => {
   if (loading) {
     // Table-like skeleton for loading state
     return (

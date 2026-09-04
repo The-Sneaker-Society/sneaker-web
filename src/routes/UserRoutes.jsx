@@ -1,8 +1,10 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import UserSignupPage from "../pages/SignupPage/UserSIgnupPage";
-import UpdateProfilePage from "../pages/UpdateProfilePage/UpdateProfilePage";
+import UserUpdateProfilePage from "../pages/UpdateProfilePage/UserUpdateProfilePage";
 import { ContractForm } from "../pages/ContractForm/ContractForm";
+import ReviewProtectPage from "../pages/ReviewProtect/ReviewProtectPage";
+import UserContractPage from "../pages/ContractsPage/UserContractPage";
 import { UserProvider } from "../context/UserContext";
 import UserDashboard from "../pages/Dashboard/UserDashboard";
 import Layout from "../components/Layout";
@@ -33,7 +35,7 @@ const UserRoutes = () => {
           path="update-profile"
           element={
             <Layout>
-              <UpdateProfilePage />
+              <UserUpdateProfilePage />
             </Layout>
           }
         />
@@ -42,6 +44,22 @@ const UserRoutes = () => {
           element={
             <Layout>
               <ContractForm />
+            </Layout>
+          }
+        />
+        <Route
+          path="review-protect/:orderRef"
+          element={
+            <Layout>
+              <ReviewProtectPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="contract/:orderRef"
+          element={
+            <Layout>
+              <UserContractPage />
             </Layout>
           }
         />
