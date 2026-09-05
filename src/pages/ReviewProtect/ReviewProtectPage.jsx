@@ -13,6 +13,7 @@ import {
   Divider,
   Chip,
   Checkbox,
+  Switch,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -30,7 +31,7 @@ import { GET_CHECKOUT_BY_ORDER_REF } from "../../context/graphql/getContractDeta
 // Shippo quotes (server re-resolves on submit), so this preview can never
 // spoof the Stripe total. Thresholds gate the toggles only.
 const INSURANCE_THRESHOLD = 300;
-const SIGNATURE_THRESHOLD = 500;
+const SIGNATURE_THRESHOLD = 300;
 
 const CREATE_CONTRACT_CHECKOUT = gql`
   mutation CreateContractCheckout($data: CreateContractCheckoutInput!) {
@@ -88,22 +89,46 @@ const ReviewProtectPage = () => {
   const [preset, setPreset] = useState("single");
   const [declined, setDeclined] = useState(false);
   const [waiverOpen, setWaiverOpen] = useState(false);
+  const [signatureDeclined, setSignatureDeclined] = useState(false);
+  const [signatureWaiverOpen, setSignatureWaiverOpen] = useState(false);
   const [packagingModalOpen, setPackagingModalOpen] = useState(false);
   const [signatureOptIn, setSignatureOptIn] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState(0);
 
   useEffect(() => {
+    // Reset per-contract choices so state never leaks between orders.
+    setSignatureDeclined(false);
+    setSignatureOptIn(false);
+    if (!contract?.insuranceDeclined) setDeclined(false);
     if (contract?.shippingPreset) setPreset(contract.shippingPreset);
     if (contract?.insuranceDeclined) setDeclined(true);
-    if (contract?.signatureRequired) setSignatureOptIn(true);
-  }, [contract?.shippingPreset, contract?.shippingSpeed, contract?.insuranceDeclined, contract?.signatureRequired]);
+    // A persisted false is an explicit decline regardless of carrier —
+    // the backend only auto-computes true at/over threshold, so a stored
+    // false on a high-value order can only mean the user waived it.
+    if (contract?.signatureRequired === false) {
+      setSignatureDeclined(true);
+    } else if (contract?.signatureRequired === true) {
+      setSignatureOptIn(true);
+    }
+  }, [contract?.shippingPreset, contract?.shippingSpeed, contract?.insuranceDeclined, contract?.signatureRequired, contract?.shippingCarrier]);
 
   const declared = Number(contract?.declaredMarketValue) || 0;
   const insuranceToggleable = declared >= INSURANCE_THRESHOLD;
-  // Signature is automatic at/over threshold (porch-piracy + claim
-  // validity); below it the client may opt in for ~$4.15/carrier.
+  // Signature is automatic at/over SIGNATURE_THRESHOLD, opt-in below.
+  // (Threshold lives in the constant above — keep copy in sync with it.)
   const signatureAuto = declared >= SIGNATURE_THRESHOLD;
-  const signatureEffective = signatureAuto || signatureOptIn;
+  const signatureEffective = signatureAuto ? !signatureDeclined : signatureOptIn;
+
+  const handleSignatureToggle = (e) => {
+    if (e.target.checked) {
+      setSignatureDeclined(false);
+      setSelectedIdx(0);
+    } else {
+      // Waiver modal only — the rate selection is untouched unless the
+      // waiver is actually accepted (cancel keeps the current rate).
+      setSignatureWaiverOpen(true);
+    }
+  };
 
   const {
     data: ratesData,
@@ -144,11 +169,12 @@ const ReviewProtectPage = () => {
     if (e.target.checked) {
       // Re-enabling protection needs no waiver.
       setDeclined(false);
+      setSelectedIdx(0);
     } else {
-      // Opting out requires acknowledging the liability waiver first.
+      // Opting out requires acknowledging the liability waiver first —
+      // selection resets only if the waiver is accepted.
       setWaiverOpen(true);
     }
-    setSelectedIdx(0);
   };
 
   const handlePresetChange = (e) => {
@@ -328,7 +354,9 @@ const ReviewProtectPage = () => {
                 ? "Covered by us"
                 : declined
                   ? "Declined"
-                  : "Included in rates"
+                  : selected
+                    ? money(selected.insuranceTotal || 0)
+                    : "…"
             }
             color={!insuranceToggleable || declined ? "success" : "default"}
           />
@@ -343,7 +371,7 @@ const ReviewProtectPage = () => {
                   sx={{ "&.Mui-checked": { color: "#FFD100" } }}
                 />
               }
-              label="Protect my shipment — full value covered on both trips"
+              label={<span>Protect my shipment — <strong>{money(declared)}</strong> full value covered on both trips</span>}
               sx={{ alignItems: "flex-start", "& .MuiFormControlLabel-label": { fontSize: "0.875rem", pt: 1 } }}
             />
             {declined && (
@@ -367,29 +395,69 @@ const ReviewProtectPage = () => {
           </Typography>
           <Chip
             size="small"
-            label={signatureEffective ? "Required" : "Not required"}
-            color={signatureEffective ? "default" : "success"}
+            label={
+              signatureAuto
+                ? signatureDeclined
+                  ? "Declined"
+                  : "Included"
+                : signatureOptIn
+                ? "Included"
+                : "Not required"
+            }
+            color={signatureEffective ? "success" : "default"}
           />
         </Box>
         {signatureAuto ? (
-          <Typography variant="body1" color="text.secondary">
-            {`Signature required on orders over ${money(SIGNATURE_THRESHOLD)} — someone must sign at delivery. Closes porch-piracy gaps insurance alone doesn't cover, and keeps high-value claims valid.`}
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 2 }}>
+            <Box>
+              <Typography variant="subtitle1" fontWeight={700}>
+                Signature Confirmation
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                {signatureDeclined
+                  ? "Signature declined — delivery driver may leave package unattended at doorstep."
+                  : `Signature required — someone must sign at delivery to prevent porch piracy.`}
+              </Typography>
+            </Box>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!signatureDeclined}
+                  onChange={handleSignatureToggle}
+                  color="primary"
+                />
+              }
+              label={!signatureDeclined ? "Active" : "Off"}
+              labelPlacement="start"
+              sx={{ m: 0, flexShrink: 0 }}
+            />
+          </Box>
         ) : (
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={signatureOptIn}
-                onChange={(e) => {
-                  setSignatureOptIn(e.target.checked);
-                  setSelectedIdx(0);
-                }}
-                sx={{ "&.Mui-checked": { color: "#FFD100" } }}
-              />
-            }
-            label="Require a signature"
-            sx={{ alignItems: "flex-start", "& .MuiFormControlLabel-label": { fontSize: "0.875rem", pt: 1 } }}
-          />
+          <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 2 }}>
+            <Box>
+              <Typography variant="subtitle1" fontWeight={700}>
+                Signature Confirmation
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                Add direct signature on delivery to ensure your package is handed directly to someone.
+              </Typography>
+            </Box>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={signatureOptIn}
+                  onChange={(e) => {
+                    setSignatureOptIn(e.target.checked);
+                    setSelectedIdx(0);
+                  }}
+                  color="primary"
+                />
+              }
+              label={signatureOptIn ? "Active" : "Off"}
+              labelPlacement="start"
+              sx={{ m: 0, flexShrink: 0 }}
+            />
+          </Box>
         )}
       </Paper>
 
@@ -399,6 +467,7 @@ const ReviewProtectPage = () => {
         </Typography>
         <Typography variant="body1" color="text.secondary" mb={2}>
           Live rates, there and back{declined ? ", insurance excluded" : ", insurance included"}.
+          Signature cost is embedded in the shipping rate — the final total is confirmed at checkout.
         </Typography>
         
         {ratesLoading ? (
@@ -454,7 +523,13 @@ const ReviewProtectPage = () => {
                       {o.carrier} {o.service}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {o.etaDays != null ? `~${o.etaDays} days` : "Standard delivery"} — {money(Math.round((o.roundTripTotal - (o.insuranceTotal || 0)) * 100) / 100)} round trip
+                      {o.etaDays != null ? `~${o.etaDays} days` : "Standard delivery"} — {money(o.roundTripTotal)} round trip
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {money(Math.round((o.roundTripTotal - (o.insuranceTotal || 0)) * 100) / 100)} shipping
+                      {(o.insuranceTotal || 0) > 0
+                        ? ` + ${money(o.insuranceTotal)} insurance`
+                        : " · insurance waived"}
                     </Typography>
                   </Box>
                 </Box>
@@ -491,8 +566,12 @@ const ReviewProtectPage = () => {
         </Box>
         <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, mb: 1 }}>
           <Typography variant="body1" sx={{ minWidth: 0 }}>Signature Required</Typography>
-          <Typography variant="h6" fontWeight={600} sx={{ whiteSpace: "nowrap", color: signatureEffective ? "text.primary" : "text.secondary" }}>
-            {signatureEffective ? "Included" : "Not required"}
+          <Typography variant="h6" fontWeight={600} sx={{ whiteSpace: "nowrap", color: (signatureAuto && signatureDeclined) ? "text.secondary" : signatureEffective ? "text.primary" : "text.secondary" }}>
+            {signatureAuto && signatureDeclined
+              ? "Declined"
+              : signatureEffective
+                ? "In shipping"
+                : "Not required"}
           </Typography>
         </Box>
         <Divider sx={{ my: 1.5 }} />
@@ -562,6 +641,44 @@ const ReviewProtectPage = () => {
             onClick={() => {
               setDeclined(true);
               setWaiverOpen(false);
+              setSelectedIdx(0);
+            }}
+            fullWidth
+            sx={{
+              bgcolor: "#FFD100",
+              color: "#000",
+              fontWeight: 700,
+              textTransform: "none",
+              borderRadius: 2,
+              "&:hover": { bgcolor: "#E6BC00" },
+            }}
+          >
+            I accept responsibility
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={signatureWaiverOpen} onClose={() => setSignatureWaiverOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Ship without signature?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+            Signature confirmation prevents porch piracy and unattended delivery theft. By waiving a signature, <strong>you accept full responsibility</strong> if the carrier marks the package as delivered but it is missing or stolen.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button
+            onClick={() => setSignatureWaiverOpen(false)}
+            variant="outlined"
+            fullWidth
+            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
+          >
+            Keep signature
+          </Button>
+          <Button
+            onClick={() => {
+              setSignatureDeclined(true);
+              setSignatureWaiverOpen(false);
+              setSelectedIdx(0);
             }}
             fullWidth
             sx={{
