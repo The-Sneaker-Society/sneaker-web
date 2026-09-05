@@ -7,6 +7,7 @@ const SidebarItem = ({ text, icon, notification, onClick }) => {
 
   return (
     <ListItem
+      button
       onClick={onClick}
       sx={{
         borderRadius: 2,

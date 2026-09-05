@@ -31,7 +31,7 @@ import { GET_CHECKOUT_BY_ORDER_REF } from "../../context/graphql/getContractDeta
 // Shippo quotes (server re-resolves on submit), so this preview can never
 // spoof the Stripe total. Thresholds gate the toggles only.
 const INSURANCE_THRESHOLD = 300;
-const SIGNATURE_THRESHOLD = 500;
+const SIGNATURE_THRESHOLD = 300;
 
 const CREATE_CONTRACT_CHECKOUT = gql`
   mutation CreateContractCheckout($data: CreateContractCheckoutInput!) {
@@ -96,9 +96,16 @@ const ReviewProtectPage = () => {
   const [selectedIdx, setSelectedIdx] = useState(0);
 
   useEffect(() => {
+    // Reset per-contract choices so state never leaks between orders.
+    setSignatureDeclined(false);
+    setSignatureOptIn(false);
+    if (!contract?.insuranceDeclined) setDeclined(false);
     if (contract?.shippingPreset) setPreset(contract.shippingPreset);
     if (contract?.insuranceDeclined) setDeclined(true);
-    if (contract?.signatureRequired === false && contract?.shippingCarrier) {
+    // A persisted false is an explicit decline regardless of carrier —
+    // the backend only auto-computes true at/over threshold, so a stored
+    // false on a high-value order can only mean the user waived it.
+    if (contract?.signatureRequired === false) {
       setSignatureDeclined(true);
     } else if (contract?.signatureRequired === true) {
       setSignatureOptIn(true);
@@ -107,17 +114,20 @@ const ReviewProtectPage = () => {
 
   const declared = Number(contract?.declaredMarketValue) || 0;
   const insuranceToggleable = declared >= INSURANCE_THRESHOLD;
-  // Signature is automatic at/over threshold ($300), opt-in below
+  // Signature is automatic at/over SIGNATURE_THRESHOLD, opt-in below.
+  // (Threshold lives in the constant above — keep copy in sync with it.)
   const signatureAuto = declared >= SIGNATURE_THRESHOLD;
   const signatureEffective = signatureAuto ? !signatureDeclined : signatureOptIn;
 
   const handleSignatureToggle = (e) => {
     if (e.target.checked) {
       setSignatureDeclined(false);
+      setSelectedIdx(0);
     } else {
+      // Waiver modal only — the rate selection is untouched unless the
+      // waiver is actually accepted (cancel keeps the current rate).
       setSignatureWaiverOpen(true);
     }
-    setSelectedIdx(0);
   };
 
   const {
@@ -159,11 +169,12 @@ const ReviewProtectPage = () => {
     if (e.target.checked) {
       // Re-enabling protection needs no waiver.
       setDeclined(false);
+      setSelectedIdx(0);
     } else {
-      // Opting out requires acknowledging the liability waiver first.
+      // Opting out requires acknowledging the liability waiver first —
+      // selection resets only if the waiver is accepted.
       setWaiverOpen(true);
     }
-    setSelectedIdx(0);
   };
 
   const handlePresetChange = (e) => {
@@ -403,7 +414,7 @@ const ReviewProtectPage = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 {signatureDeclined
                   ? "Signature declined — delivery driver may leave package unattended at doorstep."
-                  : `Signature required on orders over ${money(SIGNATURE_THRESHOLD)} — someone must sign at delivery to prevent porch piracy.`}
+                  : `Signature required on orders of ${money(SIGNATURE_THRESHOLD)} or more — someone must sign at delivery to prevent porch piracy.`}
               </Typography>
             </Box>
             <FormControlLabel
@@ -454,6 +465,7 @@ const ReviewProtectPage = () => {
         </Typography>
         <Typography variant="body1" color="text.secondary" mb={2}>
           Live rates, there and back{declined ? ", insurance excluded" : ", insurance included"}.
+          Signature cost is embedded in the shipping rate — the final total is confirmed at checkout.
         </Typography>
         
         {ratesLoading ? (
@@ -550,7 +562,7 @@ const ReviewProtectPage = () => {
             {signatureAuto && signatureDeclined
               ? "Declined"
               : signatureEffective
-                ? "Included"
+                ? "In shipping"
                 : "Not required"}
           </Typography>
         </Box>
@@ -621,6 +633,7 @@ const ReviewProtectPage = () => {
             onClick={() => {
               setDeclined(true);
               setWaiverOpen(false);
+              setSelectedIdx(0);
             }}
             fullWidth
             sx={{
@@ -641,7 +654,7 @@ const ReviewProtectPage = () => {
         <DialogTitle sx={{ fontWeight: 700 }}>Ship without signature?</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-            For orders over <strong>{money(SIGNATURE_THRESHOLD)}</strong>, signature confirmation prevents porch piracy and unattended delivery theft. By waiving a signature, <strong>you accept full responsibility</strong> if the carrier marks the package as delivered but it is missing or stolen.
+            For orders of <strong>{money(SIGNATURE_THRESHOLD)}</strong> or more, signature confirmation prevents porch piracy and unattended delivery theft. By waiving a signature, <strong>you accept full responsibility</strong> if the carrier marks the package as delivered but it is missing or stolen.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
