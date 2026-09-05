@@ -371,7 +371,7 @@ const ReviewProtectPage = () => {
                   sx={{ "&.Mui-checked": { color: "#FFD100" } }}
                 />
               }
-              label={`Protect my shipment — ${money(declared)} full value covered on both trips`}
+              label={<span>Protect my shipment — <strong>{money(declared)}</strong> full value covered on both trips</span>}
               sx={{ alignItems: "flex-start", "& .MuiFormControlLabel-label": { fontSize: "0.875rem", pt: 1 } }}
             />
             {declined && (
