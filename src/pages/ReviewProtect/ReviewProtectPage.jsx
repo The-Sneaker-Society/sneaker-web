@@ -354,7 +354,9 @@ const ReviewProtectPage = () => {
                 ? "Covered by us"
                 : declined
                   ? "Declined"
-                  : "Included in rates"
+                  : selected
+                    ? money(selected.insuranceTotal || 0)
+                    : "…"
             }
             color={!insuranceToggleable || declined ? "success" : "default"}
           />
@@ -369,7 +371,7 @@ const ReviewProtectPage = () => {
                   sx={{ "&.Mui-checked": { color: "#FFD100" } }}
                 />
               }
-              label={`Protect my shipment — full value covered on both trips · ${selected ? money(selected.insuranceTotal || 0) : "…"}`}
+              label="Protect my shipment — full value covered on both trips"
               sx={{ alignItems: "flex-start", "& .MuiFormControlLabel-label": { fontSize: "0.875rem", pt: 1 } }}
             />
             {declined && (
@@ -397,9 +399,9 @@ const ReviewProtectPage = () => {
               signatureAuto
                 ? signatureDeclined
                   ? "Declined"
-                  : "Active"
+                  : "Included"
                 : signatureOptIn
-                ? "Active"
+                ? "Included"
                 : "Not required"
             }
             color={signatureEffective ? "success" : "default"}
@@ -416,11 +418,6 @@ const ReviewProtectPage = () => {
                   ? "Signature declined — delivery driver may leave package unattended at doorstep."
                   : `Signature required on orders of ${money(SIGNATURE_THRESHOLD)} or more — someone must sign at delivery to prevent porch piracy.`}
               </Typography>
-              {!signatureDeclined && (
-                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-                  No separate charge — the carrier signature fee is already inside each shipping rate above.
-                </Typography>
-              )}
             </Box>
             <FormControlLabel
               control={
@@ -444,11 +441,6 @@ const ReviewProtectPage = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 Add direct signature on delivery to ensure your package is handed directly to someone.
               </Typography>
-              {signatureOptIn && (
-                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-                  No separate charge — the carrier signature fee is already inside each shipping rate above.
-                </Typography>
-              )}
             </Box>
             <FormControlLabel
               control={
