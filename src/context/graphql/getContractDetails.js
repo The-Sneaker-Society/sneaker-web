@@ -85,6 +85,7 @@ export const CONTRACT_FULL_FIELDS = gql`
     shippingSpeed
     shippingFee
     insuranceFee
+    taxFee
     insuranceDeclined
     signatureRequired
     selectedServiceMenuItem {
