@@ -89,7 +89,7 @@ const UserContractPage = () => {
     .join(" ");
   const statusCfg = STATUS_UI_CONFIG[contract.status] ?? { label: contract.status, color: colors.textSecondary };
   const servicePrice = contract.price ?? contract.proposedPrice ?? 0;
-  const total = servicePrice + (contract.shippingFee || 0) + (contract.insuranceFee || 0);
+  const total = servicePrice + (contract.shippingFee || 0) + (contract.insuranceFee || 0) + (contract.taxFee || 0);
   const canReview =
     contract.status === "PRICE_PROPOSED" || contract.status === "AWAITING_PAYMENT";
 
@@ -175,6 +175,12 @@ const UserContractPage = () => {
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                   <Typography variant="body2" color="text.secondary">Package Protection</Typography>
                   <Typography variant="body2" fontWeight={600} color="success.main">Included (On Us)</Typography>
+                </Box>
+              )}
+              {contract.taxFee > 0 && (
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary">Sales Tax</Typography>
+                  <Typography variant="body2" fontWeight={600}>{money(contract.taxFee)}</Typography>
                 </Box>
               )}
               <Divider sx={{ my: 1.5 }} />

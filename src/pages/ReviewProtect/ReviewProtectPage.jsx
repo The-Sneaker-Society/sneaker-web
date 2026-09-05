@@ -574,6 +574,12 @@ const ReviewProtectPage = () => {
                 : "Not required"}
           </Typography>
         </Box>
+        <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, mb: 1 }}>
+          <Typography variant="body1" sx={{ minWidth: 0 }}>Estimated Tax</Typography>
+          <Typography variant="h6" fontWeight={600} color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
+            Calculated at checkout
+          </Typography>
+        </Box>
         <Divider sx={{ my: 1.5 }} />
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h4" fontWeight={700}>Total</Typography>
