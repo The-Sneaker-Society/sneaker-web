@@ -416,7 +416,7 @@ const ReviewProtectPage = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 {signatureDeclined
                   ? "Signature declined — delivery driver may leave package unattended at doorstep."
-                  : `Signature required on orders of ${money(SIGNATURE_THRESHOLD)} or more — someone must sign at delivery to prevent porch piracy.`}
+                  : `Signature required — someone must sign at delivery to prevent porch piracy.`}
               </Typography>
             </Box>
             <FormControlLabel
@@ -662,7 +662,7 @@ const ReviewProtectPage = () => {
         <DialogTitle sx={{ fontWeight: 700 }}>Ship without signature?</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-            For orders of <strong>{money(SIGNATURE_THRESHOLD)}</strong> or more, signature confirmation prevents porch piracy and unattended delivery theft. By waiving a signature, <strong>you accept full responsibility</strong> if the carrier marks the package as delivered but it is missing or stolen.
+            Signature confirmation prevents porch piracy and unattended delivery theft. By waiving a signature, <strong>you accept full responsibility</strong> if the carrier marks the package as delivered but it is missing or stolen.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
