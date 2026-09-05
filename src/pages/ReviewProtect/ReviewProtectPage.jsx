@@ -521,7 +521,13 @@ const ReviewProtectPage = () => {
                       {o.carrier} {o.service}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {o.etaDays != null ? `~${o.etaDays} days` : "Standard delivery"} — {money(Math.round((o.roundTripTotal - (o.insuranceTotal || 0)) * 100) / 100)} round trip
+                      {o.etaDays != null ? `~${o.etaDays} days` : "Standard delivery"} — {money(o.roundTripTotal)} round trip
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {money(Math.round((o.roundTripTotal - (o.insuranceTotal || 0)) * 100) / 100)} shipping
+                      {(o.insuranceTotal || 0) > 0
+                        ? ` + ${money(o.insuranceTotal)} insurance`
+                        : " · insurance waived"}
                     </Typography>
                   </Box>
                 </Box>
