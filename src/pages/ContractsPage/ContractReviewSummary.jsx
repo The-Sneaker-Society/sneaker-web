@@ -15,6 +15,7 @@ import {
   TextField,
   Button,
   Divider,
+  Alert,
 } from "@mui/material";
 import {
   FiZoomIn,
@@ -30,6 +31,7 @@ import { useQuery, useMutation, gql } from "@apollo/client";
 import { GET_CONTRACT_BY_ID, GET_CONTRACT_BY_ORDER_REF } from "../../context/graphql/getContractDetails";
 import ImagePreviewDialog from "../../components/ImagePreviewDialog";
 import Timeline from "../../components/Timeline";
+import CancelContractModal from "../../components/CancelContractModal";
 
 const INITIATE_CONTRACT_CHAT = gql`
   mutation InitiateContractChat($contractId: ID!) {
@@ -176,6 +178,7 @@ const ContractReviewSummary = () => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
 
   const { loading, error, data } = useQuery(GET_CONTRACT_BY_ORDER_REF, {
     variables: { orderRef },
@@ -229,9 +232,20 @@ const ContractReviewSummary = () => {
   }
 
   const statusColor = STATUS_COLORS[contract.status] || "#6B7280";
+  // Members can only cancel pre-payment; once paid (READY_TO_SHIP), they must contact support
+  const canCancel =
+    contract &&
+    ["PENDING_REVIEW", "PRICE_PROPOSED", "AWAITING_PAYMENT"].includes(
+      contract.status
+    );
 
   const leftContent = (
     <Box>
+      {contract.status === "CANCELED" && (
+        <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
+          This contract has been canceled.
+        </Alert>
+      )}
       <Paper variant="outlined" sx={{ p: 3, mb: 4, textAlign: "center" }}>
         <Box
           sx={{
@@ -414,27 +428,43 @@ const ContractReviewSummary = () => {
           <Button
             variant="contained"
             fullWidth
-            disabled={!contract.outboundLabelUrl}
+            disabled={!contract.outboundLabelUrl || contract.status === "CANCELED"}
             startIcon={
-              contract.outboundLabelUrl ? <FiPrinter size={18} /> : 
-              (needsLabelPoll ? <CircularProgress size={16} color="inherit" /> : <FiPrinter size={18} />)
+              needsLabelPoll && !contract.outboundLabelUrl ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <FiPrinter size={18} />
+              )
             }
             onClick={() => contract.outboundLabelUrl && window.open(contract.outboundLabelUrl, "_blank", "noopener")}
             sx={{
               py: 1.25,
-              bgcolor: contract.outboundLabelUrl ? "#FFD100" : "action.disabledBackground",
-              color: contract.outboundLabelUrl ? "#000" : "text.disabled",
+              bgcolor:
+                contract.outboundLabelUrl && contract.status !== "CANCELED"
+                  ? "#FFD100"
+                  : "action.disabledBackground",
+              color:
+                contract.outboundLabelUrl && contract.status !== "CANCELED"
+                  ? "#000"
+                  : "text.disabled",
               fontWeight: 700,
               textTransform: "none",
               fontSize: "1rem",
-              "&:hover": { bgcolor: contract.outboundLabelUrl ? "#E6BC00" : undefined },
+              "&:hover": {
+                bgcolor:
+                  contract.outboundLabelUrl && contract.status !== "CANCELED"
+                    ? "#E6BC00"
+                    : undefined,
+              },
             }}
           >
-            {contract.outboundLabelUrl 
+            {contract.status === "CANCELED"
+              ? "Contract Canceled"
+              : contract.outboundLabelUrl 
               ? "Print Return Label" 
               : (needsLabelPoll ? "Processing Label..." : "Label Unavailable")}
           </Button>
-          {!contract.outboundLabelUrl && needsLabelPoll && (
+          {contract.status !== "CANCELED" && !contract.outboundLabelUrl && needsLabelPoll && (
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", textAlign: "center", mt: 1 }}>
               Usually takes under a minute. This page will automatically refresh.
             </Typography>
@@ -496,6 +526,20 @@ const ContractReviewSummary = () => {
         </Button>
       </Paper>
 
+      {canCancel && (
+        <Box sx={{ mt: 1, mb: 3, textAlign: "center" }}>
+          <Button
+            variant="text"
+            color="error"
+            size="small"
+            onClick={() => setCancelModalOpen(true)}
+            sx={{ textTransform: "none", fontWeight: 600, fontSize: "0.85rem" }}
+          >
+            Cancel Contract Request
+          </Button>
+        </Box>
+      )}
+
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
           Timeline
@@ -522,6 +566,13 @@ const ContractReviewSummary = () => {
           </Box>
         </Box>
       )}
+
+      <CancelContractModal
+        open={cancelModalOpen}
+        onClose={() => setCancelModalOpen(false)}
+        contract={contract}
+        userRole="member"
+      />
 
       <ImagePreviewDialog open={!!previewUrl} url={previewUrl} onClose={() => setPreviewUrl(null)} />
     </Box>

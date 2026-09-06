@@ -9,6 +9,7 @@ import { GET_CONTRACT_BY_ORDER_REF } from "../../context/graphql/getContractDeta
 import { useColors } from "../../theme/colors";
 import { STATUS_UI_CONFIG } from "../../utils/statusConfig";
 import ImagePreviewDialog from "../../components/ImagePreviewDialog";
+import CancelContractModal from "../../components/CancelContractModal";
 
 const money = (n) =>
   `$${(Number(n) || 0).toLocaleString("en-US", {
@@ -28,6 +29,7 @@ const UserContractPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
   // Labels are bought asynchronously after the Stripe webhook lands, so a
   // fresh payment briefly has no labelUrl. Poll until it appears, then
   // stop. Unpaid contracts never poll.
@@ -92,6 +94,9 @@ const UserContractPage = () => {
   const total = servicePrice + (contract.shippingFee || 0) + (contract.insuranceFee || 0) + (contract.taxFee || 0);
   const canReview =
     contract.status === "PRICE_PROPOSED" || contract.status === "AWAITING_PAYMENT";
+  const canCancel = ["PENDING_REVIEW", "PRICE_PROPOSED", "AWAITING_PAYMENT", "READY_TO_SHIP"].includes(
+    contract.status
+  );
 
   const tracking = [
     { leg: "Inbound label", ...contract.inboundTracking },
@@ -100,6 +105,11 @@ const UserContractPage = () => {
 
   const leftContent = (
     <Box>
+      {contract.status === "CANCELED" && (
+        <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
+          This contract has been canceled.
+        </Alert>
+      )}
       <Paper variant="outlined" sx={{ p: 3, mb: 4, textAlign: "center" }}>
         <Box
           sx={{
@@ -444,27 +454,43 @@ const UserContractPage = () => {
           <Button
             variant="contained"
             fullWidth
-            disabled={!contract.inboundLabelUrl}
+            disabled={!contract.inboundLabelUrl || contract.status === "CANCELED"}
             startIcon={
-              contract.inboundLabelUrl ? <FiPrinter size={18} /> : 
-              (needsLabelPoll ? <CircularProgress size={16} color="inherit" /> : <FiPrinter size={18} />)
+              needsLabelPoll && !contract.inboundLabelUrl ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <FiPrinter size={18} />
+              )
             }
             onClick={() => contract.inboundLabelUrl && window.open(contract.inboundLabelUrl, "_blank", "noopener")}
             sx={{
               py: 1.25,
-              bgcolor: contract.inboundLabelUrl ? "#FFD100" : "action.disabledBackground",
-              color: contract.inboundLabelUrl ? "#000" : "text.disabled",
+              bgcolor:
+                contract.inboundLabelUrl && contract.status !== "CANCELED"
+                  ? "#FFD100"
+                  : "action.disabledBackground",
+              color:
+                contract.inboundLabelUrl && contract.status !== "CANCELED"
+                  ? "#000"
+                  : "text.disabled",
               fontWeight: 700,
               textTransform: "none",
               fontSize: "1rem",
-              "&:hover": { bgcolor: contract.inboundLabelUrl ? "#E6BC00" : undefined },
+              "&:hover": {
+                bgcolor:
+                  contract.inboundLabelUrl && contract.status !== "CANCELED"
+                    ? "#E6BC00"
+                    : undefined,
+              },
             }}
           >
-            {contract.inboundLabelUrl 
+            {contract.status === "CANCELED"
+              ? "Contract Canceled"
+              : contract.inboundLabelUrl 
               ? "Print Shipping Label" 
               : (needsLabelPoll ? "Processing Label..." : "Label Unavailable")}
           </Button>
-          {!contract.inboundLabelUrl && needsLabelPoll && (
+          {contract.status !== "CANCELED" && !contract.inboundLabelUrl && needsLabelPoll && (
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", textAlign: "center", mt: 1 }}>
               Usually takes under a minute. This page will automatically refresh.
             </Typography>
@@ -498,6 +524,22 @@ const UserContractPage = () => {
           support@thesneakersociety.com
         </Button>
       </Paper>
+
+      {canCancel && (
+        <Box sx={{ mt: 1, mb: 3, textAlign: "center" }}>
+          <Button
+            variant="text"
+            color="error"
+            size="small"
+            onClick={() => setCancelModalOpen(true)}
+            sx={{ textTransform: "none", fontWeight: 600, fontSize: "0.85rem" }}
+          >
+            {contract.status === "READY_TO_SHIP"
+              ? "Cancel Contract (Label fees non-refundable)"
+              : "Cancel Contract Request"}
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 
@@ -520,6 +562,13 @@ const UserContractPage = () => {
           </Box>
         </Box>
       )}
+
+      <CancelContractModal
+        open={cancelModalOpen}
+        onClose={() => setCancelModalOpen(false)}
+        contract={contract}
+        userRole="client"
+      />
 
       <ImagePreviewDialog
         open={!!previewUrl}
