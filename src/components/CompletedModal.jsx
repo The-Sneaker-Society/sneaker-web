@@ -7,13 +7,19 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, 
  */
 export default function CompletedModal({ contract, role }) {
   const key = contract?.orderRef ? `completed-notice-seen:${contract.orderRef}` : null;
-  const [open, setOpen] = useState(() => {
+  // All hooks above the early return — hook order must never depend on data.
+  const [copied, setCopied] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const seen = (() => {
     try {
-      return !!key && !sessionStorage.getItem(key);
+      return !!key && !!sessionStorage.getItem(key);
     } catch {
-      return !!key;
+      return false;
     }
-  });
+  })();
+  // Derived per render (not captured in an initializer) so late-loading
+  // contract data still opens the modal on first view.
+  const open = !!key && !!contract && !seen && !dismissed;
 
   if (!contract || !key) return null;
 
@@ -23,14 +29,13 @@ export default function CompletedModal({ contract, role }) {
     } catch {
       // storage unavailable — modal simply shows again next visit
     }
-    setOpen(false);
+    setDismissed(true);
   };
 
   const isMember = role === "member";
   const otherName = isMember
     ? contract?.client?.firstName
     : contract?.member?.firstName;
-  const [copied, setCopied] = useState(false);
 
   const shareText = `Just got my ${[contract?.shoeDetails?.brand, contract?.shoeDetails?.model].filter(Boolean).join(" ") || "sneakers"} restored by @thesneakerssociety 👟✨`;
 
