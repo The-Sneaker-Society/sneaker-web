@@ -34,8 +34,9 @@ const STATUS_CONFIG = {
   INBOUND_SHIPPED:     { label: "Inbound Shipped",     icon: FiInbox,       colorKey: "inProgress" },
   ARRIVED_AT_MEMBER:   { label: "Arrived at Member",   icon: FiTool,        colorKey: "inProgress" },
   WORK_IN_PROGRESS:    { label: "Work in Progress",    icon: FiTool,        colorKey: "inProgress" },
+  READY_FOR_RETURN:    { label: "Ready for Return",    icon: FiInbox,       colorKey: "inProgress" },
   RETURN_SHIPPED:      { label: "Return Shipped",      icon: FiInbox,       colorKey: "inProgress" },
-  DELIVERED_TO_USER:   { label: "Delivered to User",   icon: FiCheckCircle, colorKey: "completed"  },
+  DELIVERED_TO_USER:   { label: "Delivered",           icon: FiCheckCircle, colorKey: "completed"  },
   COMPLETED:           { label: "Completed",           icon: FiCheckCircle, colorKey: "completed"  },
   CANCELED:            { label: "Canceled",            icon: FiClock,       colorKey: "notStarted" },
   UNDER_MANUAL_REVIEW: { label: "Under Review",        icon: FiClock,       colorKey: "error"      },
@@ -43,7 +44,7 @@ const STATUS_CONFIG = {
 
 const STATUS_BUCKETS = [
   { label: "Pending Review", statuses: ["PENDING_REVIEW"],                                                                                    icon: FiClock,       colorKey: "pending"    },
-  { label: "In Progress",    statuses: ["PRICE_PROPOSED","AWAITING_PAYMENT","READY_TO_SHIP","INBOUND_SHIPPED","ARRIVED_AT_MEMBER","WORK_IN_PROGRESS","RETURN_SHIPPED","DELIVERED_TO_USER"], icon: FiTool, colorKey: "inProgress" },
+  { label: "In Progress",    statuses: ["PRICE_PROPOSED","AWAITING_PAYMENT","READY_TO_SHIP","INBOUND_SHIPPED","ARRIVED_AT_MEMBER","WORK_IN_PROGRESS","READY_FOR_RETURN","RETURN_SHIPPED","DELIVERED_TO_USER"], icon: FiTool, colorKey: "inProgress" },
   { label: "Completed",      statuses: ["COMPLETED"],                                                                                          icon: FiCheckCircle, colorKey: "completed"  },
 ];
 

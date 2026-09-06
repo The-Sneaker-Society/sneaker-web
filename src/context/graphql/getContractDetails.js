@@ -94,7 +94,11 @@ export const CONTRACT_FULL_FIELDS = gql`
       price
     }
     unboxingPhotos
+    packagingPhotos
+    returnPackagingPhotos
     completionPhotos
+    payoutEligibleAt
+    payoutStatus
     inboundLabelUrl
     outboundLabelUrl
     inboundTracking {
@@ -108,9 +112,12 @@ export const CONTRACT_FULL_FIELDS = gql`
     timeline {
       event
       date
+      reason
+      actor
     }
     shippingCarrier
     paymentStatus
+    payoutAmount
     createdAt
     updatedAt
   }

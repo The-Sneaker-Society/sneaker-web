@@ -39,6 +39,7 @@ const STATUS_BUCKETS = [
       "INBOUND_SHIPPED",
       "ARRIVED_AT_MEMBER",
       "WORK_IN_PROGRESS",
+      "READY_FOR_RETURN",
       "RETURN_SHIPPED",
       "DELIVERED_TO_USER",
     ],
