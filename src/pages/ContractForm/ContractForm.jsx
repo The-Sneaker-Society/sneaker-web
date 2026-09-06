@@ -22,9 +22,13 @@ const CREATE_CONTRACT = gql`
   }
 `;
 
-const GET_MEMBER_CONTRACT_STATUS = gql`
-  query GetMemberContractStatus($memberId: ID!) {
+const GET_PUBLIC_MEMBER = gql`
+  query GetPublicMember($memberId: ID!) {
     publicMemberById(id: $memberId) {
+      id
+      firstName
+      lastName
+      businessName
       contractsDisabled
     }
   }
@@ -51,17 +55,6 @@ const GET_SERVICE_MENU = gql`
       description
       isActive
       sortOrder
-    }
-  }
-`;
-
-const GET_MEMBER_FOR_CUSTOM = gql`
-  query GetMemberForCustom($memberId: ID!) {
-    publicMemberById(id: $memberId) {
-      id
-      firstName
-      lastName
-      businessName
     }
   }
 `;
@@ -285,13 +278,14 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
   const memberId = isPreview ? memberIdProp : memberIdParam;
 
   const {
-    loading: statusLoading,
-    error: statusError,
-    data: statusData,
-  } = useQuery(GET_MEMBER_CONTRACT_STATUS, {
+    data: memberData,
+    loading: memberLoading,
+    error: memberError,
+  } = useQuery(GET_PUBLIC_MEMBER, {
     variables: { memberId },
-    skip: isPreview,
+    skip: !memberId,
   });
+  const member = memberData?.publicMemberById;
 
   const {
     data: menuData,
@@ -300,12 +294,6 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     variables: { memberId },
     skip: !memberId,
   });
-
-  const { data: memberData, loading: memberLoading } = useQuery(GET_MEMBER_FOR_CUSTOM, {
-    variables: { memberId },
-    skip: !memberId,
-  });
-  const member = memberData?.publicMemberById;
 
   const serviceMenu = menuData?.getServiceMenu || [];
   const activeItems = serviceMenu.filter((i) => i.isActive);
@@ -333,13 +321,25 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     setActiveStep((prevStep) => prevStep - 1);
   };
 
-  if (isPreview && !memberIdProp) return <div>Unauthorized preview access</div>;
+  if (isPreview && !memberIdProp) {
+    return (
+      <Box sx={{ p: 4, maxWidth: 600, mx: "auto" }}>
+        <Alert severity="warning">Unauthorized preview access</Alert>
+      </Box>
+    );
+  }
 
-  if (statusLoading || memberLoading) return <LoadingCircle />;
+  if (memberLoading) return <LoadingCircle />;
 
   if (!isPreview) {
-    if (statusError) return <div>Error: {statusError.message}</div>;
-    if (statusData?.publicMemberById?.contractsDisabled) return <NotAcceptingContracts />;
+    if (memberError) {
+      return (
+        <Box sx={{ p: 4, maxWidth: 600, mx: "auto" }}>
+          <Alert severity="error">Error: {memberError.message}</Alert>
+        </Box>
+      );
+    }
+    if (member?.contractsDisabled) return <NotAcceptingContracts />;
   }
 
   if (showIntro) {

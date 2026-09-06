@@ -44,13 +44,16 @@ const CREATE_GROUP = gql`
   }
 `;
 
-const GET_MEMBERS = gql`
-  query Members($searchTerm: String) {
-    members(searchTerm: $searchTerm) {
-      id
-      firstName
-      lastName
-      email
+const GET_DISCOVER_MEMBERS = gql`
+  query GetDiscoverMembers($limit: Int, $offset: Int) {
+    getDiscoverMembers(limit: $limit, offset: $offset) {
+      items {
+        id
+        firstName
+        lastName
+        businessName
+      }
+      totalCount
     }
   }
 `;
@@ -86,7 +89,7 @@ const GroupCreationForm = () => {
   );
 
   const [fetchMembers, { data, loading: membersLoading }] =
-    useLazyQuery(GET_MEMBERS);
+    useLazyQuery(GET_DISCOVER_MEMBERS);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -98,7 +101,7 @@ const GroupCreationForm = () => {
 
   useEffect(() => {
     if (debouncedSearchTerm.trim().length > 0) {
-      fetchMembers({ variables: { searchTerm: debouncedSearchTerm } });
+      fetchMembers({ variables: { limit: 50, offset: 0 } });
     }
   }, [debouncedSearchTerm, fetchMembers]);
 
@@ -151,7 +154,14 @@ const GroupCreationForm = () => {
     });
   };
 
-  const users = data?.members || [];
+  const allMembers = data?.getDiscoverMembers?.items || [];
+  const searchLower = debouncedSearchTerm.toLowerCase().trim();
+  const users = searchLower
+    ? allMembers.filter((m) => {
+        const full = `${m.firstName || ""} ${m.lastName || ""} ${m.businessName || ""}`.toLowerCase();
+        return full.includes(searchLower);
+      })
+    : allMembers;
 
   const textPrimary = isDark ? colors.grey[100] : colors.grey[900];
   const textSecondary = isDark ? colors.grey[300] : colors.grey[500];
@@ -361,7 +371,7 @@ const GroupCreationForm = () => {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {user.email}
+                    {user.businessName || "Member"}
                   </Typography>
                 </Box>
 
