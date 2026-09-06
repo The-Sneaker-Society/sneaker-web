@@ -10,6 +10,7 @@ const statusColors = {
   INBOUND_SHIPPED: 'info',
   ARRIVED_AT_MEMBER: 'info',
   WORK_IN_PROGRESS: 'info',
+  READY_FOR_RETURN: 'info',
   RETURN_SHIPPED: 'info',
   DELIVERED_TO_USER: 'info',
   COMPLETED: 'success',

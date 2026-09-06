@@ -32,6 +32,13 @@ import { GET_CONTRACT_BY_ID, GET_CONTRACT_BY_ORDER_REF } from "../../context/gra
 import ImagePreviewDialog from "../../components/ImagePreviewDialog";
 import Timeline from "../../components/Timeline";
 import CancelContractModal from "../../components/CancelContractModal";
+import EvidenceStrip from "../../components/EvidenceStrip";
+import UnboxingCheckpoint from "../../components/UnboxingCheckpoint";
+import PackagingPhotoCard from "../../components/PackagingPhotoCard";
+import { MARK_WORK_COMPLETE, MARK_RETURN_SHIPPED } from "../../context/graphql/escrowMutations";
+import ReportIssueEntry, { FreezeBanner, isFrozen } from "../../components/FlagIssue";
+import UnderReviewModal from "../../components/UnderReviewModal";
+import CompletedModal from "../../components/CompletedModal";
 
 const INITIATE_CONTRACT_CHAT = gql`
   mutation InitiateContractChat($contractId: ID!) {
@@ -172,6 +179,195 @@ const MemberNotesCard = ({ contract, contractId }) => {
   );
 };
 
+/**
+ * Member work-completion + return-shipment actions. WORK_IN_PROGRESS offers
+ * "Mark work complete" (→ READY_FOR_RETURN); READY_FOR_RETURN offers the
+ * return-label flow (print → packing photos → done) plus "Mark as shipped".
+ * Hidden when frozen — nothing moves during review.
+ */
+const WorkReturnActions = ({ contract }) => {
+  const [flowOpen, setFlowOpen] = React.useState(false);
+  const [errorMsg, setErrorMsg] = React.useState(null);
+  const refetch = contract?.orderRef
+    ? [{ query: GET_CONTRACT_BY_ORDER_REF, variables: { orderRef: contract.orderRef } }]
+    : [];
+  const [markComplete, { loading: completing }] = useMutation(MARK_WORK_COMPLETE, { refetchQueries: refetch });
+  const [markShipped, { loading: shipping }] = useMutation(MARK_RETURN_SHIPPED, { refetchQueries: refetch });
+
+  if (!contract || isFrozen(contract)) return null;
+
+  const run = async (fn) => {
+    setErrorMsg(null);
+    try {
+      await fn({ variables: { contractId: contract.id } });
+    } catch (err) {
+      setErrorMsg(err.message || "Action failed.");
+    }
+  };
+
+  if (contract.status === "WORK_IN_PROGRESS") {
+    return (
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
+          Work finished?
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Mark the restoration complete to stage the return — you&apos;ll print the return label next.
+        </Typography>
+        {errorMsg && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{errorMsg}</Alert>}
+        <Button
+          variant="contained"
+          fullWidth
+          disabled={completing}
+          onClick={() => run(markComplete)}
+          sx={{ bgcolor: "#FFD100", color: "#000", fontWeight: 700, textTransform: "none", "&:hover": { bgcolor: "#E6BC00" } }}
+        >
+          {completing ? "Saving…" : "Mark work complete"}
+        </Button>
+      </Paper>
+    );
+  }
+
+  if (contract.status === "READY_FOR_RETURN") {
+    return (
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
+          Ready for return
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Print the return label, snap the packed box, then mark it shipped — batch as many as you like before drop-off.
+        </Typography>
+        {errorMsg && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{errorMsg}</Alert>}
+        <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+          <Button
+            variant="outlined"
+            disabled={!contract.outboundLabelUrl}
+            onClick={() => contract.outboundLabelUrl && setFlowOpen(true)}
+            sx={{ flex: 1, textTransform: "none", fontWeight: 700 }}
+          >
+            Print return label
+          </Button>
+          <Button
+            variant="contained"
+            disabled={shipping}
+            onClick={() => run(markShipped)}
+            sx={{ flex: 1, bgcolor: "#FFD100", color: "#000", fontWeight: 700, textTransform: "none", "&:hover": { bgcolor: "#E6BC00" } }}
+          >
+            {shipping ? "Saving…" : "Mark as shipped"}
+          </Button>
+        </Box>
+        <PackagingPhotoCard contract={contract} mode="return" open={flowOpen} onClose={() => setFlowOpen(false)} />
+      </Paper>
+    );
+  }
+
+  return null;
+};
+
+/**
+ * Member earnings summary: service price, 15% platform fee, net payout
+ * (stored payoutAmount — authoritative, not recomputed). Shown once priced,
+ * hidden when canceled. Members should never wonder what they're earning.
+ */
+const EarningsSummary = ({ contract }) => {
+  if (!contract || contract.status === "CANCELED") return null;
+  const service = Number(contract.price ?? contract.proposedPrice) || 0;
+  if (service <= 0) return null;
+  const fee = Math.round(service * 0.15 * 100) / 100;
+  const net = Number(contract.payoutAmount) || Math.round((service - fee) * 100) / 100;
+
+  const row = (label, value) => (
+    <Box key={label} sx={{ display: "flex", justifyContent: "space-between", gap: 2, mb: 1 }}>
+      <Typography variant="body1" sx={{ minWidth: 0 }}>{label}</Typography>
+      <Typography variant="h6" fontWeight={600} sx={{ whiteSpace: "nowrap" }}>{value}</Typography>
+    </Box>
+  );
+
+  return (
+    <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+      <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+        Your earnings
+      </Typography>
+      {row("Service price", `$${service.toFixed(2)}`)}
+      {row("Platform fee (15%)", `−$${fee.toFixed(2)}`)}
+      <Divider sx={{ my: 1.5 }} />
+      {row("You earn", `$${net.toFixed(2)}`)}
+    </Paper>
+  );
+};
+
+/**
+ * Member DELIVERED_TO_USER card: awaiting the client's confirmation.
+ * States plainly that payout releases after the 72h window, automatically
+ * if the client does nothing — the member's money is never held hostage
+ * by an unresponsive buyer.
+ */
+const DeliveredPayoutCard = ({ contract }) => {
+  const [now, setNow] = React.useState(() => new Date());
+  React.useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(t);
+  }, []);
+
+  if (!contract || contract.status !== "DELIVERED_TO_USER") return null;
+
+  const eligibleAt = contract.payoutEligibleAt ? new Date(Number(contract.payoutEligibleAt) || contract.payoutEligibleAt) : null;
+  const remaining = eligibleAt ? eligibleAt.getTime() - now.getTime() : null;
+  const payout = Number(contract.payoutAmount) || 0;
+  const clientName = contract.client?.firstName || "your client";
+
+  const countdown =
+    remaining == null
+      ? null
+      : remaining <= 0
+        ? "any moment now"
+        : (() => {
+            const mins = Math.floor(remaining / 60000);
+            const d = Math.floor(mins / 1440);
+            const h = Math.floor((mins % 1440) / 60);
+            const m = mins % 60;
+            if (d > 0) return `${d}d ${h}h`;
+            if (h > 0) return `${h}h ${m}m`;
+            return `${m}m`;
+          })();
+
+  return (
+    <Paper variant="outlined" sx={{ p: 3, mb: 3, borderColor: "#14B8A6", bgcolor: "rgba(20,184,166,0.04)" }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mb: 1, flexWrap: "wrap" }}>
+        <Typography variant="h6" fontWeight={700}>
+          Delivered — awaiting {clientName}&apos;s confirmation
+        </Typography>
+        <Box
+          sx={{
+            px: 1.75,
+            py: 0.5,
+            borderRadius: 2,
+            bgcolor: "#14B8A6",
+            color: "#fff",
+            fontWeight: 700,
+            fontSize: "0.8rem",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {countdown ? (countdown === "any moment now" ? "Releasing soon" : `Auto-release in ${countdown}`) : "Auto-release pending"}
+        </Box>
+      </Box>
+      {payout > 0 && (
+        <Typography variant="h3" fontWeight={800} sx={{ mb: 0.5 }}>
+          ${payout.toFixed(2)}
+        </Typography>
+      )}
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        Your payout releases after the 72-hour confirmation period. If {clientName} doesn&apos;t
+        confirm by then, it releases on its own.
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        Nothing you need to do. If an issue is reported, you&apos;ll see it here.
+      </Typography>
+    </Paper>
+  );
+};
+
 const ContractReviewSummary = () => {
   const { orderRef } = useParams();
   const theme = useTheme();
@@ -202,6 +398,8 @@ const ContractReviewSummary = () => {
     }
   };
 
+  const frozen = isFrozen(contract);
+  const labelLive = !!contract?.outboundLabelUrl && contract.status !== "CANCELED" && !frozen;
   const needsLabelPoll = contract && !contract.outboundLabelUrl && [
     "AWAITING_SHIPMENT", "IN_TRANSIT_TO_RESTORER", "IN_RESTORATION",
     "PENDING_FINAL_APPROVAL", "COMPLETED", "IN_TRANSIT_TO_USER"
@@ -241,11 +439,7 @@ const ContractReviewSummary = () => {
 
   const leftContent = (
     <Box>
-      {contract.status === "CANCELED" && (
-        <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
-          This contract has been canceled.
-        </Alert>
-      )}
+      {/* Hero first, always: status + shoes, whatever the state. */}
       <Paper variant="outlined" sx={{ p: 3, mb: 4, textAlign: "center" }}>
         <Box
           sx={{
@@ -273,6 +467,20 @@ const ContractReviewSummary = () => {
           Submitted {new Date(Number(contract.createdAt) || contract.createdAt).toLocaleDateString()}
         </Typography>
       </Paper>
+
+      <EarningsSummary contract={contract} />
+      {contract.status === "COMPLETED" && <CompletedModal contract={contract} role="member" />}
+
+      {contract.status === "CANCELED" && (
+        <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
+          This contract has been canceled.
+        </Alert>
+      )}
+      {isFrozen(contract) && <FreezeBanner role="member" />}
+      {isFrozen(contract) && <UnderReviewModal contract={contract} role="member" />}
+      <DeliveredPayoutCard contract={contract} />
+      <UnboxingCheckpoint contract={contract} />
+      <WorkReturnActions contract={contract} />
 
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Typography variant="h5" fontWeight={600} mb={2}>
@@ -377,6 +585,8 @@ const ContractReviewSummary = () => {
           </Typography>
         </Paper>
       )}
+
+      <EvidenceStrip contract={contract} onPreview={setPreviewUrl} />
     </Box>
   );
 
@@ -428,7 +638,7 @@ const ContractReviewSummary = () => {
           <Button
             variant="contained"
             fullWidth
-            disabled={!contract.outboundLabelUrl || contract.status === "CANCELED"}
+            disabled={!labelLive}
             startIcon={
               needsLabelPoll && !contract.outboundLabelUrl ? (
                 <CircularProgress size={16} color="inherit" />
@@ -436,15 +646,15 @@ const ContractReviewSummary = () => {
                 <FiPrinter size={18} />
               )
             }
-            onClick={() => contract.outboundLabelUrl && window.open(contract.outboundLabelUrl, "_blank", "noopener")}
+            onClick={() => labelLive && window.open(contract.outboundLabelUrl, "_blank", "noopener")}
             sx={{
               py: 1.25,
               bgcolor:
-                contract.outboundLabelUrl && contract.status !== "CANCELED"
+                labelLive
                   ? "#FFD100"
                   : "action.disabledBackground",
               color:
-                contract.outboundLabelUrl && contract.status !== "CANCELED"
+                labelLive
                   ? "#000"
                   : "text.disabled",
               fontWeight: 700,
@@ -452,7 +662,7 @@ const ContractReviewSummary = () => {
               fontSize: "1rem",
               "&:hover": {
                 bgcolor:
-                  contract.outboundLabelUrl && contract.status !== "CANCELED"
+                  labelLive
                     ? "#E6BC00"
                     : undefined,
               },
@@ -460,6 +670,8 @@ const ContractReviewSummary = () => {
           >
             {contract.status === "CANCELED"
               ? "Contract Canceled"
+              : frozen
+              ? "Paused During Review"
               : contract.outboundLabelUrl 
               ? "Print Return Label" 
               : (needsLabelPoll ? "Processing Label..." : "Label Unavailable")}
@@ -525,6 +737,8 @@ const ContractReviewSummary = () => {
           support@thesneakersociety.com
         </Button>
       </Paper>
+
+      <ReportIssueEntry contract={contract} />
 
       {canCancel && (
         <Box sx={{ mt: 1, mb: 3, textAlign: "center" }}>
