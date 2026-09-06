@@ -24,7 +24,7 @@ const CREATE_CONTRACT = gql`
 
 const GET_MEMBER_CONTRACT_STATUS = gql`
   query GetMemberContractStatus($memberId: ID!) {
-    memberById(id: $memberId) {
+    publicMemberById(id: $memberId) {
       contractsDisabled
     }
   }
@@ -57,7 +57,7 @@ const GET_SERVICE_MENU = gql`
 
 const GET_MEMBER_FOR_CUSTOM = gql`
   query GetMemberForCustom($memberId: ID!) {
-    memberById(id: $memberId) {
+    publicMemberById(id: $memberId) {
       id
       firstName
       lastName
@@ -305,7 +305,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
     variables: { memberId },
     skip: !memberId,
   });
-  const member = memberData?.memberById;
+  const member = memberData?.publicMemberById;
 
   const serviceMenu = menuData?.getServiceMenu || [];
   const activeItems = serviceMenu.filter((i) => i.isActive);
@@ -339,7 +339,7 @@ export const ContractForm = ({ isPreview = false, memberId: memberIdProp }) => {
 
   if (!isPreview) {
     if (statusError) return <div>Error: {statusError.message}</div>;
-    if (statusData?.memberById?.contractsDisabled) return <NotAcceptingContracts />;
+    if (statusData?.publicMemberById?.contractsDisabled) return <NotAcceptingContracts />;
   }
 
   if (showIntro) {
