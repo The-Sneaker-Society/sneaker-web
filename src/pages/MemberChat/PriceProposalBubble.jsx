@@ -7,6 +7,7 @@ const statusConfig = {
   pending: { label: "Pending", icon: FiClock, color: "#F59E0B" },
   paid: { label: "Paid", icon: FiCheckCircle, color: "#10B981" },
   expired: { label: "Expired", icon: FiAlertCircle, color: "#EF4444" },
+  canceled: { label: "Canceled", icon: FiAlertCircle, color: "#6B7280" },
 };
 
 const PriceProposalBubble = ({ metadata, isMine, contractId, contractOrderRef, canCheckout }) => {
