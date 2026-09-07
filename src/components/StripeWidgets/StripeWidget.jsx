@@ -12,6 +12,7 @@ const GET_STRIPE_WIDGET_DATA = gql`
       payoutAmount
       percentChange
       previousPayoutAmount
+      lastPayoutDate
       accountStatus
       pendingCount
       totalFees
@@ -39,6 +40,54 @@ function StatusDot({ status, colors }) {
       }}
     />
   );
+}
+
+function getPayoutBadge(stripeWidgetData, colors) {
+  const { percentChange, lastPayoutDate, pendingCount } = stripeWidgetData || {};
+  const hasPending = (pendingCount ?? 0) > 0;
+
+  if (lastPayoutDate) {
+    const paidDate = new Date(lastPayoutDate);
+    if (!isNaN(paidDate.getTime())) {
+      const now = new Date();
+      const isToday =
+        paidDate.getFullYear() === now.getFullYear() &&
+        paidDate.getMonth() === now.getMonth() &&
+        paidDate.getDate() === now.getDate();
+      if (isToday) {
+        return {
+          label: "Paid today",
+          color: colors.status.completed,
+          bgColor: `${colors.status.completed}15`,
+        };
+      }
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      const isYesterday =
+        paidDate.getFullYear() === yesterday.getFullYear() &&
+        paidDate.getMonth() === yesterday.getMonth() &&
+        paidDate.getDate() === yesterday.getDate();
+      if (isYesterday) {
+        return {
+          label: "Paid yesterday",
+          color: colors.status.completed,
+          bgColor: `${colors.status.completed}15`,
+        };
+      }
+    }
+  }
+
+  // Only show percent change when there are pending payouts, suppressing any negative artifact
+  if (hasPending && percentChange !== 0 && percentChange !== -100) {
+    const isPositive = percentChange > 0;
+    return {
+      label: `${isPositive ? "+" : ""}${percentChange}%`,
+      color: isPositive ? colors.status.completed : colors.status.error,
+      bgColor: isPositive ? `${colors.status.completed}15` : `${colors.status.error}15`,
+    };
+  }
+
+  return null;
 }
 
 export const StripeWidget = () => {
@@ -87,6 +136,7 @@ export const StripeWidget = () => {
 
   const { payoutAmount, previousPayoutAmount, accountStatus, pendingCount } = data.stripeWidgetData;
   const hasPending = pendingCount > 0;
+  const payoutBadge = getPayoutBadge(data.stripeWidgetData, colors);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%", bgcolor: colors.widgetBg, borderRadius: 3, border: `1px solid ${colors.borderSubtle}`, p: 3 }}>
@@ -100,10 +150,10 @@ export const StripeWidget = () => {
         <Typography sx={{ fontSize: { xs: "1.75rem", sm: "2rem", md: "2.5rem" }, fontWeight: 700, color: colors.textPrimary, lineHeight: 1.1 }}>
           {payoutAmount}
         </Typography>
-        {data.stripeWidgetData.percentChange !== 0 && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, px: 1.5, py: 0.5, borderRadius: 1, bgcolor: data.stripeWidgetData.percentChange > 0 ? `${colors.status.completed}15` : `${colors.status.error}15` }}>
-            <Typography sx={{ fontSize: "0.875rem", fontWeight: 600, color: data.stripeWidgetData.percentChange > 0 ? colors.status.completed : colors.status.error }}>
-              {data.stripeWidgetData.percentChange > 0 ? "+" : ""}{data.stripeWidgetData.percentChange}%
+        {payoutBadge && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, px: 1.5, py: 0.5, borderRadius: 1, bgcolor: payoutBadge.bgColor }}>
+            <Typography sx={{ fontSize: "0.875rem", fontWeight: 600, color: payoutBadge.color }}>
+              {payoutBadge.label}
             </Typography>
           </Box>
         )}
