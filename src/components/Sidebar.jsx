@@ -32,8 +32,9 @@ const Sidebar = ({
     </>
   ) : (
     <>
-      <SidebarItem text="Groups"   icon={<GroupsOutlined />}    onClick={() => navigate("/member/groups")} />
-      <SidebarItem text="Messages" icon={<ChatBubbleOutline />} notification={5} onClick={() => navigate("/member/messages")} />
+      <SidebarItem text="Dashboard" icon={<DirectionsRunOutlined />} onClick={() => navigate("/member/dashboard")} />
+      <SidebarItem text="Groups"    icon={<GroupsOutlined />}         onClick={() => navigate("/member/groups")} />
+      <SidebarItem text="Messages"  icon={<ChatBubbleOutline />}      notification={5} onClick={() => navigate("/member/messages")} />
     </>
   );
 
