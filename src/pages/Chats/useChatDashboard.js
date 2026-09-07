@@ -177,6 +177,18 @@ const useChatDashboard = (senderType) => {
     }
   }, [updateData]);
 
+  // Mark current chat as read and notify listeners
+  useEffect(() => {
+    if (id) {
+      try {
+        localStorage.setItem(`last_read_chat_${id}`, String(Date.now()));
+        window.dispatchEvent(new CustomEvent("chat_read", { detail: { chatId: id } }));
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, [id, messages]);
+
   const sendMessage = async (content) => {
     setIsSending(true);
     try {

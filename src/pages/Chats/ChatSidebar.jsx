@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   List,
@@ -93,8 +93,22 @@ const ChatSidebar = () => {
   const colors = useColors();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [, setVersion] = useState(0);
 
-  const { data, loading, error } = useQuery(GET_MEMBER_CHATS);
+  useEffect(() => {
+    const handleRead = () => setVersion((v) => v + 1);
+    window.addEventListener("chat_read", handleRead);
+    window.addEventListener("storage", handleRead);
+    return () => {
+      window.removeEventListener("chat_read", handleRead);
+      window.removeEventListener("storage", handleRead);
+    };
+  }, []);
+
+  const { data, loading, error } = useQuery(GET_MEMBER_CHATS, {
+    pollInterval: 15000,
+    fetchPolicy: "cache-and-network",
+  });
 
   const chats = data?.currentMember?.chats || [];
 
@@ -182,6 +196,16 @@ const ChatSidebar = () => {
             const avatarColor = stringToColor(label);
             const initials = getInitials(label);
 
+            let isUnread = false;
+            if (lastMsg && lastMsg.senderType === "USER") {
+              try {
+                const lastSeen = localStorage.getItem(`last_read_chat_${chat.id}`);
+                isUnread = !lastSeen || Number(lastMsg.createdAt) > Number(lastSeen);
+              } catch (e) {
+                isUnread = true;
+              }
+            }
+
             return (
               <ListItem
                 key={chat.id}
@@ -209,6 +233,7 @@ const ChatSidebar = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
+                      position: "relative",
                     }}
                   >
                     <Typography
@@ -221,6 +246,20 @@ const ChatSidebar = () => {
                     >
                       {initials}
                     </Typography>
+                    {isUnread && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          right: 0,
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          bgcolor: colors.status?.completed || "#FFD100",
+                          border: `2px solid ${colors.isDark ? "#000" : "#fff"}`,
+                        }}
+                      />
+                    )}
                   </Box>
                 </ListItemAvatar>
                 <ListItemText
@@ -228,7 +267,7 @@ const ChatSidebar = () => {
                     <Typography
                       sx={{
                         fontFamily: "Montserrat, sans-serif",
-                        fontWeight: 600,
+                        fontWeight: isUnread ? 700 : 600,
                         fontSize: "0.95rem",
                         color: colors.textPrimary,
                         whiteSpace: "nowrap",
@@ -252,7 +291,8 @@ const ChatSidebar = () => {
                         sx={{
                           fontFamily: "Montserrat, sans-serif",
                           fontSize: "0.8rem",
-                          color: colors.textSecondary,
+                          color: isUnread ? colors.textPrimary : colors.textSecondary,
+                          fontWeight: isUnread ? 600 : 400,
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -266,7 +306,8 @@ const ChatSidebar = () => {
                           sx={{
                             fontFamily: "Montserrat, sans-serif",
                             fontSize: "0.7rem",
-                            color: colors.textSecondary,
+                            color: isUnread ? (colors.status?.completed || "#FFD100") : colors.textSecondary,
+                            fontWeight: isUnread ? 700 : 400,
                             flexShrink: 0,
                           }}
                         >
