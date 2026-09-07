@@ -2,7 +2,6 @@ import React from "react";
 import { Box, List, Drawer } from "@mui/material";
 import {
   GroupsOutlined,
-  Inventory2Outlined,
   ChatBubbleOutline,
   SettingsOutlined,
   DirectionsRunOutlined,
@@ -33,10 +32,8 @@ const Sidebar = ({
     </>
   ) : (
     <>
-      <SidebarItem text="My Society"  icon={<DirectionsRunOutlined />} onClick={() => navigate("/member/my-society")} />
-      <SidebarItem text="Groups"      icon={<GroupsOutlined />}         onClick={() => navigate("/member/groups")} />
-      <SidebarItem text="The Vault"   icon={<Inventory2Outlined />}     onClick={() => navigate("/member/the-vault")} />
-      <SidebarItem text="Messages"    icon={<ChatBubbleOutline />}      notification={5} onClick={() => navigate("/member/messages")} />
+      <SidebarItem text="Groups"   icon={<GroupsOutlined />}    onClick={() => navigate("/member/groups")} />
+      <SidebarItem text="Messages" icon={<ChatBubbleOutline />} notification={5} onClick={() => navigate("/member/messages")} />
     </>
   );
 
