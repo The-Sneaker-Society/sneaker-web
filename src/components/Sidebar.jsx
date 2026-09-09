@@ -6,6 +6,7 @@ import {
   SettingsOutlined,
   DirectionsRunOutlined,
   GavelOutlined,
+  ReceiptLongOutlined,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
@@ -113,6 +114,7 @@ const Sidebar = ({
   const navItems = isAdminSection ? (
     <>
       <SidebarItem text="Disputes" icon={<GavelOutlined />} onClick={() => navigate("/admin/disputes")} />
+      <SidebarItem text="Contracts & P&L" icon={<ReceiptLongOutlined />} onClick={() => navigate("/admin/contracts")} />
     </>
   ) : isUserSection ? (
     <>

@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import AdminDisputeQueuePage from "../pages/Admin/AdminDisputeQueuePage";
 import AdminDisputeDetailPage from "../pages/Admin/AdminDisputeDetailPage";
+import AdminContractsPage from "../pages/Admin/AdminContractsPage";
+import AdminContractDetailPage from "../pages/Admin/AdminContractDetailPage";
 
 const AdminRoutes = () => {
   return (
@@ -20,6 +22,22 @@ const AdminRoutes = () => {
         element={
           <Layout>
             <AdminDisputeDetailPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="contracts"
+        element={
+          <Layout>
+            <AdminContractsPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="contracts/:orderRef"
+        element={
+          <Layout>
+            <AdminContractDetailPage />
           </Layout>
         }
       />
