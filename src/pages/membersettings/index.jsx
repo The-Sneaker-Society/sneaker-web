@@ -5,17 +5,13 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Box, TextField, Typography, useTheme, Alert, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Box, Typography, useTheme } from "@mui/material";
 import Form from "../../membersettingsform";
 import PricingCard from "../../pricing";
-import ChangeUsername from "../../updateusername";
-import ServiceMenuEditor from "./ServiceMenuEditor";
 
 const MemberSettings = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate();
 
   return (
     <Box m="20px">
@@ -61,32 +57,6 @@ const MemberSettings = () => {
           />
         </AccordionDetails>
       </Accordion>
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography
-            variant="h3"
-            color={colors.grey[100]}
-            sx={{ m: "15px 0 5px 20px", fontWeight: "bold" }}
-          >
-            Service Menu
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Alert
-            severity="info"
-            sx={{ mb: 2 }}
-            action={
-              <Button color="inherit" size="small" onClick={() => navigate("/member/services")}>
-                Manage Services →
-              </Button>
-            }
-          >
-            Moved to Manage Services — new card grid + list view with full page at <strong>/member/services</strong>.
-          </Alert>
-          <ServiceMenuEditor />
-        </AccordionDetails>
-      </Accordion>
-
     </Box>
   );
 };
