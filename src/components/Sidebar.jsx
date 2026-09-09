@@ -5,6 +5,7 @@ import {
   ChatBubbleOutline,
   SettingsOutlined,
   DirectionsRunOutlined,
+  GavelOutlined,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
@@ -41,12 +42,13 @@ const Sidebar = ({
   // Layout is shared across sections — derive the section from the URL so
   // users never see member routes (every one 401s on role guards).
   const isUserSection = pathname.startsWith("/user");
+  const isAdminSection = pathname.startsWith("/admin");
 
   const [readVersion, setReadVersion] = useState(0);
 
   // Poll chats periodically for members to keep unread badges fresh
   const { data: chatData } = useQuery(GET_SIDEBAR_CHATS, {
-    skip: isUserSection,
+    skip: isUserSection || isAdminSection,
     fetchPolicy: "cache-and-network",
     pollInterval: 15000,
   });
@@ -108,7 +110,11 @@ const Sidebar = ({
     return count + 1;
   }, 0);
 
-  const navItems = isUserSection ? (
+  const navItems = isAdminSection ? (
+    <>
+      <SidebarItem text="Disputes" icon={<GavelOutlined />} onClick={() => navigate("/admin/disputes")} />
+    </>
+  ) : isUserSection ? (
     <>
       <SidebarItem text="Dashboard"  icon={<DirectionsRunOutlined />} onClick={() => navigate("/user/dashboard")} />
       <SidebarItem text="My Society" icon={<DirectionsRunOutlined />} onClick={() => navigate("/mysociety")} />
@@ -121,7 +127,7 @@ const Sidebar = ({
     </>
   );
 
-  const settingsItem = (
+  const settingsItem = isAdminSection ? null : (
     <Box sx={{ padding: 2, borderTop: `1px solid ${colors.border}` }}>
       <SidebarItem
         text="Settings"
@@ -138,7 +144,7 @@ const Sidebar = ({
         src={colors.isDark ? LogoBlack : LogoWhite}
         alt="Logo"
         sx={{ width: "80%", maxWidth: "300px", height: "auto", my: 4, cursor: "pointer" }}
-        onClick={() => navigate(isUserSection ? "/user/dashboard" : "/member/dashboard")}
+        onClick={() => navigate(isAdminSection ? "/admin/disputes" : isUserSection ? "/user/dashboard" : "/member/dashboard")}
       />
       <Box sx={{ position: "absolute", top: 8, right: 8 }}>
         <ThemeToggle />
