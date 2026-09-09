@@ -58,6 +58,7 @@ export const GET_ADMIN_DISPUTE_DETAIL = gql`
         afterFormNotes
         createdAt
         shoeDetails {
+          brand
           model
           color
           size
@@ -69,6 +70,10 @@ export const GET_ADMIN_DISPUTE_DETAIL = gql`
           previousRepairs
           previousRepairsNotes
           photos {
+            leftSide { url note key }
+            rightSide { url note key }
+            topView { url note key }
+            bottomView { url note key }
             frontView { url note key }
             backView { url note key }
             inside { url note key }
@@ -88,7 +93,6 @@ export const GET_ADMIN_DISPUTE_DETAIL = gql`
           email
           phoneNumber
           businessName
-          avatar
         }
         client {
           id
@@ -96,7 +100,6 @@ export const GET_ADMIN_DISPUTE_DETAIL = gql`
           lastName
           email
           phoneNumber
-          avatar
         }
         timeline {
           event
@@ -282,6 +285,10 @@ export const GET_ADMIN_CONTRACT_DETAIL = gql`
         previousRepairs
         previousRepairsNotes
         photos {
+          leftSide { url note key }
+          rightSide { url note key }
+          topView { url note key }
+          bottomView { url note key }
           frontView { url note key }
           backView { url note key }
           inside { url note key }
@@ -301,7 +308,6 @@ export const GET_ADMIN_CONTRACT_DETAIL = gql`
         email
         phoneNumber
         businessName
-        avatar
       }
       client {
         id
@@ -309,7 +315,6 @@ export const GET_ADMIN_CONTRACT_DETAIL = gql`
         lastName
         email
         phoneNumber
-        avatar
       }
       timeline {
         event
