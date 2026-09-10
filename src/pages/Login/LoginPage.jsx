@@ -16,7 +16,6 @@ import { SignedOut, useClerk, useUser } from "@clerk/clerk-react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 import Logo from "../../assets/ss-logo.svg";
-import { useColors } from "../../theme/colors";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -25,7 +24,6 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { isSignedIn, isLoaded } = useUser();
   const { openSignIn } = useClerk();
-  const colors = useColors();
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
@@ -60,7 +58,7 @@ export default function LoginPage() {
       <Box
         sx={{
           alignItems: "center",
-          bgcolor: colors.pageBg,
+          bgcolor: "background.default",
           display: "flex",
           justifyContent: "center",
           minHeight: "100vh",
@@ -73,10 +71,11 @@ export default function LoginPage() {
 
   return (
     <Box
+      component="main"
       sx={{
         alignItems: "center",
-        bgcolor: colors.pageBg,
-        color: colors.textPrimary,
+        bgcolor: "background.default",
+        color: "text.primary",
         display: "flex",
         minHeight: "100vh",
         py: { xs: 3, sm: 5 },
@@ -89,10 +88,10 @@ export default function LoginPage() {
             startIcon={<ArrowBackIcon />}
             sx={{
               alignSelf: "flex-start",
-              color: colors.textSecondary,
+              color: "text.secondary",
               "&:hover": {
                 bgcolor: "action.hover",
-                color: colors.textPrimary,
+                color: "text.primary",
               },
             }}
             to="/"
@@ -107,28 +106,46 @@ export default function LoginPage() {
               border: 1,
               borderColor: "divider",
               borderRadius: 2,
-              color: colors.textPrimary,
+              color: "text.primary",
               p: { xs: 3, sm: 5 },
             }}
           >
             <Stack alignItems="center" spacing={3}>
               <Box
-                alt="The Sneaker Society"
-                component="img"
-                src={Logo}
+                aria-label="Return to The Sneaker Society home page"
+                component={RouterLink}
                 sx={{
-                  height: "auto",
-                  maxWidth: 240,
-                  width: { xs: "72%", sm: "62%" },
+                  display: "inline-flex",
+                  lineHeight: 0,
+                  textDecoration: "none",
+                  "&:focus-visible": {
+                    borderRadius: 1,
+                    outline: "3px solid",
+                    outlineColor: "primary.main",
+                    outlineOffset: 4,
+                  },
                 }}
-              />
+                to="/"
+              >
+                <Box
+                  alt="The Sneaker Society"
+                  component="img"
+                  src={Logo}
+                  sx={{
+                    display: "block",
+                    height: "auto",
+                    maxWidth: 240,
+                    width: { xs: "72%", sm: "62%" },
+                  }}
+                />
+              </Box>
 
               <Stack spacing={1} textAlign="center">
                 <Typography component="h1" variant="h3">
                   Welcome back
                 </Typography>
 
-                <Typography color={colors.textSecondary} variant="body1">
+                <Typography color="text.secondary" variant="body1">
                   Sign in to manage your sneaker-service business, clients, and
                   community connections.
                 </Typography>
@@ -137,6 +154,7 @@ export default function LoginPage() {
               <Box sx={{ width: "100%" }}>
                 <SignedOut>
                   <Button
+                    aria-label="Continue with Google"
                     disabled={isSubmitting}
                     fullWidth
                     onClick={handleLogin}
@@ -147,7 +165,24 @@ export default function LoginPage() {
                         <GoogleIcon />
                       )
                     }
-                    sx={{ minHeight: 48 }}
+                    sx={{
+                      bgcolor: "brandSurface.main",
+                      border: 1,
+                      borderColor: "divider",
+                      color: "common.black",
+                      fontWeight: 700,
+                      minHeight: 48,
+                      "&:hover": {
+                        bgcolor: "brandSurface.main",
+                        borderColor: "primary.main",
+                        boxShadow: 2,
+                      },
+                      "&.Mui-disabled": {
+                        bgcolor: "brandSurface.main",
+                        color: "text.secondary",
+                        opacity: 0.65,
+                      },
+                    }}
                     variant="contained"
                   >
                     {isSubmitting
@@ -170,7 +205,7 @@ export default function LoginPage() {
               <Divider flexItem />
 
               <Typography
-                color={colors.textSecondary}
+                color="text.secondary"
                 textAlign="center"
                 variant="body2"
               >
@@ -192,7 +227,7 @@ export default function LoginPage() {
               </Typography>
 
               <Typography
-                color={colors.textSecondary}
+                color="text.secondary"
                 textAlign="center"
                 variant="body2"
               >
@@ -216,7 +251,7 @@ export default function LoginPage() {
           </Paper>
 
           <Typography
-            color={colors.textSecondary}
+            color="text.secondary"
             textAlign="center"
             variant="caption"
           >

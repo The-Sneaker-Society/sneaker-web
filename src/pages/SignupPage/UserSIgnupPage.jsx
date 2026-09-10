@@ -17,8 +17,8 @@ import { useMutation } from "@apollo/client";
 import { useUser } from "@clerk/clerk-react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
+import Logo from "../../assets/ss-logo.svg";
 import { CREATE_USER } from "../SignUpMemberPage/graphql/addUser";
-import { useColors } from "../../theme/colors";
 
 const FormikTextField = ({ name, helperText, ...props }) => {
   const [field, meta] = useField(name);
@@ -56,9 +56,7 @@ const UserSignupPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
-  const colors = useColors();
   const { isLoaded, user } = useUser();
-
   const [createUser, { loading }] = useMutation(CREATE_USER);
 
   const email =
@@ -108,7 +106,7 @@ const UserSignupPage = () => {
       <Box
         sx={{
           alignItems: "center",
-          bgcolor: colors.pageBg,
+          bgcolor: "background.default",
           display: "flex",
           justifyContent: "center",
           minHeight: "100vh",
@@ -123,8 +121,8 @@ const UserSignupPage = () => {
     <Box
       component="main"
       sx={{
-        bgcolor: colors.pageBg,
-        color: colors.textPrimary,
+        bgcolor: "background.default",
+        color: "text.primary",
         minHeight: "100vh",
         py: { xs: 3, sm: 5 },
       }}
@@ -136,10 +134,10 @@ const UserSignupPage = () => {
             startIcon={<ArrowBackIcon />}
             sx={{
               alignSelf: "flex-start",
-              color: colors.textSecondary,
+              color: "text.secondary",
               "&:hover": {
                 bgcolor: "action.hover",
-                color: colors.textPrimary,
+                color: "text.primary",
               },
             }}
             to="/"
@@ -157,7 +155,37 @@ const UserSignupPage = () => {
               p: { xs: 3, sm: 5 },
             }}
           >
-            <Stack spacing={1.5} sx={{ mb: 4 }}>
+            <Stack alignItems="flex-start" spacing={1.5} sx={{ mb: 4 }}>
+              <Box
+                aria-label="Return to The Sneaker Society home page"
+                component={RouterLink}
+                sx={{
+                  display: "inline-flex",
+                  lineHeight: 0,
+                  mb: 1,
+                  textDecoration: "none",
+                  "&:focus-visible": {
+                    borderRadius: 1,
+                    outline: "3px solid",
+                    outlineColor: "primary.main",
+                    outlineOffset: 4,
+                  },
+                }}
+                to="/"
+              >
+                <Box
+                  alt="The Sneaker Society"
+                  component="img"
+                  src={Logo}
+                  sx={{
+                    display: "block",
+                    height: "auto",
+                    maxWidth: 180,
+                    width: { xs: "52%", sm: "38%" },
+                  }}
+                />
+              </Box>
+
               <Typography
                 color="primary.main"
                 fontWeight={800}
@@ -170,7 +198,7 @@ const UserSignupPage = () => {
                 Tell us a little about yourself
               </Typography>
 
-              <Typography color={colors.textSecondary} variant="body1">
+              <Typography color="text.secondary" variant="body1">
                 Complete your client profile to connect with sneaker-service
                 professionals and manage your service inquiries.
               </Typography>

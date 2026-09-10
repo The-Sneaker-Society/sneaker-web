@@ -10,13 +10,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import GoogleIcon from "@mui/icons-material/Google";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import GoogleIcon from "@mui/icons-material/Google";
 import { SignedOut, useClerk, useUser } from "@clerk/clerk-react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 import Logo from "../../assets/ss-logo.svg";
-import { useColors } from "../../theme/colors";
 
 const SignUpMember = () => {
   const [error, setError] = useState("");
@@ -25,7 +24,6 @@ const SignUpMember = () => {
   const { isSignedIn, isLoaded } = useUser();
   const { openSignUp } = useClerk();
   const navigate = useNavigate();
-  const colors = useColors();
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
@@ -62,12 +60,29 @@ const SignUpMember = () => {
     }
   };
 
+  if (!isLoaded) {
+    return (
+      <Box
+        sx={{
+          alignItems: "center",
+          bgcolor: "background.default",
+          display: "flex",
+          justifyContent: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress color="primary" />
+      </Box>
+    );
+  }
+
   return (
     <Box
+      component="main"
       sx={{
         alignItems: "center",
-        bgcolor: colors.pageBg,
-        color: colors.textPrimary,
+        bgcolor: "background.default",
+        color: "text.primary",
         display: "flex",
         minHeight: "100vh",
         py: { xs: 3, sm: 5 },
@@ -80,10 +95,10 @@ const SignUpMember = () => {
             startIcon={<ArrowBackIcon />}
             sx={{
               alignSelf: "flex-start",
-              color: colors.textSecondary,
+              color: "text.secondary",
               "&:hover": {
                 bgcolor: "action.hover",
-                color: colors.textPrimary,
+                color: "text.primary",
               },
             }}
             to="/"
@@ -98,28 +113,46 @@ const SignUpMember = () => {
               border: 1,
               borderColor: "divider",
               borderRadius: 2,
-              color: colors.textPrimary,
+              color: "text.primary",
               p: { xs: 3, sm: 5 },
             }}
           >
             <Stack alignItems="center" spacing={3}>
               <Box
-                alt="The Sneaker Society"
-                component="img"
-                src={Logo}
+                aria-label="Return to The Sneaker Society home page"
+                component={RouterLink}
                 sx={{
-                  height: "auto",
-                  maxWidth: 240,
-                  width: { xs: "72%", sm: "62%" },
+                  display: "inline-flex",
+                  lineHeight: 0,
+                  textDecoration: "none",
+                  "&:focus-visible": {
+                    borderRadius: 1,
+                    outline: "3px solid",
+                    outlineColor: "primary.main",
+                    outlineOffset: 4,
+                  },
                 }}
-              />
+                to="/"
+              >
+                <Box
+                  alt="The Sneaker Society"
+                  component="img"
+                  src={Logo}
+                  sx={{
+                    display: "block",
+                    height: "auto",
+                    maxWidth: 240,
+                    width: { xs: "72%", sm: "62%" },
+                  }}
+                />
+              </Box>
 
               <Stack spacing={1} textAlign="center">
                 <Typography component="h1" variant="h3">
                   Create your business profile
                 </Typography>
 
-                <Typography color={colors.textSecondary} variant="body1">
+                <Typography color="text.secondary" variant="body1">
                   Join The Sneaker Society to manage your sneaker-service
                   business, organize client work, and connect with the
                   community.
@@ -127,26 +160,44 @@ const SignUpMember = () => {
               </Stack>
 
               <Box sx={{ width: "100%" }}>
-                <Button
-                  disabled={isSubmitting}
-                  fullWidth
-                  onClick={handleGoogleSignUp}
-                  startIcon={
-                    isSubmitting ? (
-                      <CircularProgress color="inherit" size={20} />
-                    ) : (
-                      <GoogleIcon />
-                    )
-                  }
-                  sx={{
-                    minHeight: 48,
-                  }}
-                  variant="contained"
-                >
-                  {isSubmitting
-                    ? "Connecting to Google..."
-                    : "Continue with Google"}
-                </Button>
+                <SignedOut>
+                  <Button
+                    aria-label="Continue with Google"
+                    disabled={isSubmitting}
+                    fullWidth
+                    onClick={handleGoogleSignUp}
+                    startIcon={
+                      isSubmitting ? (
+                        <CircularProgress color="inherit" size={20} />
+                      ) : (
+                        <GoogleIcon />
+                      )
+                    }
+                    sx={{
+                      bgcolor: "brandSurface.main",
+                      border: 1,
+                      borderColor: "divider",
+                      color: "common.black",
+                      fontWeight: 700,
+                      minHeight: 48,
+                      "&:hover": {
+                        bgcolor: "brandSurface.main",
+                        borderColor: "primary.main",
+                        boxShadow: 2,
+                      },
+                      "&.Mui-disabled": {
+                        bgcolor: "brandSurface.main",
+                        color: "text.secondary",
+                        opacity: 0.65,
+                      },
+                    }}
+                    variant="contained"
+                  >
+                    {isSubmitting
+                      ? "Connecting to Google..."
+                      : "Continue with Google"}
+                  </Button>
+                </SignedOut>
               </Box>
 
               {error && (
@@ -162,7 +213,7 @@ const SignUpMember = () => {
               <Divider flexItem />
 
               <Typography
-                color={colors.textSecondary}
+                color="text.secondary"
                 textAlign="center"
                 variant="body2"
               >
@@ -184,15 +235,6 @@ const SignUpMember = () => {
               </Typography>
             </Stack>
           </Paper>
-
-          <Typography
-            color={colors.textSecondary}
-            textAlign="center"
-            variant="caption"
-          >
-            By continuing, you agree to create a business-member account for The
-            Sneaker Society.
-          </Typography>
         </Stack>
       </Container>
     </Box>

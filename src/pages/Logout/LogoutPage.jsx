@@ -1,12 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useClerk } from "@clerk/clerk-react";
-import { useColors } from "../../theme/colors";
 
 export const LogoutPage = () => {
   const hasStartedSignOut = useRef(false);
   const { signOut } = useClerk();
-  const colors = useColors();
 
   useEffect(() => {
     if (hasStartedSignOut.current) {
@@ -20,7 +18,7 @@ export const LogoutPage = () => {
         await signOut({
           redirectUrl: "/",
         });
-      } catch (error) {
+      } catch {
         window.location.assign("/");
       }
     };
@@ -33,8 +31,8 @@ export const LogoutPage = () => {
       component="main"
       sx={{
         alignItems: "center",
-        bgcolor: colors.pageBg,
-        color: colors.textPrimary,
+        bgcolor: "background.default",
+        color: "text.primary",
         display: "flex",
         justifyContent: "center",
         minHeight: "100vh",
