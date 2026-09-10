@@ -10,6 +10,9 @@ import {
 import { Facebook, Instagram } from "@mui/icons-material";
 import { useColors } from "../../theme/colors";
 
+const FACEBOOK_URL = "https://www.facebook.com/TheSneakerSociety1";
+const INSTAGRAM_URL = "https://www.instagram.com/thesneakersociety1/";
+
 function Footer() {
   const colors = useColors();
   const currentYear = new Date().getFullYear();
@@ -38,7 +41,7 @@ function Footer() {
               The Sneaker Society
             </Typography>
 
-            <Typography color={colors.textSecondary} variant="body2">
+            <Typography color="text.secondary" variant="body2">
               © {currentYear} The Sneaker Society, LLC. All rights reserved.
             </Typography>
           </Box>
@@ -61,7 +64,7 @@ function Footer() {
             <IconButton
               aria-label="The Sneaker Society on Facebook"
               component="a"
-              href="#"
+              href={FACEBOOK_URL}
               rel="noreferrer"
               size="small"
               target="_blank"
@@ -79,7 +82,7 @@ function Footer() {
             <IconButton
               aria-label="The Sneaker Society on Instagram"
               component="a"
-              href="#"
+              href={INSTAGRAM_URL}
               rel="noreferrer"
               size="small"
               target="_blank"

@@ -4,7 +4,6 @@ import AnalyticsIcon from "@mui/icons-material/Analytics";
 import ConnectWithoutContactIcon from "@mui/icons-material/ConnectWithoutContact";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
-import { useColors } from "../../theme/colors";
 
 const features = [
   {
@@ -34,7 +33,6 @@ const features = [
 ];
 
 function FeatureCard({ feature, index }) {
-  const colors = useColors();
   const Icon = feature.icon;
 
   return (
@@ -45,7 +43,7 @@ function FeatureCard({ feature, index }) {
         border: 1,
         borderColor: "divider",
         borderRadius: 2,
-        color: colors.textPrimary,
+        color: "text.primary",
         display: "flex",
         flexDirection: "column",
         minHeight: 290,
@@ -91,7 +89,7 @@ function FeatureCard({ feature, index }) {
         {feature.title}
       </Typography>
 
-      <Typography color={colors.textSecondary} variant="body1">
+      <Typography color="text.secondary" variant="body1">
         {feature.description}
       </Typography>
     </Box>
@@ -99,15 +97,13 @@ function FeatureCard({ feature, index }) {
 }
 
 function FeaturesSection() {
-  const colors = useColors();
-
   return (
     <Box
       component="section"
       id="Features"
       sx={{
-        bgcolor: colors.pageBg,
-        color: colors.textPrimary,
+        bgcolor: "background.default",
+        color: "text.primary",
         py: { xs: 7, md: 10 },
       }}
     >
@@ -126,7 +122,7 @@ function FeaturesSection() {
             Everything your sneaker-service business needs to stay organized.
           </Typography>
 
-          <Typography color={colors.textSecondary} variant="body1">
+          <Typography color="text.secondary" variant="body1">
             Create a more professional experience for your clients while keeping
             the operations behind every service simple, visible, and connected.
           </Typography>

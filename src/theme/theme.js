@@ -166,7 +166,7 @@ export const themeSettings = (mode) => {
 
   const backgroundDefault = isDark ? colors.primary[900] : "#f7f7f7";
   const backgroundPaper = isDark ? colors.primary[800] : "#ffffff";
-  const textPrimary = isDark ? colors.grey[100] : colors.grey[100];
+  const textPrimary = colors.grey[100];
   const textSecondary = isDark ? colors.grey[300] : colors.grey[500];
   const divider = isDark ? "rgba(255, 255, 255, 0.16)" : "rgba(0, 0, 0, 0.12)";
 
@@ -210,6 +210,10 @@ export const themeSettings = (mode) => {
       background: {
         default: backgroundDefault,
         paper: backgroundPaper,
+      },
+
+      brandSurface: {
+        main: "#080b12",
       },
 
       text: {

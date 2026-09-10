@@ -55,7 +55,7 @@ function PricingCard({
       </Typography>
 
       <Typography
-        color={colors.textSecondary}
+        color="text.secondary"
         sx={{ minHeight: 48, mt: 1 }}
         variant="body2"
       >
@@ -71,11 +71,7 @@ function PricingCard({
           ${price}
         </Typography>
 
-        <Typography
-          color={colors.textSecondary}
-          component="span"
-          variant="body2"
-        >
+        <Typography color="text.secondary" component="span" variant="body2">
           {period}
         </Typography>
       </Stack>
@@ -109,7 +105,7 @@ function PricingCard({
               sx={{ mt: "2px" }}
             />
 
-            <Typography color={colors.textSecondary} variant="body2">
+            <Typography color="text.secondary" variant="body2">
               {benefit}
             </Typography>
           </Stack>

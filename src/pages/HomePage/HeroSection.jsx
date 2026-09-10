@@ -1,18 +1,16 @@
 import React from "react";
 import { Box, Container, Stack, Typography } from "@mui/material";
+
 import StyledButton from "./StyledButton";
-import { useColors } from "../../theme/colors";
 import Sneakers from "../../../assets/sneakers-header.png";
 
 function HeroSection({ onMemberSignupClick, onUserSignupClick }) {
-  const colors = useColors();
-
   return (
     <Box
       component="section"
       sx={{
-        bgcolor: colors.pageBg,
-        color: colors.textPrimary,
+        bgcolor: "background.default",
+        color: "text.primary",
         overflow: "hidden",
         py: { xs: 7, md: 11 },
       }}
@@ -61,7 +59,7 @@ function HeroSection({ onMemberSignupClick, onUserSignupClick }) {
             </Typography>
 
             <Typography
-              color={colors.textSecondary}
+              color="text.secondary"
               sx={{
                 fontSize: { xs: "1.05rem", md: "1.2rem" },
                 maxWidth: 640,
@@ -87,7 +85,7 @@ function HeroSection({ onMemberSignupClick, onUserSignupClick }) {
               </StyledButton>
             </Stack>
 
-            <Typography color={colors.textSecondary} variant="body2">
+            <Typography color="text.secondary" variant="body2">
               Manage jobs, clients, agreements, and your professional network.
             </Typography>
           </Stack>
@@ -95,7 +93,7 @@ function HeroSection({ onMemberSignupClick, onUserSignupClick }) {
           <Box
             sx={{
               alignItems: "center",
-              bgcolor: "background.paper",
+              bgcolor: "brandSurface.main",
               border: 1,
               borderColor: "divider",
               borderRadius: 4,
@@ -115,6 +113,7 @@ function HeroSection({ onMemberSignupClick, onUserSignupClick }) {
                 filter: "blur(8px)",
                 height: { xs: 180, md: 260 },
                 opacity: 0.18,
+                pointerEvents: "none",
                 position: "absolute",
                 right: { xs: -72, md: -96 },
                 top: { xs: -72, md: -96 },
@@ -127,6 +126,7 @@ function HeroSection({ onMemberSignupClick, onUserSignupClick }) {
               component="img"
               src={Sneakers}
               sx={{
+                display: "block",
                 maxHeight: { xs: 190, md: 270 },
                 maxWidth: "100%",
                 objectFit: "contain",

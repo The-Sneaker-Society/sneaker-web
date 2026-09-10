@@ -11,8 +11,8 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MenuIcon from "@mui/icons-material/Menu";
+
 import ThemeToggle from "../../components/ThemeToggle";
-import { useColors } from "../../theme/colors";
 import Sneakers from "../../../assets/sneakers-header.png";
 import StyledButton from "./StyledButton";
 
@@ -25,7 +25,6 @@ const Header = ({
   onRedirectClick,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const colors = useColors();
 
   const closeSidebar = () => {
     setSidebarOpen(false);
@@ -57,13 +56,13 @@ const Header = ({
   const mobileNavigation = (
     <Box
       sx={{
-        width: "min(100vw, 360px)",
-        height: "100%",
-        bgcolor: colors.surfaceBg,
-        color: colors.textPrimary,
+        bgcolor: "background.paper",
+        color: "text.primary",
         display: "flex",
         flexDirection: "column",
+        height: "100%",
         p: 3,
+        width: "min(100vw, 360px)",
       }}
     >
       <Stack
@@ -80,7 +79,7 @@ const Header = ({
           aria-label="Close navigation menu"
           onClick={closeSidebar}
           sx={{
-            color: colors.textPrimary,
+            color: "text.primary",
             "&:hover": {
               bgcolor: "action.hover",
             },
@@ -93,14 +92,14 @@ const Header = ({
       <Stack spacing={1}>
         {navigationItems.map((item) => (
           <Button
-            key={item.label}
             color="inherit"
+            key={item.label}
             onClick={item.onClick}
             sx={{
+              color: "text.primary",
               justifyContent: "flex-start",
               px: 2,
               py: 1.5,
-              color: colors.textPrimary,
               "&:hover": {
                 bgcolor: "action.hover",
               },
@@ -121,12 +120,12 @@ const Header = ({
               onLoginButtonClick?.();
             }}
             sx={{
-              color: colors.textPrimary,
               border: 1,
               borderColor: "divider",
+              color: "text.primary",
               "&:hover": {
-                borderColor: "primary.main",
                 bgcolor: "action.hover",
+                borderColor: "primary.main",
               },
             }}
             variant="outlined"
@@ -155,12 +154,10 @@ const Header = ({
         elevation={0}
         position="sticky"
         sx={{
-          bgcolor: colors.surfaceBg,
+          bgcolor: "background.paper",
           borderBottom: 1,
           borderColor: "divider",
-          color: colors.textPrimary,
-          backdropFilter: "blur(12px)",
-          backgroundColor: "rgba(8, 11, 18, 0.88)",
+          color: "text.primary",
         }}
       >
         <Toolbar
@@ -203,7 +200,7 @@ const Header = ({
             <Typography
               component="span"
               sx={{
-                color: colors.textPrimary,
+                color: "text.primary",
                 fontWeight: 800,
                 letterSpacing: "-0.03em",
               }}
@@ -221,11 +218,11 @@ const Header = ({
           >
             {navigationItems.map((item) => (
               <Button
-                key={item.label}
                 color="inherit"
+                key={item.label}
                 onClick={item.onClick}
                 sx={{
-                  color: colors.textPrimary,
+                  color: "text.primary",
                   px: 1.5,
                   "&:hover": {
                     bgcolor: "action.hover",
@@ -240,7 +237,7 @@ const Header = ({
               color="inherit"
               onClick={onLoginButtonClick}
               sx={{
-                color: colors.textPrimary,
+                color: "text.primary",
                 ml: 1,
                 "&:hover": {
                   bgcolor: "action.hover",
@@ -267,7 +264,7 @@ const Header = ({
               aria-label="Open navigation menu"
               onClick={() => setSidebarOpen(true)}
               sx={{
-                color: colors.textPrimary,
+                color: "text.primary",
                 "&:hover": {
                   bgcolor: "action.hover",
                 },

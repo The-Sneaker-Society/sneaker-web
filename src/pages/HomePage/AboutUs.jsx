@@ -10,6 +10,7 @@ import {
 import Header from "./Header";
 import Footer from "./Footer";
 import { useColors } from "../../theme/colors";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 const principles = [
   {
@@ -68,6 +69,7 @@ function SectionLabel({ children }) {
 
 function AboutUs() {
   const colors = useColors();
+  const navigate = useNavigate();
 
   const scrollToSection = (sectionId) => {
     const section = document.getElementById(sectionId);
@@ -95,15 +97,9 @@ function AboutUs() {
       <Header
         contactRef={() => scrollToSection("about-contact")}
         featureRef={() => scrollToSection("about-mission")}
-        onButtonClick={() => {
-          window.location.assign("/member/signup");
-        }}
-        onLoginButtonClick={() => {
-          window.location.assign("/login");
-        }}
-        onRedirectClick={() => {
-          window.location.assign("/");
-        }}
+        onButtonClick={() => navigate("/member/signup")}
+        onLoginButtonClick={() => navigate("/login")}
+        onRedirectClick={() => navigate("/")}
         pricingRef={() => scrollToSection("about-principles")}
       />
 
@@ -133,7 +129,7 @@ function AboutUs() {
               </Typography>
 
               <Typography
-                color={colors.textSecondary}
+                color="text.secondary"
                 sx={{
                   fontSize: { xs: "1.05rem", md: "1.25rem" },
                   maxWidth: 760,
@@ -183,14 +179,14 @@ function AboutUs() {
               </Box>
 
               <Stack spacing={3}>
-                <Typography color={colors.textSecondary} variant="body1">
+                <Typography color="text.secondary" variant="body1">
                   Great sneaker work is personal. A customer trusts a
                   professional with a pair that may carry financial value,
                   memories, or real cultural significance. The business systems
                   behind that work should be just as thoughtful.
                 </Typography>
 
-                <Typography color={colors.textSecondary} variant="body1">
+                <Typography color="text.secondary" variant="body1">
                   We are building The Sneaker Society to help providers manage
                   their operations, present their services professionally, and
                   create a clearer experience from the first client inquiry to
@@ -218,7 +214,7 @@ function AboutUs() {
                 A platform grounded in practical work and real community.
               </Typography>
 
-              <Typography color={colors.textSecondary} variant="body1">
+              <Typography color="text.secondary" variant="body1">
                 The product is designed around the work people already do every
                 day, with tools and connections that help service businesses
                 operate with more confidence.
@@ -261,7 +257,7 @@ function AboutUs() {
                     {principle.title}
                   </Typography>
 
-                  <Typography color={colors.textSecondary} variant="body2">
+                  <Typography color="text.secondary" variant="body2">
                     {principle.description}
                   </Typography>
                 </Paper>
@@ -288,7 +284,7 @@ function AboutUs() {
                 Built around the people doing the work.
               </Typography>
 
-              <Typography color={colors.textSecondary} variant="body1">
+              <Typography color="text.secondary" variant="body1">
                 These are example statements until you replace them with
                 approved member feedback or verified customer testimonials.
               </Typography>
@@ -333,7 +329,7 @@ function AboutUs() {
                   </Typography>
 
                   <Typography
-                    color={colors.textSecondary}
+                    color="text.secondary"
                     sx={{ flex: 1 }}
                     variant="body1"
                   >
@@ -346,7 +342,7 @@ function AboutUs() {
                     {testimonial.name}
                   </Typography>
 
-                  <Typography color={colors.textSecondary} variant="caption">
+                  <Typography color="text.secondary" variant="caption">
                     {testimonial.role}
                   </Typography>
                 </Paper>
@@ -393,8 +389,7 @@ function AboutUs() {
               </Box>
 
               <Box
-                component="a"
-                href="/member/signup"
+                component={RouterLink}
                 sx={{
                   alignItems: "center",
                   bgcolor: "background.paper",
@@ -415,6 +410,7 @@ function AboutUs() {
                     color: "primary.light",
                   },
                 }}
+                to="/member/signup"
               >
                 Create your profile
               </Box>

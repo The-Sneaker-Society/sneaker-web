@@ -9,12 +9,14 @@ import {
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import InstagramIcon from "@mui/icons-material/Instagram";
-import { useColors } from "../../theme/colors";
+
 import Sneakers from "../../../assets/sneakers-header.png";
 
-function ContactMethod({ icon, label, href, value, external = false }) {
-  const colors = useColors();
+const CONTACT_EMAIL = "help@thesneakerssociety.com";
+const INSTAGRAM_HANDLE = "@thesneakersociety1";
+const INSTAGRAM_URL = "https://www.instagram.com/thesneakersociety1/";
 
+function ContactMethod({ icon, label, href, value, external = false }) {
   return (
     <Box
       sx={{
@@ -62,7 +64,7 @@ function ContactMethod({ icon, label, href, value, external = false }) {
         </Typography>
 
         <Link
-          color={colors.textPrimary}
+          color="text.primary"
           href={href}
           rel={external ? "noreferrer" : undefined}
           sx={{
@@ -87,15 +89,13 @@ function ContactMethod({ icon, label, href, value, external = false }) {
 }
 
 function ContactSection() {
-  const colors = useColors();
-
   return (
     <Box
       component="section"
       id="Contact"
       sx={{
-        bgcolor: colors.pageBg,
-        color: colors.textPrimary,
+        bgcolor: "background.default",
+        color: "text.primary",
         py: { xs: 7, md: 10 },
       }}
     >
@@ -126,7 +126,7 @@ function ContactSection() {
             </Typography>
 
             <Typography
-              color={colors.textSecondary}
+              color="text.secondary"
               sx={{ mb: 4, maxWidth: 620 }}
               variant="body1"
             >
@@ -136,18 +136,18 @@ function ContactSection() {
 
             <Stack spacing={2}>
               <ContactMethod
-                href="mailto:help@thesneakerssociety.com"
+                href={`mailto:${CONTACT_EMAIL}`}
                 icon={<EmailIcon />}
                 label="Email"
-                value="help@thesneakerssociety.com"
+                value={CONTACT_EMAIL}
               />
 
               <ContactMethod
                 external
-                href="https://www.instagram.com/thesneakersociety1/"
+                href={INSTAGRAM_URL}
                 icon={<InstagramIcon />}
                 label="Instagram"
-                value="@thesneakersociety1"
+                value={INSTAGRAM_HANDLE}
               />
             </Stack>
           </Box>
@@ -155,7 +155,7 @@ function ContactSection() {
           <Box
             sx={{
               alignItems: "center",
-              bgcolor: "background.paper",
+              bgcolor: "brandSurface.main",
               border: 1,
               borderColor: "divider",
               borderRadius: 2,
@@ -164,16 +164,34 @@ function ContactSection() {
               minHeight: { xs: 280, md: 440 },
               overflow: "hidden",
               p: { xs: 4, md: 6 },
+              position: "relative",
             }}
           >
+            <Box
+              sx={{
+                bgcolor: "primary.main",
+                borderRadius: "50%",
+                filter: "blur(8px)",
+                height: { xs: 180, md: 250 },
+                opacity: 0.18,
+                pointerEvents: "none",
+                position: "absolute",
+                right: { xs: -72, md: -96 },
+                top: { xs: -72, md: -96 },
+                width: { xs: 180, md: 250 },
+              }}
+            />
+
             <Box
               alt="The Sneaker Society"
               component="img"
               src={Sneakers}
               sx={{
+                display: "block",
                 maxHeight: { xs: 235, md: 325 },
                 maxWidth: "100%",
                 objectFit: "contain",
+                position: "relative",
                 width: "100%",
               }}
             />

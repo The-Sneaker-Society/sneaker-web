@@ -7,7 +7,6 @@ import ConnectSection from "./ConnectSection";
 import CallToAction from "./CallToAction";
 import Header from "./Header";
 import Footer from "./Footer";
-import HeroSection from "./HeroSection";
 import FeaturesSection from "./FeaturesSection";
 import PricingTable from "./PricingTable";
 import ContactSection from "./ContactSection";
@@ -74,28 +73,39 @@ function HomePage() {
         pricingRef={() => scrollToRef(pricingSectionRef)}
       />
 
-      <Box component="main" sx={{ flex: 1 }}>
-        <HeroSection
-          onMemberSignupClick={handleMemberSignupClick}
-          onUserSignupClick={handleUserSignupClick}
-        />
-
+      <Box
+        component="section"
+        ref={featuresSectionRef}
+        sx={{ scrollMarginTop: "88px" }}
+      >
         <FeaturesSection />
+      </Box>
 
-        <AboutSection />
+      <AboutSection />
 
+      <Box
+        component="section"
+        ref={pricingSectionRef}
+        sx={{ scrollMarginTop: "88px" }}
+      >
         <PricingTable
           onMemberSignupClick={handleMemberSignupClick}
           onUserSignupClick={handleUserSignupClick}
         />
+      </Box>
 
-        <ConnectSection />
+      <ConnectSection />
 
-        <CallToAction
-          buttonText="Start your business profile"
-          onButtonClick={handleMemberSignupClick}
-        />
+      <CallToAction
+        buttonText="Start your business profile"
+        onButtonClick={handleMemberSignupClick}
+      />
 
+      <Box
+        component="section"
+        ref={contactSectionRef}
+        sx={{ scrollMarginTop: "88px" }}
+      >
         <ContactSection />
       </Box>
 
