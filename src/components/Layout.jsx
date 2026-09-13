@@ -29,10 +29,13 @@ const Layout = ({ children }) => {
         <Box
           sx={{
             flexGrow: 1,
+            minWidth: 0,
             overflowY: "auto",
+            overflowX: "hidden",
             height: "100vh",
             display: "flex",
             flexDirection: "column",
+            boxSizing: "border-box",
           }}
         >
           {children}

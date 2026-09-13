@@ -7,6 +7,7 @@ import {
   DirectionsRunOutlined,
   GavelOutlined,
   ReceiptLongOutlined,
+  LogoutOutlined,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
@@ -129,7 +130,15 @@ const Sidebar = ({
     </>
   );
 
-  const settingsItem = isAdminSection ? null : (
+  const settingsItem = isAdminSection ? (
+    <Box sx={{ padding: 2, borderTop: `1px solid ${colors.border}` }}>
+      <SidebarItem
+        text="Logout"
+        icon={<LogoutOutlined />}
+        onClick={() => navigate("/logout")}
+      />
+    </Box>
+  ) : (
     <Box sx={{ padding: 2, borderTop: `1px solid ${colors.border}` }}>
       <SidebarItem
         text="Settings"

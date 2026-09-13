@@ -22,29 +22,38 @@ import DisputeResolutionModal from "./DisputeResolutionModal";
 import EvidenceStrip from "../../components/EvidenceStrip";
 import ImagePreviewDialog from "../../components/ImagePreviewDialog";
 import Timeline from "../../components/Timeline";
-import Header from "../../components/Header";
 import {
   FiArrowLeft,
   FiUser,
   FiTool,
   FiPackage,
   FiMessageSquare,
-  FiCheckCircle,
   FiXCircle,
   FiSliders,
   FiTruck,
   FiExternalLink,
 } from "react-icons/fi";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 
 const money = (val) => `$${Number(val || 0).toFixed(2)}`;
+
+const formatDateTime = (value) => {
+  if (!value) return "—";
+  try {
+    const d = new Date(Number(value) || value);
+    if (Number.isNaN(d.getTime())) return "—";
+    return format(d, "MMM d, yyyy · h:mm a");
+  } catch {
+    return "—";
+  }
+};
 
 const AdminDisputeDetailPage = () => {
   const { orderRef } = useParams();
   const navigate = useNavigate();
 
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [modalAction, setModalAction] = useState(null); // "USER" | "MEMBER" | "INCONCLUSIVE" | null
+  const [decisionOpen, setDecisionOpen] = useState(false);
 
   const { data, loading, error, refetch } = useQuery(GET_ADMIN_DISPUTE_DETAIL, {
     variables: { orderRef },
@@ -76,50 +85,134 @@ const AdminDisputeDetailPage = () => {
   const isTerminal = contract.status === "COMPLETED" || contract.status === "CANCELED";
   const isUnderReview = contract.status === "UNDER_MANUAL_REVIEW";
 
-  return (
-    <Box m="20px">
-      {/* Top Header & Breadcrumb */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-        <Button
-          startIcon={<FiArrowLeft />}
-          onClick={() => navigate("/admin/disputes")}
-          sx={{ fontWeight: 600, color: "text.primary" }}
-        >
-          Back to Dispute Queue
-        </Button>
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          <Chip
-            label={contract.status}
-            sx={{
-              fontWeight: 800,
-              bgcolor: isUnderReview ? "rgba(239, 68, 68, 0.15)" : "rgba(16, 185, 129, 0.15)",
-              color: isUnderReview ? "#EF4444" : "#10B981",
-              border: `1px solid ${isUnderReview ? "#EF4444" : "#10B981"}`,
-            }}
-          />
-          <Chip
-            label={`Payout: ${contract.payoutStatus || "pending"}`}
-            variant="outlined"
-            sx={{ fontWeight: 700 }}
-          />
-        </Box>
-      </Box>
+  const disputeOpenedEvent = (contract.timeline || []).find((t) => t?.event === "DISPUTE_OPENED");
+  const disputeOpenedAt = disputeOpenedEvent?.date;
+  let flaggedAge = "";
+  if (disputeOpenedAt) {
+    try {
+      flaggedAge = formatDistanceToNow(new Date(Number(disputeOpenedAt) || disputeOpenedAt), {
+        addSuffix: false,
+      });
+    } catch {
+      flaggedAge = "";
+    }
+  }
 
-      <Header
-        title={`Adjudication Hub: ${contract.orderRef || contract.id}`}
-        subtitle="Full un-redacted evidence viewer, customer/restorer communications, and per-contract P&L"
-      />
+  return (
+    <Box sx={{ p: "20px", width: "100%", maxWidth: "100%", boxSizing: "border-box" }}>
+      <Button
+        startIcon={<FiArrowLeft />}
+        onClick={() => navigate("/admin/disputes")}
+        sx={{ fontWeight: 600, color: "text.primary", mb: 2 }}
+      >
+        Back to Dispute Queue
+      </Button>
+
+      {/* Top header bar: identity + dates + values */}
+      <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <Box>
+          <Typography
+            variant="caption"
+            fontWeight={800}
+            color="text.secondary"
+            sx={{ letterSpacing: "0.12em" }}
+          >
+            ADJUDICATION HUB
+          </Typography>
+          <Typography variant="h5" fontWeight={700} sx={{ mt: 0.5 }}>
+            Order {contract.orderRef || contract.id}
+          </Typography>
+        </Box>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          Created {formatDateTime(contract.createdAt)}
+          {"   ·   "}
+          Flagged {formatDateTime(disputeOpenedAt)}
+          {flaggedAge ? ` (${flaggedAge} ago)` : ""}
+        </Typography>
+
+        <Grid2 container spacing={2} sx={{ mt: 2 }}>
+          <Grid2 size={{ xs: 6, sm: 3 }}>
+            <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "action.hover" }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                SERVICE
+              </Typography>
+              <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5 }}>
+                {money(contract.price)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                agreed price
+              </Typography>
+            </Box>
+          </Grid2>
+          <Grid2 size={{ xs: 6, sm: 3 }}>
+            <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "action.hover" }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                DECLARED
+              </Typography>
+              <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5 }}>
+                {money(contract.declaredMarketValue)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                at-risk value
+              </Typography>
+            </Box>
+          </Grid2>
+          <Grid2 size={{ xs: 6, sm: 3 }}>
+            <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "action.hover" }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                PAYOUT
+              </Typography>
+              <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5, textTransform: "capitalize" }}>
+                {contract.payoutStatus || "pending"}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {money(pnl?.payoutAmount)} to release
+              </Typography>
+            </Box>
+          </Grid2>
+          <Grid2 size={{ xs: 6, sm: 3 }}>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: isUnderReview ? "rgba(239, 68, 68, 0.08)" : "action.hover",
+                border: `1px solid ${isUnderReview ? "#EF4444" : "transparent"}`,
+              }}
+            >
+              <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                STATUS
+              </Typography>
+              <Typography
+                variant="h4"
+                fontWeight={800}
+                sx={{
+                  mt: 0.5,
+                  fontSize: "1.4rem",
+                  lineHeight: 1.2,
+                  color: isUnderReview ? "#EF4444" : "#10B981",
+                }}
+              >
+                {contract.status}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                contract state
+              </Typography>
+            </Box>
+          </Grid2>
+        </Grid2>
+      </Paper>
 
       <Grid2 container spacing={3} sx={{ mt: 1 }}>
         {/* Left Column: Evidence Viewer & Communications */}
-        <Grid2 xs={12} lg={7}>
+        <Grid2 size={{ xs: 12, lg: 7 }}>
           {/* Parties Overview Card */}
           <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
             <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
               Dispute Parties
             </Typography>
             <Grid2 container spacing={2}>
-              <Grid2 xs={12} sm={6}>
+              <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Box sx={{ p: 2, borderRadius: 2, bgcolor: "action.hover" }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
                     <Avatar sx={{ bgcolor: "#3B82F6", width: 36, height: 36 }}>
@@ -143,7 +236,7 @@ const AdminDisputeDetailPage = () => {
                 </Box>
               </Grid2>
 
-              <Grid2 xs={12} sm={6}>
+              <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Box sx={{ p: 2, borderRadius: 2, bgcolor: "action.hover" }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
                     <Avatar sx={{ bgcolor: "#FFD100", color: "#000", width: 36, height: 36 }}>
@@ -175,27 +268,27 @@ const AdminDisputeDetailPage = () => {
               Shoe & Service Specifications
             </Typography>
             <Grid2 container spacing={2}>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Model</Typography>
                 <Typography variant="body2" fontWeight={700}>{contract.shoeDetails?.model || "Standard"}</Typography>
               </Grid2>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Declared Value</Typography>
                 <Typography variant="body2" fontWeight={700}>{money(contract.declaredMarketValue)}</Typography>
               </Grid2>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Service Agreed</Typography>
                 <Typography variant="body2" fontWeight={700}>{money(contract.price)}</Typography>
               </Grid2>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Size / Year</Typography>
                 <Typography variant="body2">{contract.shoeDetails?.size || "—"} / {contract.shoeDetails?.year || "—"}</Typography>
               </Grid2>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Condition / Odor</Typography>
                 <Typography variant="body2">{contract.shoeDetails?.soleCondition || "—"} (Odor: {contract.shoeDetails?.odorLevel || "—"})</Typography>
               </Grid2>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Return Target</Typography>
                 <Typography variant="body2">{contract.shoeDetails?.returnTimeframe || "Standard"}</Typography>
               </Grid2>
@@ -282,17 +375,17 @@ const AdminDisputeDetailPage = () => {
         </Grid2>
 
         {/* Right Column: Economics, Tracking & Adjudication Actions */}
-        <Grid2 xs={12} lg={5}>
+        <Grid2 size={{ xs: 12, lg: 5 }}>
           {/* Option B: Itemized Unit Economics & P&L Card */}
           <ContractPnLCard pnl={pnl} />
 
-          {/* Adjudication Decision Card */}
+          {/* Make Decision Card */}
           <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
             <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-              Adjudication Decision
+              Make Decision
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-              Choose a binding resolution. Refunds are processed immediately through Stripe, payouts released, and the timeline updated.
+              Review the evidence, then issue a binding resolution. Refunds move immediately through Stripe, payouts release, and the timeline updates.
             </Typography>
 
             {isTerminal ? (
@@ -300,40 +393,21 @@ const AdminDisputeDetailPage = () => {
                 This contract has already been resolved ({contract.status}). No further actions required.
               </Alert>
             ) : (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  startIcon={<FiCheckCircle />}
-                  onClick={() => setModalAction("USER")}
-                  sx={{ py: 1.2, fontWeight: 700 }}
-                >
-                  Rule for Customer (100% Refund)
-                </Button>
-
-                <Button
-                  variant="contained"
-                  color="success"
-                  fullWidth
-                  startIcon={<FiCheckCircle />}
-                  onClick={() => setModalAction("MEMBER")}
-                  sx={{ py: 1.2, fontWeight: 700 }}
-                >
-                  Rule for Restorer (Release Payout)
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  color="warning"
-                  fullWidth
-                  startIcon={<FiSliders />}
-                  onClick={() => setModalAction("INCONCLUSIVE")}
-                  sx={{ py: 1.2, fontWeight: 700 }}
-                >
-                  Inconclusive / Split Resolution
-                </Button>
-              </Box>
+              <Button
+                variant="contained"
+                fullWidth
+                startIcon={<FiSliders />}
+                onClick={() => setDecisionOpen(true)}
+                sx={{
+                  py: 1.4,
+                  fontWeight: 800,
+                  bgcolor: "#FFD100",
+                  color: "#000",
+                  "&:hover": { bgcolor: "#e6bd00" },
+                }}
+              >
+                Make Decision
+              </Button>
             )}
           </Paper>
 
@@ -405,14 +479,13 @@ const AdminDisputeDetailPage = () => {
         </Grid2>
       </Grid2>
 
-      {/* Adjudication Modal */}
-      {modalAction && (
+      {/* Decision Modal */}
+      {decisionOpen && (
         <DisputeResolutionModal
-          open={Boolean(modalAction)}
-          onClose={() => setModalAction(null)}
+          open={decisionOpen}
+          onClose={() => setDecisionOpen(false)}
           contract={contract}
           pnl={pnl}
-          actionType={modalAction}
           onSuccess={() => {
             refetch();
           }}

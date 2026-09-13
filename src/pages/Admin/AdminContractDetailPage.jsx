@@ -66,7 +66,7 @@ const AdminContractDetailPage = () => {
   const isDisputed = contract.status === "UNDER_MANUAL_REVIEW";
 
   return (
-    <Box m="20px">
+    <Box sx={{ p: "20px", width: "100%", maxWidth: "100%", boxSizing: "border-box" }}>
       {/* Top Header & Breadcrumb */}
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
         <Button
@@ -128,14 +128,14 @@ const AdminContractDetailPage = () => {
 
       <Grid2 container spacing={3} sx={{ mt: 1 }}>
         {/* Left Column: Specs, Parties & Photo Evidence */}
-        <Grid2 xs={12} lg={7}>
+        <Grid2 size={{ xs: 12, lg: 7 }}>
           {/* Parties Card */}
           <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
             <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
               Contract Parties
             </Typography>
             <Grid2 container spacing={2}>
-              <Grid2 xs={12} sm={6}>
+              <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Box sx={{ p: 2, borderRadius: 2, bgcolor: "action.hover" }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
                     <Avatar sx={{ bgcolor: "#3B82F6", width: 36, height: 36 }}>
@@ -159,7 +159,7 @@ const AdminContractDetailPage = () => {
                 </Box>
               </Grid2>
 
-              <Grid2 xs={12} sm={6}>
+              <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Box sx={{ p: 2, borderRadius: 2, bgcolor: "action.hover" }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
                     <Avatar sx={{ bgcolor: "#FFD100", color: "#000", width: 36, height: 36 }}>
@@ -191,29 +191,29 @@ const AdminContractDetailPage = () => {
               Shoe Specifications
             </Typography>
             <Grid2 container spacing={2}>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Brand & Model</Typography>
                 <Typography variant="body2" fontWeight={700}>
                   {[contract.shoeDetails?.brand, contract.shoeDetails?.model].filter(Boolean).join(" ") || "Custom Repair"}
                 </Typography>
               </Grid2>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Declared Market Value</Typography>
                 <Typography variant="body2" fontWeight={700}>{money(contract.declaredMarketValue)}</Typography>
               </Grid2>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Service Agreed Price</Typography>
                 <Typography variant="body2" fontWeight={700}>{money(contract.price)}</Typography>
               </Grid2>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Size / Year</Typography>
                 <Typography variant="body2">{contract.shoeDetails?.size || "—"} / {contract.shoeDetails?.year || "—"}</Typography>
               </Grid2>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Condition</Typography>
                 <Typography variant="body2">{contract.shoeDetails?.soleCondition || "—"}</Typography>
               </Grid2>
-              <Grid2 xs={6} sm={4}>
+              <Grid2 size={{ xs: 6, sm: 4 }}>
                 <Typography variant="caption" color="text.secondary">Return Target</Typography>
                 <Typography variant="body2">{contract.shoeDetails?.returnTimeframe || "Standard"}</Typography>
               </Grid2>
@@ -234,7 +234,7 @@ const AdminContractDetailPage = () => {
         </Grid2>
 
         {/* Right Column: Option B Unit Economics & Logistics */}
-        <Grid2 xs={12} lg={5}>
+        <Grid2 size={{ xs: 12, lg: 5 }}>
           {/* Option B: Itemized Contract P&L Card */}
           <ContractPnLCard pnl={pnl} />
 

@@ -87,7 +87,7 @@ const AdminContractsPage = () => {
   ];
 
   return (
-    <Box m="20px">
+    <Box sx={{ p: "20px", width: "100%", maxWidth: "100%", boxSizing: "border-box" }}>
       <Header
         title="Contracts Overview & P&L"
         subtitle="Lookup any contract, monitor profit & loss, and audit unit economics across the portfolio"
@@ -95,7 +95,7 @@ const AdminContractsPage = () => {
 
       {/* Financial Portfolio Metrics */}
       <Grid2 container spacing={2} sx={{ mb: 3 }}>
-        <Grid2 xs={12} sm={6} md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Card variant="outlined" sx={{ borderRadius: 2 }}>
             <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "rgba(59, 130, 246, 0.1)", color: "#3B82F6" }}>
@@ -109,7 +109,7 @@ const AdminContractsPage = () => {
           </Card>
         </Grid2>
 
-        <Grid2 xs={12} sm={6} md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Card variant="outlined" sx={{ borderRadius: 2 }}>
             <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "rgba(255, 209, 0, 0.15)", color: "#B45309" }}>
@@ -123,7 +123,7 @@ const AdminContractsPage = () => {
           </Card>
         </Grid2>
 
-        <Grid2 xs={12} sm={6} md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Card variant="outlined" sx={{ borderRadius: 2 }}>
             <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "rgba(16, 185, 129, 0.15)", color: "#10B981" }}>
@@ -139,7 +139,7 @@ const AdminContractsPage = () => {
           </Card>
         </Grid2>
 
-        <Grid2 xs={12} sm={6} md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Card variant="outlined" sx={{ borderRadius: 2 }}>
             <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "rgba(139, 92, 246, 0.1)", color: "#8B5CF6" }}>

@@ -56,12 +56,12 @@ const AdminDisputeQueuePage = () => {
   const highSeverityCount = items.filter((item) => (item.severityScore || 0) > 100 || (item.declaredMarketValue || 0) > 300).length;
 
   return (
-    <Box m="20px">
+    <Box sx={{ p: "20px", width: "100%", maxWidth: "100%", boxSizing: "border-box" }}>
       <Header title="Admin Dispute Queue" subtitle="Review and adjudicate disputed contracts under manual review" />
 
       {/* KPI Metrics Row */}
       <Grid2 container spacing={2} sx={{ mb: 3 }}>
-        <Grid2 xs={12} sm={4}>
+        <Grid2 size={{ xs: 12, sm: 4 }}>
           <Card variant="outlined" sx={{ borderRadius: 2 }}>
             <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "rgba(239, 68, 68, 0.1)", color: "#EF4444" }}>
@@ -75,7 +75,7 @@ const AdminDisputeQueuePage = () => {
           </Card>
         </Grid2>
 
-        <Grid2 xs={12} sm={4}>
+        <Grid2 size={{ xs: 12, sm: 4 }}>
           <Card variant="outlined" sx={{ borderRadius: 2 }}>
             <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "rgba(255, 209, 0, 0.15)", color: "#B45309" }}>
@@ -89,7 +89,7 @@ const AdminDisputeQueuePage = () => {
           </Card>
         </Grid2>
 
-        <Grid2 xs={12} sm={4}>
+        <Grid2 size={{ xs: 12, sm: 4 }}>
           <Card variant="outlined" sx={{ borderRadius: 2 }}>
             <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "rgba(59, 130, 246, 0.1)", color: "#3B82F6" }}>
@@ -128,6 +128,7 @@ const AdminDisputeQueuePage = () => {
                 <TableCell align="right" sx={{ fontWeight: 700 }}>Service Price</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700 }}>Declared Value</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Flagged Age</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Opened By</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Severity</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700 }}>Action</TableCell>
               </TableRow>
@@ -153,8 +154,42 @@ const AdminDisputeQueuePage = () => {
                         {item.orderRef}
                       </Typography>
                     </TableCell>
-                    <TableCell>{item.clientName}</TableCell>
-                    <TableCell>{item.memberName}</TableCell>
+                    <TableCell>
+                      <Box>{item.clientName}</Box>
+                      {Number(item.clientPriorDisputes || 0) > 0 && (
+                        <Chip
+                          size="small"
+                          label={`${item.clientPriorDisputes} prior dispute${item.clientPriorDisputes === 1 ? "" : "s"}`}
+                          title={`This customer has ${item.clientPriorDisputes} prior dispute${item.clientPriorDisputes === 1 ? "" : "s"}`}
+                          sx={{
+                            mt: 0.5,
+                            fontWeight: 700,
+                            fontSize: "0.68rem",
+                            height: 20,
+                            bgcolor: item.clientPriorDisputes >= 3 ? "rgba(239, 68, 68, 0.15)" : "rgba(180, 83, 9, 0.15)",
+                            color: item.clientPriorDisputes >= 3 ? "#EF4444" : "#B45309",
+                          }}
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Box>{item.memberName}</Box>
+                      {Number(item.memberPriorDisputes || 0) > 0 && (
+                        <Chip
+                          size="small"
+                          label={`${item.memberPriorDisputes} prior dispute${item.memberPriorDisputes === 1 ? "" : "s"}`}
+                          title={`This restorer has ${item.memberPriorDisputes} prior dispute${item.memberPriorDisputes === 1 ? "" : "s"}`}
+                          sx={{
+                            mt: 0.5,
+                            fontWeight: 700,
+                            fontSize: "0.68rem",
+                            height: 20,
+                            bgcolor: item.memberPriorDisputes >= 3 ? "rgba(239, 68, 68, 0.15)" : "rgba(180, 83, 9, 0.15)",
+                            color: item.memberPriorDisputes >= 3 ? "#EF4444" : "#B45309",
+                          }}
+                        />
+                      )}
+                    </TableCell>
                     <TableCell align="right">{money(item.servicePrice)}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>{money(item.declaredMarketValue)}</TableCell>
                     <TableCell>
@@ -162,6 +197,49 @@ const AdminDisputeQueuePage = () => {
                         <FiClock size={13} />
                         <Typography variant="caption">{ageText}</Typography>
                       </Box>
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const openedBy = (item.disputeOpenedBy || "").toLowerCase();
+                        const isMember = openedBy.includes("member");
+                        const isClient = openedBy.includes("client") || openedBy.includes("user");
+                        return (
+                          <Box sx={{ maxWidth: 220 }}>
+                            {openedBy ? (
+                              <Chip
+                                size="small"
+                                label={isMember ? "Restorer" : isClient ? "Customer" : item.disputeOpenedBy}
+                                sx={{
+                                  fontWeight: 700,
+                                  fontSize: "0.72rem",
+                                  bgcolor: isMember
+                                    ? "rgba(180, 83, 9, 0.15)"
+                                    : "rgba(59, 130, 246, 0.15)",
+                                  color: isMember ? "#B45309" : "#3B82F6",
+                                }}
+                              />
+                            ) : (
+                              <Typography variant="caption" color="text.secondary">—</Typography>
+                            )}
+                            {item.disputeOpenReason ? (
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                title={item.disputeOpenReason}
+                                sx={{
+                                  display: "block",
+                                  mt: 0.5,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {item.disputeOpenReason}
+                              </Typography>
+                            ) : null}
+                          </Box>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>
                       <Chip

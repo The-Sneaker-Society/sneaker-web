@@ -15,6 +15,10 @@ export const GET_ADMIN_DISPUTE_QUEUE = gql`
         servicePrice
         declaredMarketValue
         disputeOpenedAt
+        disputeOpenedBy
+        disputeOpenReason
+        clientPriorDisputes
+        memberPriorDisputes
         createdAt
         severityScore
       }
@@ -30,6 +34,8 @@ export const GET_ADMIN_DISPUTE_DETAIL = gql`
         orderRef
         status
         payoutStatus
+        preDisputeStatus
+        preDisputePayoutStatus
         declaredMarketValue
         boxIncluded
         proposedPrice
@@ -144,15 +150,56 @@ export const GET_ADMIN_DISPUTE_DETAIL = gql`
   }
 `;
 
+export const DISMISS_DISPUTE = gql`
+  mutation DismissDispute(
+    $contractId: ID!
+    $resumeStatus: String
+    $banUser: Boolean
+    $banMember: Boolean
+    $reason: String
+  ) {
+    dismissDispute(
+      contractId: $contractId
+      resumeStatus: $resumeStatus
+      banUser: $banUser
+      banMember: $banMember
+      reason: $reason
+    )
+  }
+`;
+
+export const MEMBER_OUTSTANDING_DEBT = gql`
+  query MemberOutstandingDebt($memberId: ID!) {
+    memberOutstandingDebt(memberId: $memberId)
+  }
+`;
+
+export const CHARGE_MEMBER_DEBT = gql`
+  mutation ChargeMemberDebt(
+    $memberId: ID!
+    $contractId: ID!
+    $type: String
+    $amountCents: Int!
+    $reason: String
+  ) {
+    chargeMemberDebt(
+      memberId: $memberId
+      contractId: $contractId
+      type: $type
+      amountCents: $amountCents
+      reason: $reason
+    )
+  }
+`;
 export const RESOLVE_DISPUTE_FOR_USER = gql`
-  mutation ResolveDisputeForUser($contractId: ID!, $banMember: Boolean, $reason: String) {
-    resolveDisputeForUser(contractId: $contractId, banMember: $banMember, reason: $reason)
+  mutation ResolveDisputeForUser($contractId: ID!, $banMember: Boolean, $banUser: Boolean, $reason: String) {
+    resolveDisputeForUser(contractId: $contractId, banMember: $banMember, banUser: $banUser, reason: $reason)
   }
 `;
 
 export const RESOLVE_DISPUTE_FOR_MEMBER = gql`
-  mutation ResolveDisputeForMember($contractId: ID!, $banUser: Boolean, $reason: String) {
-    resolveDisputeForMember(contractId: $contractId, banUser: $banUser, reason: $reason)
+  mutation ResolveDisputeForMember($contractId: ID!, $banUser: Boolean, $banMember: Boolean, $reason: String) {
+    resolveDisputeForMember(contractId: $contractId, banUser: $banUser, banMember: $banMember, reason: $reason)
   }
 `;
 
@@ -162,6 +209,8 @@ export const RESOLVE_DISPUTE_INCONCLUSIVE = gql`
     $refundCents: Int!
     $payoutCents: Int!
     $banBoth: Boolean
+    $banUser: Boolean
+    $banMember: Boolean
     $reason: String
   ) {
     resolveDisputeInconclusive(
@@ -169,6 +218,8 @@ export const RESOLVE_DISPUTE_INCONCLUSIVE = gql`
       refundCents: $refundCents
       payoutCents: $payoutCents
       banBoth: $banBoth
+      banUser: $banUser
+      banMember: $banMember
       reason: $reason
     )
   }
