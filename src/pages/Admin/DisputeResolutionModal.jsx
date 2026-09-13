@@ -25,6 +25,7 @@ import {
   DISMISS_DISPUTE,
   MEMBER_OUTSTANDING_DEBT,
   CHARGE_MEMBER_DEBT,
+  WRITE_OFF_MEMBER_DEBT,
 } from "./graphql";
 import {
   FiUser,
@@ -160,6 +161,7 @@ const DisputeResolutionModal = ({
     RESOLVE_DISPUTE_INCONCLUSIVE
   );
   const [chargeDebt] = useMutation(CHARGE_MEMBER_DEBT);
+  const [writeOffDebt] = useMutation(WRITE_OFF_MEMBER_DEBT);
   const [dismissDispute, { loading: loadingDismiss }] =
     useMutation(DISMISS_DISPUTE);
 
@@ -189,7 +191,7 @@ const DisputeResolutionModal = ({
   );
   const effectivePayoutCents = rawPayoutCents;
 
-  const allocatedCents = rawRefundCents + rawPayoutCents;
+  const allocatedCents = effectiveRefundCents + effectivePayoutCents;
   const retainsCents = maxCents - effectiveRefundCents - effectivePayoutCents;
 
   // Validation
@@ -201,12 +203,18 @@ const DisputeResolutionModal = ({
     } else if (!reason.trim()) {
       validationError = "Attach a reason — dismissals require a memo on the timeline.";
     }
+  } else if (![rawRefundCents, rawPayoutCents, shippingChargeCents].every(Number.isFinite)) {
+    validationError = "Enter valid monetary amounts (numbers only).";
   } else if (rawRefundCents < 0 || rawPayoutCents < 0 || shippingChargeCents < 0) {
     validationError = "All monetary amounts must be non-negative.";
   } else if (allocatedCents > maxCents) {
     validationError = `Total allocation ($${(allocatedCents / 100).toFixed(
       2
     )}) exceeds captured escrow ($${totalCaptured.toFixed(2)}).`;
+  } else if (shippingChargeCents > maxCents) {
+    validationError = `Shipping charge ($${(shippingChargeCents / 100).toFixed(
+      2
+    )}) cannot exceed captured escrow ($${totalCaptured.toFixed(2)}).`;
   } else if (shippingPayer === "user" && shippingChargeCents > rawRefundCents) {
     validationError = `Shipping deduction ($${(
       shippingChargeCents / 100
@@ -218,16 +226,18 @@ const DisputeResolutionModal = ({
   const isValid = !validationError;
 
   // Platform Net Cash calculation:
-  // Retained escrow from order - Shippo label spend - Stripe card fee + any debt recoverable from member
+  // Retained escrow from order - Shippo label spend - Stripe card fee.
+  // Member receivables are NOT cash — shown separately as pending collection.
   const platformDebtRecoveryDollars =
     shippingPayer === "member" ? shippingChargeCents / 100 : 0;
-  const netPlatformCash =
-    retainsCents / 100 -
-    sunkLabels -
-    estimatedStripeFee +
-    platformDebtRecoveryDollars;
+  const netCashNow =
+    retainsCents / 100 - sunkLabels - estimatedStripeFee;
 
   // Restorer Ledger math:
+  // Display-only mirror of the backend guarantee: payout mutations receive the
+  // GROSS authorized cents and contract.service planDebtNetting nets outstanding
+  // debts (including any entry created above) before transferring. "Net" figures
+  // below are what the restorer actually receives, barring concurrent changes.
   const newMemberDebt =
     shippingPayer === "member" ? shippingChargeCents / 100 : 0;
   const totalMemberDebt = alreadyOwes + newMemberDebt;
@@ -313,7 +323,15 @@ const DisputeResolutionModal = ({
   };
 
   const handleExecute = async () => {
+    // Defense in depth: buttons disable on invalid state, but never trust the UI alone
+    if (!isValid || !confirmMatches) {
+      setErrorMsg("Resolve the validation issues and type the order reference first.");
+      return;
+    }
     setErrorMsg(null);
+    // Tracks a debt entry created ahead of settlement so a failed adjudication
+    // can void it instead of double-charging on retry.
+    let chargedEntryId = null;
     try {
       // Dismiss path: no money moves, restore pre-dispute state
       if (dismissMode) {
@@ -338,7 +356,7 @@ const DisputeResolutionModal = ({
           );
           return;
         }
-        await chargeDebt({
+        const chargeRes = await chargeDebt({
           variables: {
             memberId,
             contractId: contract.id,
@@ -349,50 +367,80 @@ const DisputeResolutionModal = ({
             ),
           },
         });
+        chargedEntryId = chargeRes?.data?.chargeMemberDebt || null;
       }
 
       // 2. Determine and fire the appropriate adjudication mutation
+      // NOTE: payout mutations receive GROSS authorized cents; the backend nets
+      // outstanding member debts (including the entry just created above) via
+      // planDebtNetting before transferring — "Payout Now" figures are net.
       const isPureCustomerRefund =
         effectiveRefundCents === maxCents && effectivePayoutCents === 0;
       const isPureMemberPayout =
         effectivePayoutCents === Math.round(Number(fullPayout) * 100) &&
         effectiveRefundCents === 0;
 
-      if (isPureCustomerRefund) {
-        await resolveUser({
-          variables: {
-            contractId: contract.id,
-            banMember,
-            banUser: banCustomer,
-            reason: withReturnNote(
-              reason.trim() || "Admin ruled full refund to customer"
-            ),
-          },
-        });
-      } else if (isPureMemberPayout) {
-        await resolveMember({
-          variables: {
-            contractId: contract.id,
-            banUser: banCustomer,
-            banMember,
-            reason: withReturnNote(
-              reason.trim() || "Admin ruled full payout to restorer"
-            ),
-          },
-        });
-      } else {
-        await resolveInconclusive({
-          variables: {
-            contractId: contract.id,
-            refundCents: effectiveRefundCents,
-            payoutCents: effectivePayoutCents,
-            banUser: banCustomer,
-            banMember,
-            reason: withReturnNote(
-              reason.trim() || "Admin resolved dispute with split allocation"
-            ),
-          },
-        });
+      try {
+        if (isPureCustomerRefund) {
+          await resolveUser({
+            variables: {
+              contractId: contract.id,
+              banMember,
+              banUser: banCustomer,
+              reason: withReturnNote(
+                reason.trim() || "Admin ruled full refund to customer"
+              ),
+            },
+          });
+        } else if (isPureMemberPayout) {
+          await resolveMember({
+            variables: {
+              contractId: contract.id,
+              banUser: banCustomer,
+              banMember,
+              reason: withReturnNote(
+                reason.trim() || "Admin ruled full payout to restorer"
+              ),
+            },
+          });
+        } else {
+          await resolveInconclusive({
+            variables: {
+              contractId: contract.id,
+              refundCents: effectiveRefundCents,
+              payoutCents: effectivePayoutCents,
+              banUser: banCustomer,
+              banMember,
+              reason: withReturnNote(
+                reason.trim() || "Admin resolved dispute with split allocation"
+              ),
+            },
+          });
+        }
+      } catch (adjudicationErr) {
+        // Settlement failed AFTER the debt landed: void it so a retry doesn't charge twice
+        if (chargedEntryId) {
+          const baseMsg = adjudicationErr.message || "Adjudication failed.";
+          let voided = false;
+          try {
+            await writeOffDebt({
+              variables: {
+                entryId: chargedEntryId,
+                reason: `Auto-voided: adjudication failed (${baseMsg})`,
+              },
+            });
+            voided = true;
+          } catch {
+            voided = false;
+          }
+          if (voided) {
+            throw new Error(`${baseMsg} The shipping debt was voided — safe to retry.`);
+          }
+          throw new Error(
+            `${baseMsg} WARNING: the shipping debt was recorded but could not be voided — do NOT retry without checking the member ledger.`
+          );
+        }
+        throw adjudicationErr;
       }
 
       onSuccess();
@@ -1080,12 +1128,12 @@ const DisputeResolutionModal = ({
                     p: 2,
                     borderRadius: 2,
                     border: `1px solid ${
-                      netPlatformCash >= 0
+                      netCashNow >= 0
                         ? "rgba(16, 185, 129, 0.4)"
                         : "rgba(239, 68, 68, 0.4)"
                     }`,
                     bgcolor:
-                      netPlatformCash >= 0
+                      netCashNow >= 0
                         ? "rgba(16, 185, 129, 0.04)"
                         : "rgba(239, 68, 68, 0.04)",
                   }}
@@ -1099,7 +1147,7 @@ const DisputeResolutionModal = ({
                     }}
                   >
                     <FiShield
-                      color={netPlatformCash >= 0 ? "#10B981" : "#EF4444"}
+                      color={netCashNow >= 0 ? "#10B981" : "#EF4444"}
                       size={18}
                     />
                     <Typography variant="subtitle2" fontWeight={800}>
@@ -1178,25 +1226,41 @@ const DisputeResolutionModal = ({
                     }}
                   >
                     <Typography variant="body2" fontWeight={800}>
-                      Net Platform P&L:
+                      Net Cash Now:
                     </Typography>
                     <Typography
                       variant="h6"
                       fontWeight={800}
                       color={
-                        netPlatformCash >= 0 ? "success.main" : "error.main"
+                        netCashNow >= 0 ? "success.main" : "error.main"
                       }
                     >
-                      {netPlatformCash >= 0 ? "+" : ""}
-                      {money(netPlatformCash)}
+                      {netCashNow >= 0 ? "+" : ""}
+                      {money(netCashNow)}
                     </Typography>
                   </Box>
+                  {platformDebtRecoveryDollars > 0 && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mt: 0.5,
+                      }}
+                    >
+                      <Typography variant="caption" color="text.secondary">
+                        + Member receivable (pending collection):
+                      </Typography>
+                      <Typography variant="caption" fontWeight={700} color="success.main">
+                        +{money(platformDebtRecoveryDollars)}
+                      </Typography>
+                    </Box>
+                  )}
                   <Typography
                     variant="caption"
                     color="text.secondary"
                     sx={{ display: "block", mt: 0.5 }}
                   >
-                    Actual cash impact on platform account.
+                    Cash now excludes uncollected receivables.
                   </Typography>
                 </Paper>
               </Box>
@@ -1325,13 +1389,20 @@ const DisputeResolutionModal = ({
                   <Typography variant="body2" color="text.secondary">
                     Restorer Payout ({restorerName}):
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    fontWeight={700}
-                    color="warning.main"
-                  >
-                    {money(netTransferredToRestorer)} (now via Stripe Connect)
-                  </Typography>
+                    <Typography
+                      variant="body2"
+                      fontWeight={700}
+                      color="warning.main"
+                    >
+                      {money(netTransferredToRestorer)} net
+                      {totalMemberDebt > 0 && (
+                        <Typography component="span" variant="caption" color="text.secondary">
+                          {" "}(authorized {money(effectivePayoutCents / 100)} gross — backend nets{" "}
+                          {money(totalMemberDebt)} outstanding debt)
+                        </Typography>
+                      )}
+                      {!totalMemberDebt && " (now via Stripe Connect)"}
+                    </Typography>
                 </Box>
                 {shippingPayer === "member" && shippingChargeCents > 0 && (
                   <Box
@@ -1351,17 +1422,27 @@ const DisputeResolutionModal = ({
                 )}
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography variant="body2" color="text.secondary">
-                    Platform Net Cash Impact:
+                    Platform Net Cash Now:
                   </Typography>
                   <Typography
                     variant="body2"
                     fontWeight={800}
-                    color={netPlatformCash >= 0 ? "success.main" : "error.main"}
+                    color={netCashNow >= 0 ? "success.main" : "error.main"}
                   >
-                    {netPlatformCash >= 0 ? "+" : ""}
-                    {money(netPlatformCash)}
+                    {netCashNow >= 0 ? "+" : ""}
+                    {money(netCashNow)}
                   </Typography>
                 </Box>
+                {platformDebtRecoveryDollars > 0 && (
+                  <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                    <Typography variant="body2" color="text.secondary">
+                      + Member receivable (pending):
+                    </Typography>
+                    <Typography variant="body2" fontWeight={700} color="success.main">
+                      +{money(platformDebtRecoveryDollars)}
+                    </Typography>
+                  </Box>
+                )}
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography variant="body2" color="text.secondary">
                     Account Actions:

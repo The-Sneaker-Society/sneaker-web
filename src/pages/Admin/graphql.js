@@ -191,6 +191,12 @@ export const CHARGE_MEMBER_DEBT = gql`
     )
   }
 `;
+
+export const WRITE_OFF_MEMBER_DEBT = gql`
+  mutation WriteOffMemberDebt($entryId: ID!, $reason: String) {
+    writeOffMemberDebt(entryId: $entryId, reason: $reason)
+  }
+`;
 export const RESOLVE_DISPUTE_FOR_USER = gql`
   mutation ResolveDisputeForUser($contractId: ID!, $banMember: Boolean, $banUser: Boolean, $reason: String) {
     resolveDisputeForUser(contractId: $contractId, banMember: $banMember, banUser: $banUser, reason: $reason)
