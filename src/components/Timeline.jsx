@@ -1,7 +1,43 @@
 import React, { useMemo } from "react";
-import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
+import { Box, Typography, Chip, useTheme, useMediaQuery } from "@mui/material";
 import { format } from "date-fns";
 import { useColors } from "../theme/colors";
+
+const isAdminEvent = (eventType, actor) => {
+    if (typeof actor === "string" && actor.toLowerCase().includes("admin")) return true;
+    if (typeof eventType === "string" && eventType.toUpperCase().startsWith("ADMIN_")) return true;
+    return false;
+};
+
+const getActorChip = (actor) => {
+    if (typeof actor !== "string" || !actor) return null;
+    const a = actor.toLowerCase();
+    if (a.includes("admin")) {
+        return {
+            label: "ADMIN",
+            bgcolor: "rgba(139, 92, 246, 0.15)",
+            color: "#7C3AED",
+            border: "1px solid #8B5CF6",
+        };
+    }
+    if (a.includes("client") || a.includes("user")) {
+        return {
+            label: "CUSTOMER",
+            bgcolor: "rgba(59, 130, 246, 0.15)",
+            color: "#3B82F6",
+            border: "1px solid #3B82F6",
+        };
+    }
+    if (a.includes("member")) {
+        return {
+            label: "RESTORER",
+            bgcolor: "rgba(180, 83, 9, 0.15)",
+            color: "#B45309",
+            border: "1px solid #B45309",
+        };
+    }
+    return null;
+};
 
 const getEventDisplay = (eventType) => {
     const eventMap = {
@@ -27,6 +63,17 @@ const getEventDisplay = (eventType) => {
         CONTRACT_CANCELED: "Contract Canceled",
         DISPUTE_OPENED: "Dispute Opened",
         DISPUTE_RESOLVED: "Dispute Resolved",
+        DISPUTE_DISMISSED: "Dispute Dismissed — No Action Needed",
+        ADMIN_RULED_FOR_USER: "Admin Ruled for Customer",
+        ADMIN_RULED_FOR_MEMBER: "Admin Ruled for Restorer",
+        ADMIN_RULED_INCONCLUSIVE: "Admin Split Resolution",
+        RETURN_SHIPMENT_CHARGED_TO_MEMBER: "Shipping Charged to Restorer",
+        PAYOUT_WITHHELD_FOR_DEBT: "Payout Withheld for Debt",
+        PACKAGING_PHOTOS_UPLOADED: "Packaging Photos Uploaded",
+        RETURN_PACKAGING_PHOTOS_UPLOADED: "Return Packaging Photos Uploaded",
+        READY_FOR_RETURN: "Ready for Return",
+        ARRIVED_AT_MEMBER: "Arrived at Restorer",
+        PENDING_REVIEW: "Pending Review",
         // legacy fallbacks
         MEMBER_REVIEWED: "Member Reviewed",
         PRICE_PROPOSED: "Price Proposed",
@@ -48,7 +95,9 @@ const formatTimestamp = (timestamp) => {
     }
 };
 
-const TimelineItem = ({ event, date, isLast, colors }) => {
+const TimelineItem = ({ event, date, isLast, colors, actor, reason, refundCents }) => {
+    const admin = isAdminEvent(event?.rawEvent, actor);
+    const actorChip = getActorChip(actor);
     return (
         <Box sx={{ display: "flex", position: "relative", mb: isLast ? 0 : 2.5 }}>
             <Box sx={{ position: "relative", width: "16px", mr: 2, flexShrink: 0 }}>
@@ -57,7 +106,7 @@ const TimelineItem = ({ event, date, isLast, colors }) => {
                         width: "12px",
                         height: "12px",
                         borderRadius: "50%",
-                        bgcolor: "#FFD100",
+                        bgcolor: admin ? "#8B5CF6" : actorChip ? actorChip.color : "#FFD100",
                         zIndex: 2,
                         position: "absolute",
                         top: "4px",
@@ -78,13 +127,39 @@ const TimelineItem = ({ event, date, isLast, colors }) => {
                     />
                 )}
             </Box>
-            <Box sx={{ pb: isLast ? 0 : 0.5 }}>
-                <Typography sx={{ fontSize: "0.85rem", fontWeight: 700, color: colors.textPrimary, lineHeight: 1.3 }}>
-                    {event}
-                </Typography>
+            <Box sx={{ pb: isLast ? 0 : 0.5, flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                    <Typography sx={{ fontSize: "0.85rem", fontWeight: 700, color: colors.textPrimary, lineHeight: 1.3 }}>
+                        {event?.title || event}
+                    </Typography>
+                    {actorChip && (
+                        <Chip
+                            size="small"
+                            label={actorChip.label}
+                            sx={{
+                                fontWeight: 800,
+                                fontSize: "0.65rem",
+                                height: 20,
+                                bgcolor: actorChip.bgcolor,
+                                color: actorChip.color,
+                                border: actorChip.border,
+                            }}
+                        />
+                    )}
+                </Box>
                 <Typography sx={{ color: colors.textSecondary, fontSize: "0.75rem", mt: 0.25 }}>
                     {date}
                 </Typography>
+                {reason ? (
+                    <Typography sx={{ color: colors.textSecondary, fontSize: "0.78rem", mt: 0.5, fontStyle: "italic", wordBreak: "break-word" }}>
+                        {reason}
+                    </Typography>
+                ) : null}
+                {refundCents != null ? (
+                    <Typography sx={{ color: colors.textSecondary, fontSize: "0.75rem", mt: 0.25, fontWeight: 600 }}>
+                        Refund: ${(Number(refundCents) / 100).toFixed(2)}
+                    </Typography>
+                ) : null}
             </Box>
         </Box>
     );
@@ -105,7 +180,11 @@ const Timeline = ({ events = [] }) => {
             .sort((a, b) => new Date(a.date || a.timestamp) - new Date(b.date || b.timestamp))
             .map((item) => ({
                 title: item.title || getEventDisplay(item.event),
+                rawEvent: item.event,
                 date: formatTimestamp(item.date || item.timestamp),
+                actor: item.actor,
+                reason: item.reason,
+                refundCents: item.refundCents,
             }));
     }, [events]);
 
@@ -122,8 +201,11 @@ const Timeline = ({ events = [] }) => {
             {sortedTimelineEvents.map((event, index) => (
                 <TimelineItem
                     key={index}
-                    event={event.title}
+                    event={event}
                     date={event.date}
+                    actor={event.actor}
+                    reason={event.reason}
+                    refundCents={event.refundCents}
                     isLast={index === sortedTimelineEvents.length - 1}
                     colors={colors}
                 />

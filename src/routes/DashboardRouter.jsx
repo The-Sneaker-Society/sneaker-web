@@ -13,6 +13,8 @@ const DashboardRouter = () => {
         navigate("/member/dashboard");
       } else if (role === "client") {
         navigate("/user/dashboard");
+      } else if (role === "admin") {
+        navigate("/admin/disputes");
       } else {
         navigate("/error"); 
       }

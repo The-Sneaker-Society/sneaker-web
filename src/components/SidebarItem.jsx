@@ -1,13 +1,12 @@
 import React from "react";
-import { ListItem, ListItemIcon, ListItemText, Badge } from "@mui/material";
+import { ListItemButton, ListItemIcon, ListItemText, Badge } from "@mui/material";
 import { useColors } from "../theme/colors";
 
 const SidebarItem = ({ text, icon, notification, onClick }) => {
   const colors = useColors();
 
   return (
-    <ListItem
-      button
+    <ListItemButton
       onClick={onClick}
       sx={{
         borderRadius: 2,
@@ -23,7 +22,7 @@ const SidebarItem = ({ text, icon, notification, onClick }) => {
         </Badge>
       </ListItemIcon>
       <ListItemText sx={{ color: colors.sidebarText }} primary={text} />
-    </ListItem>
+    </ListItemButton>
   );
 };
 

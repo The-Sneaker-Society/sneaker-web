@@ -18,6 +18,7 @@ import LoginSSOCallback from "./pages/LoginSSOCallback/LoginSSOCallback";
 import DashboardRouter from "./routes/DashboardRouter";
 import MemberRoutes from "./routes/MemberRoutes";
 import UserRoutes from "./routes/UserRoutes";
+import AdminRoutes from "./routes/AdminRoutes";
 import MySociety from "./pages/Dashboard/Discover";
 
 function App() {
@@ -57,7 +58,7 @@ function App() {
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute requireRole={["member", "client"]}>
+                  <ProtectedRoute requireRole={["member", "client", "admin"]}>
                     <DashboardRouter />
                   </ProtectedRoute>
                 }
@@ -79,6 +80,16 @@ function App() {
                 element={
                   <ProtectedRoute requireRole="client">
                     <UserRoutes />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Protected Routes - Admin */}
+              <Route
+                path="/admin/*"
+                element={
+                  <ProtectedRoute requireRole="admin">
+                    <AdminRoutes />
                   </ProtectedRoute>
                 }
               />
