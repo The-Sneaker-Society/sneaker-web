@@ -43,9 +43,8 @@ const Sidebar = ({
   // Layout is shared across sections — derive the section from the URL so
   // users never see member routes (every one 401s on role guards).
   const isUserSection = pathname.startsWith("/user");
-  const showLogout = pathname === "/member/dashboard";
-
-  const [readVersion, setReadVersion] = useState(0);
+  const showLogout = pathname === "/member" || pathname.startsWith("/member/");
+  const [, setReadVersion] = useState(0);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
   const handleOpenLogout = () => {
@@ -223,7 +222,6 @@ const Sidebar = ({
       }}
       role="presentation"
       onClick={onMobileDrawerClose}
-      onKeyDown={onMobileDrawerClose}
     >
       {logoBox}
       <List component="nav" aria-label="sidebar nav" sx={{ flexGrow: 1 }}>
