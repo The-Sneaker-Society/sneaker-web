@@ -30,6 +30,9 @@ const LogoutConfirmModal = ({ open, onClose }) => {
     } catch (error) {
       console.error("Unable to complete sign-out:", error);
       window.location.replace("/");
+    } finally {
+      signingOutRef.current = false;
+      setIsSigningOut(false);
     }
   };
 
@@ -40,7 +43,7 @@ const LogoutConfirmModal = ({ open, onClose }) => {
       cursor: "not-allowed",
     },
     "&:focus-visible": {
-      outline: "3px solid #FFD100",
+      outline: `3px solid ${colors.primary}`,
       outlineOffset: "4px",
     },
   };
@@ -68,7 +71,7 @@ const LogoutConfirmModal = ({ open, onClose }) => {
           maxHeight: "calc(100dvh - 32px)",
           overflowY: "auto",
           boxSizing: "border-box",
-          bgcolor: "background.paper",
+          bgcolor: colors.widgetBg,
           color: colors.textPrimary,
           border: `1px solid ${colors.borderSecondary}`,
           borderRadius: "16px",
@@ -106,7 +109,15 @@ const LogoutConfirmModal = ({ open, onClose }) => {
             onClick={handleClose}
             disabled={isSigningOut}
             autoFocus
-            sx={buttonSx}
+            sx={{
+              ...buttonSx,
+              backgroundColor: "transparent",
+              color: colors.textPrimary,
+              borderColor: colors.borderSecondary,
+              "&:after": {
+                display: "none",
+              },
+            }}
           >
             Cancel
           </StyledButton>
