@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { Box, Typography, Button, IconButton } from "@mui/material";
 import { Menu } from "@mui/icons-material";
-import { useClerk } from "@clerk/clerk-react";
 import { useLayout } from "../../components/Layout";
 import { QrWidget } from "../../components/qrWidget";
 import { StripeWidget } from "../../components/StripeWidgets/StripeWidget";
@@ -14,19 +14,34 @@ import { useColors } from "../../theme/colors";
 import QuickActionsWidget from "../../components/QuickActionsWidget";
 import RecentMessagesWidget from "../../components/RecentMessagesWidget";
 import RevenueSummaryWidget from "../../components/RevenueSummaryWidget";
+import LogoutConfirmModal from "../../components/LogoutConfirmModal";
 
 export const MemberDashboard = () => {
   const { member, loading } = useSneakerMember();
-  const { signOut } = useClerk();
   const colors = useColors();
   const { openMobileNav } = useLayout();
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
-  if (loading) return <Box sx={{ width: "100%", height: "100vh", display: "flex" }}><LoadingCircle /></Box>;
+  if (loading)
+    return (
+      <Box sx={{ width: "100%", height: "100vh", display: "flex" }}>
+        <LoadingCircle />
+      </Box>
+    );
 
   if (!member) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-        <Typography>Error loading member data. Please refresh or sign out and try again.</Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Typography>
+          Error loading member data. Please refresh or sign out and try again.
+        </Typography>
       </Box>
     );
   }
@@ -35,7 +50,15 @@ export const MemberDashboard = () => {
   const isSubscribed = member.isSubscribed;
 
   return (
-    <Box sx={{ height: "100vh", width: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <Box
+      sx={{
+        height: "100vh",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       <OnboardModal isOnboarded={isOnboarded} />
       {isOnboarded && <SubscribeModal isSubscribed={isSubscribed} />}
 
@@ -57,7 +80,11 @@ export const MemberDashboard = () => {
           {/* Hamburger — mobile only, triggers the Layout-controlled drawer */}
           <IconButton
             onClick={openMobileNav}
-            sx={{ display: { xs: "flex", sm: "none" }, color: colors.textPrimary, p: 0.5 }}
+            sx={{
+              display: { xs: "flex", sm: "none" },
+              color: colors.textPrimary,
+              p: 0.5,
+            }}
           >
             <Menu fontSize="small" />
           </IconButton>
@@ -76,7 +103,10 @@ export const MemberDashboard = () => {
             </Typography>
             <Typography
               fontWeight="bold"
-              sx={{ fontSize: { xs: "1.4rem", sm: "1.75rem", md: "2rem" }, lineHeight: 1.1 }}
+              sx={{
+                fontSize: { xs: "1.4rem", sm: "1.75rem", md: "2rem" },
+                lineHeight: 1.1,
+              }}
             >
               Welcome, {member?.firstName || "member"}
             </Typography>
@@ -85,7 +115,7 @@ export const MemberDashboard = () => {
         <Button
           variant="outlined"
           size="small"
-          onClick={() => signOut()}
+          onClick={() => setLogoutModalOpen(true)}
           sx={{
             color: colors.textPrimary,
             borderColor: colors.borderSecondary,
@@ -95,7 +125,10 @@ export const MemberDashboard = () => {
             borderRadius: 1.5,
             px: 2.5,
             py: 0.75,
-            "&:hover": { bgcolor: `${colors.textPrimary}08`, borderColor: colors.textPrimary },
+            "&:hover": {
+              bgcolor: `${colors.textPrimary}08`,
+              borderColor: colors.textPrimary,
+            },
           }}
         >
           Log out
@@ -121,7 +154,14 @@ export const MemberDashboard = () => {
         </Box>
 
         {/* Left column — contract list */}
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            minWidth: 0,
+          }}
+        >
           <ContractListWidget />
         </Box>
 
@@ -144,17 +184,39 @@ export const MemberDashboard = () => {
           <RecentMessagesWidget />
 
           {/* Row 3: Stripe + QR side by side */}
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
-            {member?.isOnboardedWithStripe ? <StripeWidget /> : <StripeSetUpWidget />}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
+            {member?.isOnboardedWithStripe ? (
+              <StripeWidget />
+            ) : (
+              <StripeSetUpWidget />
+            )}
             <QrWidget />
           </Box>
 
           {/* Row 4: Revenue — reference/trend, fills remaining height */}
-          <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <Box
+            sx={{
+              flex: 1,
+              minHeight: 0,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             <RevenueSummaryWidget />
           </Box>
         </Box>
       </Box>
+
+      <LogoutConfirmModal
+        open={logoutModalOpen}
+        onClose={() => setLogoutModalOpen(false)}
+      />
     </Box>
   );
 };

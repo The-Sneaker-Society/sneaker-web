@@ -1,4 +1,4 @@
-import { useClerk, useUser } from "@clerk/clerk-react";
+import { useUser } from "@clerk/clerk-react";
 import { Box, Typography, Button, IconButton } from "@mui/material";
 import { Menu } from "@mui/icons-material";
 import GetStartedModal from "../../components/GetStartedModal";
@@ -6,21 +6,29 @@ import { useLayout } from "../../components/Layout";
 import { useColors } from "../../theme/colors";
 import { UserContractsWidget } from "./UserContractsWidget";
 import { UserMessagesWidget } from "./UserMessagesWidget";
-
+import LogoutConfirmModal from "../../components/LogoutConfirmModal";
 import { useState } from "react";
 
 const UserDashboard = () => {
   const { user } = useUser();
-  const { signOut } = useClerk();
   const colors = useColors();
   const { openMobileNav } = useLayout();
 
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   return (
-    <Box sx={{ height: "100vh", width: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <Box
+      sx={{
+        height: "100vh",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       {/* Header */}
       <Box
         sx={{
@@ -38,7 +46,11 @@ const UserDashboard = () => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <IconButton
             onClick={openMobileNav}
-            sx={{ display: { xs: "flex", sm: "none" }, color: colors.textPrimary, p: 0.5 }}
+            sx={{
+              display: { xs: "flex", sm: "none" },
+              color: colors.textPrimary,
+              p: 0.5,
+            }}
           >
             <Menu fontSize="small" />
           </IconButton>
@@ -57,7 +69,10 @@ const UserDashboard = () => {
             </Typography>
             <Typography
               fontWeight="bold"
-              sx={{ fontSize: { xs: "1.4rem", sm: "1.75rem", md: "2rem" }, lineHeight: 1.1 }}
+              sx={{
+                fontSize: { xs: "1.4rem", sm: "1.75rem", md: "2rem" },
+                lineHeight: 1.1,
+              }}
             >
               Welcome, {user?.firstName || "User"}
             </Typography>
@@ -66,7 +81,7 @@ const UserDashboard = () => {
         <Button
           variant="outlined"
           size="small"
-          onClick={() => signOut()}
+          onClick={() => setLogoutModalOpen(true)}
           sx={{
             color: colors.textPrimary,
             borderColor: colors.borderSecondary,
@@ -76,7 +91,10 @@ const UserDashboard = () => {
             borderRadius: 1.5,
             px: 2.5,
             py: 0.75,
-            "&:hover": { bgcolor: `${colors.textPrimary}08`, borderColor: colors.textPrimary },
+            "&:hover": {
+              bgcolor: `${colors.textPrimary}08`,
+              borderColor: colors.textPrimary,
+            },
           }}
         >
           Log out
@@ -97,7 +115,14 @@ const UserDashboard = () => {
         }}
       >
         {/* Left column — requests */}
-        <Box sx={{ flex: 1.4, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        <Box
+          sx={{
+            flex: 1.4,
+            display: "flex",
+            flexDirection: "column",
+            minWidth: 0,
+          }}
+        >
           <UserContractsWidget />
         </Box>
 
@@ -117,6 +142,10 @@ const UserDashboard = () => {
 
       {/* Modal for getting started */}
       <GetStartedModal open={open} onClose={handleClose} />
+      <LogoutConfirmModal
+        open={logoutModalOpen}
+        onClose={() => setLogoutModalOpen(false)}
+      />
     </Box>
   );
 };
