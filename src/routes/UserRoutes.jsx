@@ -1,7 +1,6 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import UserSignupPage from "../pages/SignupPage/UserSIgnupPage";
-import UserUpdateProfilePage from "../pages/UpdateProfilePage/UserUpdateProfilePage";
+import UserSettingsPage from "../pages/UpdateProfilePage/UserSettingsPage";
 import { ContractForm } from "../pages/ContractForm/ContractForm";
 import ReviewProtectPage from "../pages/ReviewProtect/ReviewProtectPage";
 import UserContractPage from "../pages/ContractsPage/UserContractPage";
@@ -15,6 +14,7 @@ const UserRoutes = () => {
     <UserProvider>
       <Routes>
         <Route path="signup-info" element={<UserSignupPage />} />
+
         <Route
           path="dashboard"
           element={
@@ -23,6 +23,7 @@ const UserRoutes = () => {
             </Layout>
           }
         />
+
         <Route
           path="chats/:id"
           element={
@@ -31,14 +32,21 @@ const UserRoutes = () => {
             </Layout>
           }
         />
+
         <Route
-          path="update-profile"
+          path="settings"
           element={
             <Layout>
-              <UserUpdateProfilePage />
+              <UserSettingsPage />
             </Layout>
           }
         />
+
+        <Route
+          path="update-profile"
+          element={<Navigate to="/user/settings" replace />}
+        />
+
         <Route
           path="new-contract/:memberId"
           element={
@@ -47,6 +55,7 @@ const UserRoutes = () => {
             </Layout>
           }
         />
+
         <Route
           path="review-protect/:orderRef"
           element={
@@ -55,6 +64,7 @@ const UserRoutes = () => {
             </Layout>
           }
         />
+
         <Route
           path="contract/:orderRef"
           element={

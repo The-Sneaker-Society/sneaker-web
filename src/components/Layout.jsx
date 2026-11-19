@@ -9,7 +9,9 @@ const Layout = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <LayoutContext.Provider value={{ openMobileNav: () => setDrawerOpen(true) }}>
+    <LayoutContext.Provider
+      value={{ openMobileNav: () => setDrawerOpen(true) }}
+    >
       <Box sx={{ display: "flex" }}>
         {/* Desktop sticky sidebar — hidden on mobile */}
         <Box
@@ -29,6 +31,7 @@ const Layout = ({ children }) => {
         <Box
           sx={{
             flexGrow: 1,
+            minWidth: 0,
             overflowY: "auto",
             height: "100vh",
             display: "flex",
