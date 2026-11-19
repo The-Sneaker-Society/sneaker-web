@@ -12,9 +12,9 @@ import { gql, useQuery } from "@apollo/client";
 import { useColors } from "../theme/colors";
 import LogoutConfirmModal from "./LogoutConfirmModal";
 import SidebarItem from "./SidebarItem";
-import ThemeToggle from "./ThemeToggle";
 import LogoBlack from "../assets/ss-logo-black.svg";
 import LogoWhite from "../assets/ss-logo.svg";
+import ThemeToggle from "./ThemeToggle";
 
 const GET_SIDEBAR_CHATS = gql`
   query GetSidebarChats {
@@ -170,7 +170,7 @@ const Sidebar = ({
         text="Settings"
         icon={<SettingsOutlined />}
         onClick={() =>
-          navigate(isUserSection ? "/user/update-profile" : "/member/settings")
+          navigate(isUserSection ? "/user/settings" : "/member/settings")
         }
       />
     </Box>
@@ -189,7 +189,7 @@ const Sidebar = ({
   ) : null;
 
   const logoBox = (
-    <Box sx={{ padding: 2, textAlign: "center", position: "relative" }}>
+    <Box sx={{ padding: 2, textAlign: "center" }}>
       <Box
         component="img"
         src={colors.isDark ? LogoBlack : LogoWhite}
@@ -205,9 +205,6 @@ const Sidebar = ({
           navigate(isUserSection ? "/user/dashboard" : "/member/dashboard")
         }
       />
-      <Box sx={{ position: "absolute", top: 8, right: 8 }}>
-        <ThemeToggle />
-      </Box>
     </Box>
   );
 
